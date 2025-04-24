@@ -41,17 +41,23 @@
             <div class="col">
                 <div class="login-box mx-auto mt-5">
                     <h2 class="text-center mb-4">Đăng nhập</h2>
-                    <form>
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+                    <form method="post">
                         <div class="mb-3">
                             <label for="username" class="form-label">Tên đăng nhập</label>
-                            <input type="text" class="form-control" id="username" placeholder="Nhập tên đăng nhập">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Nhập tên đăng nhập">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Mật khẩu</label>
-                            <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Nhập mật khẩu">
                         </div>
                         <button type="submit" class="btn btn-outline-success w-100">Đăng nhập</button>
-                        <div>Bạn chưa có tài khoản? <a href="#">Đăng ký</a></div>
+                        <div>Bạn chưa có tài khoản? <a href="/Register/Register">Đăng ký</a></div>
                     </form>
                 </div>
             </div>
