@@ -12,7 +12,6 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-
         public IActionResult Product()
         {
             var products = _context.Products.ToList(); // Lấy tất cả sản phẩm từ DB
