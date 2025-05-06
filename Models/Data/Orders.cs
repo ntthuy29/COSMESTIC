@@ -13,6 +13,7 @@ namespace COSMESTIC.Models.Data
         public int userID { get; set; }
         public decimal totalAmount { get; set; }
         public DateTime orderDate {get;set;}
+        public string status { get; set; }
         public virtual Users users { get; set; }
         public virtual Invoice invoice { get; set; }
         public virtual ICollection<orderDetail> orderDetails { get; set; }

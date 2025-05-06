@@ -1,0 +1,61 @@
+﻿@model COSMESTIC.Models.Discount.CreateModel;
+
+@{
+    ViewData["Title"] = "Chỉnh sửa mã giảm giá";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+
+    @TempData["SuccessMessage"]
+
+}
+<form asp-action="Edit" asp-controller="Discount" method="post">
+    @Html.AntiForgeryToken() <!-- Bảo vệ chống CSRF -->
+
+    <div class="form-group">
+        <label asp-for="discountID" class="control-label"></label>
+        <input asp-for="discountID" class="form-control" readonly />
+        <input type="hidden" asp-for="discountID" /> <!-- Đảm bảo giá trị được gửi đi -->
+        <span asp-validation-for="discountID" class="text-danger"></span>
+    </div>
+
+<div class="form-group">
+    <label asp-for="name" class="control-label"></label>
+    <input asp-for="name" class="form-control" />
+    <span asp-validation-for="name" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="value" class="control-label"></label>
+    <input asp-for="value" class="form-control" type="number" step="0.01" />
+    <span asp-validation-for="value" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="startDate" class="control-label"></label>
+    <input asp-for="startDate" class="form-control" type="date" />
+    <span asp-validation-for="startDate" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="endDate" class="control-label"></label>
+    <input asp-for="endDate" class="form-control" type="date" />
+    <span asp-validation-for="endDate" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="isActive" class="control-label"></label>
+    <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai"></select>
+    <span asp-validation-for="isActive" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</div>
+</form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
