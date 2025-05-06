@@ -1,0 +1,73 @@
+﻿@model COSMESTIC.Models.Discount.CreateModel
+
+@{
+    ViewData["Title"] = "Thêm mã khuyến mãi mới";
+}
+
+<h2>Thêm mã khuyến mãi mới</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="name" class="control-label">Tên mã khuyến mãi</label>
+                <input asp-for="name" class="form-control" />
+                <span asp-validation-for="name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="value" class="control-label">Giá trị (%)</label>
+                <input asp-for="value" type="number" class="form-control" min="0" max="100" step="0.01" />
+                <span asp-validation-for="value" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="startDate" class="control-label">Ngày bắt đầu</label>
+                <input asp-for="startDate" type="datetime-local" class="form-control" />
+                <span asp-validation-for="startDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="endDate" class="control-label">Ngày kết thúc</label>
+                <input asp-for="endDate" type="datetime-local" class="form-control" />
+                <span asp-validation-for="endDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="isActive" class="control-label">Trạng thái</label>
+                <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai"></select>
+                <span asp-validation-for="isActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Thêm mới" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+        <script>
+            // Kiểm tra ngày kết thúc phải sau ngày bắt đầu
+            $(document).ready(function() {
+                $('form').submit(function() {
+                    var startDate = new Date($('#startDate').val());
+                    var endDate = new Date($('#endDate').val());
+
+                    if (endDate <= startDate) {
+                        alert('Ngày kết thúc phải sau ngày bắt đầu');
+                        return false;
+                    }
+                    return true;
+                });
+            });
+        </script>
+}
