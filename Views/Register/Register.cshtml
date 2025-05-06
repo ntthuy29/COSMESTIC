@@ -5,6 +5,7 @@
 @{
     Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,45 +14,44 @@
     <title>Đăng ký - COSMESTIC</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/Login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/re" asp-append-version="true" />
+
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
 <body>
-    <div class="container pt-5">
+    <div class="container">
         <div class="row pb-5">
-            <div class="col col1 pb-5 position-relative" style="height: 600px;">
-                <img src="~/Img/chup-hinh-my-pham-3.png" style="width: 100%; height: 100%; object-fit: cover;" />
-                <h1 class="position-absolute h2-text" style="padding-top: 200px;">Join Us Today</h1>
-                <span class="material-symbols-outlined next position-absolute">arrow_forward_ios</span>
-                <span class="material-symbols-outlined prev position-absolute">arrow_back_ios</span>
-            </div>
+            
 
             <div class="col">
-                <div class="login-box mx-auto mt-5">
+                <div class="login-box mx-auto mb-8">
                     <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
                     <form asp-action="Register" method="post">
                         <div class="mb-3">
-                            <label class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" name="fullName" required>
+                            
+                            <input type="text" class="form-control" name="fullName" placeholder="Họ và tên" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" name="email" required>
+                            @* <label class="form-label">Email</label> *@
+                            <input type="email" class="form-control" name="email" placeholder="Email" required>
+                           
                         </div>
+                        <div class="mb-3"> 
+                            @* <label class="form-label">Số điện thoại</label> *@
+                            <input type="text" class="form-control " name="phoneNumber" placeholder="Số điện thoại" required>
+                         </div> 
                         <div class="mb-3">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" name="phoneNumber" required>
+                            @* <label class="form-label">Ngày sinh</label> *@
+                            <input type="date" class="form-control " name="dateOfBirth" placeholder="Ngày sinh" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ngày sinh</label>
-                            <input type="date" class="form-control" name="dateOfBirth" required>
+                        <div class="mb-2">
+                            @* <label class="form-label">Tên đăng nhập</label> *@
+                            <input type="text" class="form-control" name="username" placeholder="Tên đăng nhập" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tên đăng nhập</label>
-                            <input type="text" class="form-control" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu</label>
-                            <input type="password" class="form-control" name="password" required>
+                        <div class="mb-2">
+                            @* <label class="form-label">Mật khẩu</label> *@
+                            <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
                         </div>
                         <button type="submit" class="btn btn-outline-primary w-100">Đăng ký</button>
                         <div class="text-center mt-3">Bạn đã có tài khoản? <a href="/Login/Login">Đăng nhập</a></div>
