@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <title>Document</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Thanh tìm kiếm + Lọc (dùng Bootstrap Grid) -->
+        <div class="row mb-3 align-items-center">
+            <!-- Ô tìm kiếm -->
+            <div class="col-md-8">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search"></i> Tìm
+                    </button>
+                </div>
+            </div>
+    
+            <!-- Dropdown lọc -->
+            <div class="col-md-4">
+                <select class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Published">Đã đăng</option>
+                    <option value="Draft">Bản nháp</option>
+                </select>
+            </div>
+        </div>
+    
+        <!-- Bảng danh sách bài viết -->
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Chủ đề</th>
+                        <th>Ngày đăng</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var article in Model)
+                    {
+                        <tr>
+                            <td>@article.ArtID</td>
+                            <td>@article.Tittle</td>
+                            <td>@article.Topic</td>
+                            <td>@article.DayPost.ToShortDateString()</td>
+                            <td>
+                                <span class="badge @(article.State == "Published" ? "bg-success" : "bg-warning")">
+                                    @article.State
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+        
+</body>
+</html>
