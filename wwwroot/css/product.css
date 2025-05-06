@@ -1,0 +1,18 @@
+﻿body {
+}
+.card-radius {
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+}
+    .card-radius:hover {
+        transform: scale(1.05);
+    }
+#ads {
+    height: 300px;
+    width: 100%;
+    background-color: #c1cfcc;
+
+}
+.container-product{
+    margin-top: 20px;
+}

@@ -7,34 +7,64 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/COSMESTIC.styles.css" asp-append-version="true" />
+    <!-- Cách mới - Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light  border-bottom box-shadow mb-3" style="background-color: #346A54;">
-            <div class="container-fluid">
-                <a class="navbar-brand kaushan-script-regular text-white" asp-area="" asp-controller="Home" asp-action="Index" style="">COSMESTIC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Discount" asp-action="Index">Quản lý mã giảm giá</a>
-                        </li>
+
+
+    <header class="header_nav">
+        <nav class="navbar  navbar-expand-sm navbar-toggleable-sm h-100 navbar-light  border-bottom box-shadow " style="background-color: #346A54;">
+            <div class="container-fluid h-100 d-flex ">
+                <div class="col-3" style="padding-left: 10px;">   <a class="navbar-brand kaushan-script-regular text-white" asp-area="" asp-controller="Home" asp-action="Index" style="">
+                        <img src="~/Img/logo.png" style="border-radius: 100px; width: 80px;height: 80px;"/>
+                        COSMETIC
+                    </a>
+                    </div>
+               
+                <div class="dropdown col-1">
+                    <div class=" dropdown-toggle text-white" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 17px;">
+                       Danh Mục
+                    </div>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="#">Son môi</a></li>
+                        <li><a class="dropdown-item" href="#">Sửa rửa mặt</a></li>
+                        <li><a class="dropdown-item" href="#">Kem chống nắng</a></li>
 
                     </ul>
                 </div>
+                <div class="navbar-collapse collapse flex-column mb-3 justify-content-md-start gap-1 mt-2 col-4" id="search-home">
+                    <div class="d-flex gap-2 ">
+                        <a class= "a-link-catalog" href="#">Kem chống nắng</a>
+                        <a class= "a-link-catalog"href="#">Kem dưỡng ẩm</a>
+                        <a class= "a-link-catalog" href="#">Sữa rửa mặt</a>
+                    </div>
+                    <input class="form-control w-50 me-2" id="search-product-home" type="search" placeholder="Tìm kiếm sản phẩm bạn muốn.." aria-label="Search">
+                </div>
+                <div class="col-3 d-flex gap-2">
+                    <div>
+                        <span class="material-symbols-outlined text-white mt-3" style="font-size: 30px;">
+                            account_circle
+                        </span>
+                    </div>
+                    <div>  <div class="text-white text-center">   <a href="/Login/Login">Đăng nhập</a>
+                                                                  <a href="/Register/Register">Đăng ký</a>
+                            </div>
+                    <div class="text-center text-white">Tài khoản</div>
+                </div>
+                
+                </div>
+                <div class="col-1 text-white">
+                    <span class="material-symbols-outlined" style="width: 100px; height: 100px; font-size: 40px; padding-top: 30px;">
+                        add_shopping_cart
+                    </span>
+                </div>
             </div>
+
         </nav>
     </header>
-    <div class="container">
+    <div class="container container-main">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -49,5 +79,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Styles", required: false)
+
 </body>
 </html>
