@@ -20,3 +20,18 @@
         window.location.href = '/';  // Hoặc sử dụng URL phù hợp để quay lại trang chủ hoặc trạng thái ban đầu
     }
 });
+function loadProducts(catalogId) {
+    console.log(catalogId);  // Kiểm tra xem giá trị catalogId có đúng không
+
+    fetch(`/Product/GetByCatalog/${catalogId}`)
+        .then(response => response.text())  // Lấy dữ liệu dưới dạng HTML
+        .then(html => {
+            console.log(html);  // Kiểm tra dữ liệu trả về
+
+            let productList = document.getElementById('main');
+            productList.innerHTML = html;  // Chèn HTML vào phần tử với ID 'main'
+        })
+        .catch(error => console.error('Error:', error));  // Xử lý lỗi nếu có
+}
+
+

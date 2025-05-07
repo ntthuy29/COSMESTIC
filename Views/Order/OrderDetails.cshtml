@@ -1,27 +1,43 @@
 ﻿@model COSMESTIC.Models.Data.Orders
 
-<h3>Chi tiết đơn hàng @Model.orderID</h3>
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h3 class="text-success fw-bold">🎉 Đặt hàng thành công! 🎉</h3>
+        <p>Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.</p>
+    </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Sản phẩm</th>
-            <th>Số lượng</th>
-            <th>Đơn giá</th>
-            <th>Tổng tiền</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.orderDetails)
-        {
-            <tr>
-                <td>@item.products.productName</td>
-                <td>@item.quantity</td>
-                <td>@item.unitPrice ₫</td>
-                <td>@(item.quantity * item.unitPrice)₫</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<h5>Tổng tiền: @Model.totalAmount ₫</h5>
+    <div class="card shadow rounded">
+        <div class="card-body">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center">Ảnh</th>
+                        <th>Sản phẩm</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Tổng tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.orderDetails)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <img src="@Url.Content("~/" + item.products.imagePath)" class="rounded" style="width: 60px; height: 60px; object-fit: cover;" />
+                            </td>
+                            <td>@item.products.productName</td>
+                            <td class="text-center">@item.quantity</td>
+                            <td class="text-end">@item.unitPrice.ToString("N0") ₫</td>
+                            <td class="text-end">@((item.quantity * item.unitPrice).ToString("N0")) ₫</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-end mt-3">
+                <h4 class="text-danger fw-bold">
+                    Tổng cộng: @Model.totalAmount.ToString("N0") ₫
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>

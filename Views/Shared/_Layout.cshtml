@@ -12,13 +12,16 @@
 
 </head>
 <body>
+    @{
+        var catalogs = ViewBag.Catalogs as List<COSMESTIC.Models.Data.Catalogs>;
+    }
 
     @{
-        
+
         var role = Context.Session.GetString("role");
         var id = Context.Session.GetString("UserID");
         var username = Context.Session.GetString("Username");
-       
+
 
     }
     <header class="header_nav">
@@ -35,9 +38,16 @@
                         Danh Mục
                     </div>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                        <li><a class="dropdown-item" href="#">Son môi</a></li>
-                        <li><a class="dropdown-item" href="#">Sửa rửa mặt</a></li>
-                        <li><a class="dropdown-item" href="#">Kem chống nắng</a></li>
+                        <li class="dropdown-item" style="cursor: pointer;"><a href="Product/Product"style="color: black;">All</a></li>
+
+                        @foreach (var catalog in catalogs ?? new List<COSMESTIC.Models.Data.Catalogs>())
+                        {
+                            <li class="dropdown-item" style="cursor: pointer;" onclick="loadProducts(@catalog.catalogID)">
+                                @catalog.catalogName @catalog.catalogID
+                            </li>
+                        }
+
+
 
                     </ul>
                 </div>
@@ -48,7 +58,7 @@
                         <a class= "a-link-catalog" href="#">Sữa rửa mặt</a>
                     </div>
                     <input class="form-control w-50 me-2" id="search-product-home" type="search" placeholder="Tìm kiếm sản phẩm bạn muốn.." aria-label="Search">
-                  
+
                 </div>
                 <div class="col-3">
                     <div class="d-flex align-items-center gap-2">
@@ -58,7 +68,7 @@
 
                         <div class="col-3">
                             <div class="d-flex align-items-center gap-2">
-                                
+
 
                                 @if (role != null)
                                 {
@@ -92,9 +102,27 @@
                 </div>
 
                 <div class="col-1 text-white">
-                    <span class="material-symbols-outlined" style="width: 100px; height: 100px; font-size: 40px; padding-top: 30px;">
-                        add_shopping_cart
-                    </span>
+
+                    @if (role != null)
+                    {
+                        <div class="cart-icon" onclick="openCart()">
+                            <span class="material-symbols-outlined" style="width: 100px; height: 100px; font-size: 40px; padding-top: 30px;">
+                                add_shopping_cart
+                            </span>
+                            <span id="cart-count">@ViewBag.CartItemCount</span> <!-- Hiển thị số sản phẩm trong giỏ -->
+                        </div>
+
+                        <script>
+                            function openCart() {
+
+                            window.location.href = '@Url.Action("Index", "ShoppingCart")';
+                            }
+                        </script>
+                    } else
+                    {
+                        
+                    }
+
                 </div>
             </div>
 
