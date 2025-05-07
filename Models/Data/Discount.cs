@@ -12,7 +12,8 @@ namespace COSMESTIC.Models.Data
         public decimal value { get; set; }
         public decimal discountAmount { get; set; }
         public DateTime startDate { get; set; }
-        public DateTime endDate { get; set; }
+        public DateTime endDate { get; set; } 
+
         public string discountType { get; set; }
         public bool isActive { get; set; }
         // Navigation property

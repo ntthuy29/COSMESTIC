@@ -1,0 +1,57 @@
+﻿ @model COSMESTIC.Models.Product.CreateProduct;
+
+@{
+    ViewData["Title"] = "Thêm mã khuyến mãi mới";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml"; // Áp dụng layout admin
+}
+
+<h2>Admin Product Index</h2>
+<!-- Nội dung của trang -->
+<h2>Thêm sản phẩm mới</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="productName" class="control-label"></label>
+        <input asp-for="productName" class="form-control" />
+        <span asp-validation-for="productName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="productDescription" class="control-label"></label>
+        <textarea asp-for="productDescription" class="form-control"></textarea>
+        <span asp-validation-for="productDescription" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="price" class="control-label"></label>
+        <input asp-for="price" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="price" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DanhMucDuocChon" class="control-label"></label>
+        <select asp-for="DanhMucDuocChon" class="form-control" asp-items="Model.DanhMucs">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+        <span asp-validation-for="DanhMucDuocChon" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="imageFile" class="control-label"></label>
+        <!-- Input để người dùng chọn file ảnh, file sẽ được gửi lên server -->
+        <input asp-for="imageFile" class="form-control" type="file" accept="image/*" />
+        <span asp-validation-for="imageFile" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Thêm" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
