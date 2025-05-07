@@ -35,7 +35,7 @@ namespace COSMESTIC.Controllers
             else
             {
                 HttpContext.Session.SetInt32("UserID", ktrauser.userID);
-                return RedirectToAction("Product", "Product");
+                return RedirectToAction("Customer", "Customer");
             }
         }
     }

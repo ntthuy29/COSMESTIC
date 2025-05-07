@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507071444_UserDontLogin")]
+    partial class UserDontLogin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,8 +69,8 @@ namespace COSMESTIC.Migrations
                     b.Property<int>("quantity")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("unitprice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("unitprice")
+                        .HasColumnType("int");
 
                     b.HasKey("cartItemID");
 
