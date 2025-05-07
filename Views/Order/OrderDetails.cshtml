@@ -1,0 +1,27 @@
+﻿@model COSMESTIC.Models.Data.Orders
+
+<h3>Chi tiết đơn hàng @Model.orderID</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Tổng tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.orderDetails)
+        {
+            <tr>
+                <td>@item.products.productName</td>
+                <td>@item.quantity</td>
+                <td>@item.unitPrice ₫</td>
+                <td>@(item.quantity * item.unitPrice)₫</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h5>Tổng tiền: @Model.totalAmount ₫</h5>

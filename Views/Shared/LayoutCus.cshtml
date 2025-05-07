@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - COSMESTIC</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/COSMESTIC.styles.css" asp-append-version="true" />
+    <!-- Cách mới - Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+</head>
+<body>
+
+
+    <header class="header_nav">
+        <nav class="navbar  navbar-expand-sm navbar-toggleable-sm h-100 navbar-light  border-bottom box-shadow " style="background-color: #346A54;">
+            <div class="container-fluid h-100 d-flex ">
+                <div class="col-3" style="padding-left: 10px;">
+                    <a class="navbar-brand kaushan-script-regular text-white" asp-area="" asp-controller="Home" asp-action="Index" style="">
+                        <img src="~/Img/logo.png" style="border-radius: 100px; width: 80px;height: 80px;" />
+                        COSMETIC
+                    </a>
+                </div>
+
+                <div class="dropdown col-1">
+                    <div class=" dropdown-toggle text-white" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 17px;">
+                        Danh Mục
+                    </div>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="#">Son môi</a></li>
+                        <li><a class="dropdown-item" href="#">Sửa rửa mặt</a></li>
+                        <li><a class="dropdown-item" href="#">Kem chống nắng</a></li>
+
+                    </ul>
+                </div>
+                <div class="navbar-collapse collapse flex-column mb-3 justify-content-md-start gap-1 mt-2 col-4" id="search-home">
+                    <div class="d-flex gap-2 ">
+                        <a class="a-link-catalog" href="#">Kem chống nắng</a>
+                        <a class="a-link-catalog" href="#">Kem dưỡng ẩm</a>
+                        <a class="a-link-catalog" href="#">Sữa rửa mặt</a>
+                    </div>
+                    <form method="get" action="@Url.Action("Search", "Product")">
+                        <input class="form-control w-50 me-2" name="searchName" type="search" placeholder="Tìm kiếm sản phẩm bạn muốn.." aria-label="Search">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </form>
+                </div>
+                <div class="col-3 d-flex gap-2">
+                    <div>
+                        <span class="material-symbols-outlined text-white mt-3" style="font-size: 30px;">
+                            account_circle
+                        </span>
+                    </div>
+                    <div>
+                        <div class="text-white text-center">
+                            <a href="/Login/Login">Đăng xuất</a>
+                        </div>
+                        <div class="text-center text-white">Tài khoản</div>
+                    </div>
+
+                </div>
+                <!-- Biểu tượng giỏ hàng ở góc trên bên phải -->
+                <div class="cart-icon" onclick="openCart()">
+                    <img src="/path/to/cart-icon.png" alt="Giỏ hàng" />
+                    <span id="cart-count">@ViewBag.CartItemCount</span> <!-- Hiển thị số sản phẩm trong giỏ -->
+                </div>
+
+                <script>
+                function openCart() {
+                    // Chuyển hướng đến giỏ hàng khi nhấn vào biểu tượng
+                    window.location.href = '@Url.Action("Index", "ShoppingCart")';
+                }
+                </script>
+
+            </div>
+
+        </nav>
+    </header>
+    <div class="container container-main">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted " style="background-color: #346A54;">
+        <div class="container">
+            &copy; 2025 - COSMETIC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Styles", required: false)
+
+</body>
+</html>

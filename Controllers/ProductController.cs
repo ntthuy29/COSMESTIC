@@ -29,7 +29,22 @@ namespace COSMESTIC.Controllers
             {
                 return View(product);
             }
-
+        }
+        public IActionResult Search(string searchName)
+        {
+            if (string.IsNullOrEmpty(searchName))
+            {
+                return RedirectToAction("Product", "Product");
+            }
+            var products = _context.Products
+                .Where(p => p.productName.Contains(searchName))
+                .ToList();
+            // Kiểm tra nếu không có sản phẩm nào phù hợp
+            if (!products.Any())
+            {
+                ViewBag.Message = "Không có sản phẩm nào phù hợp với từ khóa tìm kiếm.";
+            }
+            return View("Product", products);
         }
         public async Task<IActionResult> Search(string query)
         {
