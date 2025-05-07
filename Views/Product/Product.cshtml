@@ -8,13 +8,16 @@
 <div id="ads">
     <img id="ads-img" src="/Img/ads01.jpg" alt="Ad Image" style="width: 100%; height: 100%; object-fit: contain; " />
     </div>
+    <!-- Hiển thị thông báo nếu không có sản phẩm tìm thấy -->
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-warning">
+            @ViewBag.Message
+        </div>
+    }
     <div class="container container-product">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
             @foreach(var product in Model)
-
-
-
-
             {
             <form  method="post">
 

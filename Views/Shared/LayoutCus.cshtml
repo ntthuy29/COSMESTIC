@@ -17,15 +17,16 @@
     <header class="header_nav">
         <nav class="navbar  navbar-expand-sm navbar-toggleable-sm h-100 navbar-light  border-bottom box-shadow " style="background-color: #346A54;">
             <div class="container-fluid h-100 d-flex ">
-                <div class="col-3" style="padding-left: 10px;">   <a class="navbar-brand kaushan-script-regular text-white" asp-area="" asp-controller="Home" asp-action="Index" style="">
-                        <img src="~/Img/logo.png" style="border-radius: 100px; width: 80px;height: 80px;"/>
+                <div class="col-3" style="padding-left: 10px;">
+                    <a class="navbar-brand kaushan-script-regular text-white" asp-area="" asp-controller="Home" asp-action="Index" style="">
+                        <img src="~/Img/logo.png" style="border-radius: 100px; width: 80px;height: 80px;" />
                         COSMETIC
                     </a>
-                    </div>
-               
+                </div>
+
                 <div class="dropdown col-1">
                     <div class=" dropdown-toggle text-white" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 17px;">
-                       Danh Mục
+                        Danh Mục
                     </div>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                         <li><a class="dropdown-item" href="#">Son môi</a></li>
@@ -36,9 +37,9 @@
                 </div>
                 <div class="navbar-collapse collapse flex-column mb-3 justify-content-md-start gap-1 mt-2 col-4" id="search-home">
                     <div class="d-flex gap-2 ">
-                        <a class= "a-link-catalog" href="#">Kem chống nắng</a>
-                        <a class= "a-link-catalog"href="#">Kem dưỡng ẩm</a>
-                        <a class= "a-link-catalog" href="#">Sữa rửa mặt</a>
+                        <a class="a-link-catalog" href="#">Kem chống nắng</a>
+                        <a class="a-link-catalog" href="#">Kem dưỡng ẩm</a>
+                        <a class="a-link-catalog" href="#">Sữa rửa mặt</a>
                     </div>
                     <form method="get" action="@Url.Action("Search", "Product")">
                         <input class="form-control w-50 me-2" name="searchName" type="search" placeholder="Tìm kiếm sản phẩm bạn muốn.." aria-label="Search">
@@ -51,18 +52,27 @@
                             account_circle
                         </span>
                     </div>
-                    <div>  <div class="text-white text-center">   <a href="/Login/Login">Đăng nhập</a>
-                                                                  <a href="/Register/Register">Đăng ký</a>
-                            </div>
-                    <div class="text-center text-white">Tài khoản</div>
+                    <div>
+                        <div class="text-white text-center">
+                            <a href="/Login/Login">Đăng xuất</a>
+                        </div>
+                        <div class="text-center text-white">Tài khoản</div>
+                    </div>
+
                 </div>
-                
+                <!-- Biểu tượng giỏ hàng ở góc trên bên phải -->
+                <div class="cart-icon" onclick="openCart()">
+                    <img src="/path/to/cart-icon.png" alt="Giỏ hàng" />
+                    <span id="cart-count">@ViewBag.CartItemCount</span> <!-- Hiển thị số sản phẩm trong giỏ -->
                 </div>
-                <div class="col-1 text-white">
-                    <span class="material-symbols-outlined" style="width: 100px; height: 100px; font-size: 40px; padding-top: 30px;">
-                        add_shopping_cart
-                    </span>
-                </div>
+
+                <script>
+                function openCart() {
+                    // Chuyển hướng đến giỏ hàng khi nhấn vào biểu tượng
+                    window.location.href = '@Url.Action("Index", "ShoppingCart")';
+                }
+                </script>
+
             </div>
 
         </nav>
