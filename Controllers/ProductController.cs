@@ -15,6 +15,9 @@ namespace COSMESTIC.Controllers
         }
         public IActionResult Product()
         {
+            var catalogs = _context.Catalogs.ToList();
+            ViewBag.Catalogs = catalogs;
+
             var products = _context.Products.ToList(); // Lấy tất cả sản phẩm từ DB
             return View(products); // Truyền danh sách qua View
         }
@@ -52,6 +55,23 @@ namespace COSMESTIC.Controllers
             // Trả về kết quả tìm kiếm
             return PartialView("_ProductListPartial", products);
         }
+        [HttpGet]
+        [Route("Product/GetByCatalog/{catalogId}")]
+        public async Task<IActionResult> GetByCatalog(int catalogId)
+        {
+            Console.WriteLine(catalogId);  // Kiểm tra catalogId
+            var products = await _context.Products
+                .Where(p => p.catalogID == catalogId)
+                .ToListAsync();
+
+            foreach (var p in products)
+            {
+                Console.WriteLine(p.catalogID);
+            }
+
+            return PartialView("Catalog", products);
+        }
+
 
 
     }

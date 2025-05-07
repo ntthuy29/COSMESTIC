@@ -41,7 +41,7 @@ namespace COSMESTIC.Controllers
                 HttpContext.Session.SetString("Username", ktrauser.username);
                
 
-                return RedirectToAction("Customer", "Customer");
+                return RedirectToAction("Product", "Product");
 
             }
         }
