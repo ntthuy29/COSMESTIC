@@ -1,5 +1,6 @@
 ﻿using COSMESTIC.Models.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace COSMESTIC.Controllers
@@ -28,7 +29,30 @@ namespace COSMESTIC.Controllers
             {
                 return View(product);
             }
-
         }
+        
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return PartialView("_ProductListPartial", new List<Products>());
+            }
+
+            // Truy vấn sản phẩm có tên chứa query
+            var products = await _context.Products
+                .Where(p => p.productName.Contains(query))
+                .ToListAsync();
+
+            // Kiểm tra xem có sản phẩm hay không
+            if (products == null || !products.Any())
+            {
+                return PartialView("_ProductListPartial", new List<Products>());
+            }
+
+            // Trả về kết quả tìm kiếm
+            return PartialView("_ProductListPartial", products);
+        }
+
+
     }
 }

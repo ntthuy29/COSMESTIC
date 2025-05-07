@@ -1,0 +1,61 @@
+﻿@model COSMESTIC.Models.Data.ShoppingCart
+@{
+    Layout = "~/Views/Shared/LayoutCus.cshtml";
+}
+<div class="container">
+    <h3>Giỏ hàng của bạn</h3>
+
+    @if (Model.cartItems.Count == 0)
+    {
+        <p>Giỏ hàng của bạn 
+            hiện tại trống. Hãy thêm sản phẩm vào giỏ hàng!</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Sản phẩm</th>
+                    <th scope="col">Số lượng</th>
+                    <th scope="col">Đơn giá</th>
+                    <th scope="col">Tổng giá</th>
+                    <th scope="col">Xóa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.cartItems)
+                {
+                    <tr>
+                        <td>@item.products.productName</td>
+                        <td>@item.quantity</td>
+                        <td>@item.unitprice ₫</td>
+                        <td>@(item.quantity * item.unitprice) ₫</td>
+                        <td>
+                            <!-- Button để xóa sản phẩm khỏi giỏ hàng -->
+                            <form method="post" action="@Url.Action("RemoveFromCart", "Cart")">
+                                <input type="hidden" name="cartItemID" value="@item.cartItemID" />
+                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col-md-8">
+                <h5>Tổng giỏ hàng:</h5>
+                <p>Số lượng sản phẩm: @Model.totalQuantity</p>
+                <p>Tổng tiền: @Model.totalPrice.ToString("N0") ₫</p>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Nút thanh toán -->
+                <!-- Nút mua hàng -->
+                <form method="post" action="@Url.Action("CreateOrder", "Order")">
+                    <button type="submit" class="btn btn-success">Mua hàng</button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
