@@ -25,12 +25,16 @@
   </ItemGroup>
 
   <ItemGroup>
+
     <Folder Include="wwwroot\Img\" />
     <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Views\Shared\_layoutAdmin.cshtml" />
+
+    <Folder Include="Views\Customer\" />
+
   </ItemGroup>
 
 </Project>

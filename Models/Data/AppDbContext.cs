@@ -37,10 +37,6 @@ namespace COSMESTIC.Models.Data
             }
             );
 
-
-
-
-
             modelBuilder.Entity<Account>(
                 entity =>
                 {
@@ -53,6 +49,20 @@ namespace COSMESTIC.Models.Data
                         .HasForeignKey<Account>(a => a.userID).IsRequired();
 
                 });
+            modelBuilder.Entity<Orders>(entity =>
+            {
+                // Ánh xạ bảng 'Orders' trong Entity Framework với tên bảng 'Order' trong cơ sở dữ liệu
+                entity.ToTable("Order");
+
+                // Các cấu hình khác của bảng Orders
+                entity.Property(o => o.orderID)
+                    .UseIdentityColumn(60000, 1);
+                entity.Property(o => o.orderDate).HasDefaultValueSql("GETDATE()").IsRequired();
+                entity.HasOne(o => o.users)
+                    .WithMany(u => u.orders)
+                    .HasForeignKey(o => o.userID).IsRequired();
+            });
+
             modelBuilder.Entity<Products>(entity =>
             {
                 entity.Property(p => p.productID)
@@ -90,21 +100,6 @@ namespace COSMESTIC.Models.Data
             }
                 );
 
-
-
-
-
-
-
-            modelBuilder.Entity<Orders>(entity =>
-            {
-                entity.Property(o => o.orderID)
-                    .UseIdentityColumn(60000, 1);
-                entity.Property(o => o.orderDate).HasDefaultValueSql("GETDATE()").IsRequired();
-                entity.HasOne(o=>o.users)
-                    .WithMany(u => u.orders)
-                    .HasForeignKey(o => o.userID).IsRequired();
-            });
             modelBuilder.Entity<orderDetail>(entity=>
             {
                 entity.Property(od => od.orderDetailID).UseIdentityColumn(200, 1);

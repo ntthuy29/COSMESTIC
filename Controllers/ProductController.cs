@@ -22,6 +22,7 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
+
         public async Task<IActionResult> Product()
         {
 
@@ -29,7 +30,6 @@ namespace COSMESTIC.Controllers
 
             var catalogs = await _context.Catalogs.ToListAsync();
             ViewBag.Catalogs = catalogs;
-
             return View(products); // Truyền danh sách qua View
         }
         public IActionResult ProductDetail(int id, string name)
