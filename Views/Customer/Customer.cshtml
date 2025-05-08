@@ -1,0 +1,51 @@
+﻿@model List<COSMESTIC.Models.Data.Products>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product.css" />
+}
+
+<div id="ads">
+    <img id="ads-img" src="/Img/ads01.jpg" alt="Ad Image" style="width: 100%; height: 100%; object-fit: contain;" />
+</div>
+
+<!-- Hiển thị thông báo nếu không có sản phẩm tìm thấy -->
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Message
+    </div>
+}
+
+<div class="container container-product">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col" onclick="getDetail(@product.productID, '@product.productName')">
+                <div class="card h-100 shadow-sm card-radius">
+                    <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top" style="height: 200px; object-fit: contain;" />
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate" title="@product.productName">@product.productName</h6>
+                        <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
+
+                        <!-- Form để thêm sản phẩm vào giỏ -->
+                        <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
+                            <input type="hidden" name="productId" value="@product.productID" />
+                            <button type="submit" class="btn btn-outline-warning">🛒 Thêm vào giỏ</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function getDetail(productId, productName) {
+        window.location.href = '@Url.Action("ProductDetail", "Product")/' + productId + '/' + encodeURIComponent(productName);
+    }
+</script>
+
+<script src="~/js/product.js"></script>

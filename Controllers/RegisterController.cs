@@ -33,7 +33,7 @@ namespace COSMESTIC.Controllers
                     phoneNumber = models.phoneNumber,
                     dateOfBirth = models.dateOfBirth,
                     role = "Customer",
-                    status = "Active"
+                    status = "Đồng"
                 };
                 var newAccount = new Account
                 {
