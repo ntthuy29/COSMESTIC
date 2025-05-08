@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace COSMESTIC.Controllers'
+namespace COSMESTIC.Controllers
 {
     public class ProductController: Controller
     {
