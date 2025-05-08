@@ -25,13 +25,21 @@ namespace COSMESTIC.Controllers
         {
             Console.WriteLine("Username: " + models.username);
             Console.WriteLine("Password: " + models.password);
+
+
+            var ktrauser = db.Accounts.FirstOrDefault(u => u.username == models.username && u.password == models.password);
            
             var ktrauser = db.Accounts.Include(u=>u.user).FirstOrDefault(u => u.username == models.username && u.password == models.password);
+
             if (ktrauser == null)
             {
                 // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
                 TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
                 return RedirectToAction("Login");
+            }
+            else if (ktrauser.username == "Ngan123@" && ktrauser.password == "Ngan123@")
+            {
+               return RedirectToAction("Home", "Admin");
             }
             else
             {

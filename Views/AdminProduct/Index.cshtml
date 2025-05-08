@@ -1,0 +1,218 @@
+﻿@* @model COSMESTIC.Models.Product.ProductViewModel;
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewBag.Title = "Danh sách mã khuyến mãi";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml"; // Áp dụng layout admin
+}
+
+<h2>Admin Product Index</h2>
+<!-- Nội dung của trang -->
+<div class="container">
+    <h2>Danh Sách Sản Phẩm</h2>
+    <button class="btn btn-primary"
+            style="background-color: #0077BE; color: white;"
+            onclick="location.href='@Url.Action("Create", "AdminProduct")'">
+        Thêm sản phẩm
+    </button>
+    <form asp-action="Index" method="get">
+        x
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" name="search" value="@Model.TuKhoaTimKiem"
+                       class="form-control" placeholder="Nhập tên sản phẩm..." />
+            </div>
+            <div class="col-md-4">
+                <select name="danhmuc" class="form-control">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach (var danhMuc in Model.DanhMucs)
+                    {
+                        <option value="@danhMuc.Value"
+                                selected="@(danhMuc.Value == Model.DanhMucDuocChon)">
+                            @danhMuc.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        @if (Model.SanPhams.Any())
+        {
+            @foreach (var sanPham in Model.SanPhams)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        @if (!string.IsNullOrEmpty(sanPham.imagePath))
+                        {
+                            <img src="@Url.Content("~/" + sanPham.imagePath)" class="card-img-top" alt="@sanPham.productName">
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@sanPham.productName</h5>
+                            <p class="card-text">@sanPham.productDescription</p>
+                            <p class="card-text">Giá: @sanPham.price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</p>
+                            <p class="card-text">Danh mục: @sanPham.catalog</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>Không tìm thấy sản phẩm nào.</p>
+        }
+    </div>
+</div> *@
+
+
+                            @model COSMESTIC.Models.Product.ProductViewModel;
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewBag.Title = "Quản lý Sản phẩm";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý Sản phẩm</h2>
+        <a href="@Url.Action("Create", "AdminProduct")" class="btn btn-success">
+            <i class="fas fa-plus-circle me-2"></i>Thêm sản phẩm
+        </a>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" value="@Model.TuKhoaTimKiem"
+                                   class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <select name="danhmuc" class="form-select">
+                            <option value="">Tất cả danh mục</option>
+                            @foreach (var danhMuc in Model.DanhMucs)
+                            {
+                                <option value="@danhMuc.Value"
+                                        selected="@(danhMuc.Value == Model.DanhMucDuocChon)">
+                                    @danhMuc.Text
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Lọc
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 100px;">Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Mô tả</th>
+                            <th>Giá</th>
+                            <th>Danh mục</th>
+                            <th style="width: 120px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.SanPhams.Any())
+                        {
+                            @foreach (var sanPham in Model.SanPhams)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(sanPham.imagePath))
+                                        {
+                                            <img src="@Url.Content("~/" + sanPham.imagePath)"
+                                                 class="img-thumbnail"
+                                                 style="width: 80px; height: 80px; object-fit: cover;"
+                                                 alt="@sanPham.productName">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center"
+                                                 style="width: 80px; height: 80px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>@sanPham.productName</td>
+                                    <td class="text-truncate" style="max-width: 250px;">@sanPham.productDescription</td>
+                                    <td>@sanPham.price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                    <td>@sanPham.catalog</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="@Url.Action("Edit", "AdminProduct", new { id = sanPham.productID })"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="@Url.Action("Delete", "AdminProduct", new { id = sanPham.productID })"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="Xóa"
+                                               onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-box-open fa-2x text-muted mb-3"></i>
+                                    <p class="mb-0">Không tìm thấy sản phẩm nào</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(46, 125, 50, 0.05);
+    }
+
+    .img-thumbnail {
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+</style>
