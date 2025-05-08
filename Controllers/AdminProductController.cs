@@ -86,12 +86,12 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+      
         public async Task<IActionResult> Create(CreateProduct model)
         {
             if (!ModelState.IsValid)
             {
-                // Tải lại danh sách dropdown nếu validation thất bại
+               
                 model.DanhMucs = await dbContext.Catalogs
                     .Select(c => new SelectListItem
                     {
@@ -102,18 +102,18 @@ namespace COSMESTIC.Controllers
                 return View(model);
             }
 
-            // Xử lý upload file ảnh
+            
             string imagePath = null;
             if (model.imageFile != null && model.imageFile.Length > 0)
             {
-                // Định nghĩa thư mục lưu file ảnh (wwwroot/Uploads)
+               
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "Img");
                 if (!Directory.Exists(uploadsFolder))
                 {
-                    Directory.CreateDirectory(uploadsFolder); // Tạo thư mục nếu chưa tồn tại
+                    Directory.CreateDirectory(uploadsFolder); 
                 }
 
-                // Tạo tên file duy nhất bằng Guid + phần mở rộng của file gốc
+                
                 var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.imageFile.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -123,7 +123,7 @@ namespace COSMESTIC.Controllers
                     await model.imageFile.CopyToAsync(fileStream);
                 }
 
-                // Gán đường dẫn tương đối để lưu vào CSDL (ví dụ: /Uploads/abc123.jpg)
+               
                 imagePath = "Img/" + uniqueFileName;
             }
 
