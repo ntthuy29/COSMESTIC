@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace COSMESTIC.Controllers
+namespace COSMESTIC.Controllers'
 {
     public class ProductController: Controller
     {
@@ -13,12 +13,12 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Product()
+        public async Task<IActionResult > Product()
         {
-            var catalogs = _context.Catalogs.ToList();
+            var catalogs = await _context.Catalogs.ToListAsync();
             ViewBag.Catalogs = catalogs;
 
-            var products = _context.Products.ToList(); // Lấy tất cả sản phẩm từ DB
+            var products = await _context.Products.ToListAsync(); // Lấy tất cả sản phẩm từ DB
             return View(products); // Truyền danh sách qua View
         }
         public IActionResult ProductDetail(int id, string name)
