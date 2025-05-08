@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250507075003_themthuoctinhOrder")]
+    partial class themthuoctinhOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,8 +69,8 @@ namespace COSMESTIC.Migrations
                     b.Property<int>("quantity")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("unitprice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("unitprice")
+                        .HasColumnType("int");
 
                     b.HasKey("cartItemID");
 
@@ -235,9 +238,6 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
-                    b.Property<int>("DeliveryID")
-                        .HasColumnType("int");
-
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
@@ -261,13 +261,11 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("orderID");
 
-                    b.HasIndex("DeliveryID");
-
                     b.HasIndex("discountID");
 
                     b.HasIndex("userID");
 
-                    b.ToTable("Order", (string)null);
+                    b.ToTable("Order");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -295,9 +293,6 @@ namespace COSMESTIC.Migrations
                     b.Property<string>("productName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("quantity")
-                        .HasColumnType("int");
 
                     b.HasKey("productID");
 
@@ -522,12 +517,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
                 {
-                    b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
-                        .WithMany()
-                        .HasForeignKey("DeliveryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")
                         .HasForeignKey("discountID");
@@ -537,8 +526,6 @@ namespace COSMESTIC.Migrations
                         .HasForeignKey("userID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Delivery");
 
                     b.Navigation("users");
                 });
