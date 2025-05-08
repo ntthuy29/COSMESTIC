@@ -70,10 +70,9 @@ namespace COSMESTIC.Controllers
                         cartItems = new List<CartItem>()
                     };
                     _context.ShoppingCart.Add(cart);
-                    _context.SaveChanges();  // Lưu giỏ hàng mới vào cơ sở dữ liệu
+                    _context.SaveChanges(); 
                 }
 
-                // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
                 var existingCartItem = cart.cartItems
                                             .FirstOrDefault(ci => ci.productID == productId);
 
@@ -91,19 +90,59 @@ namespace COSMESTIC.Controllers
                         quantity = 1,
                         unitprice = product.price
                     };
-                    cart.cartItems.Add(cartItem); // Thêm sản phẩm vào giỏ hàng
+                    cart.cartItems.Add(cartItem); 
                 }
 
                 // Cập nhật tổng số lượng và tổng giá trị giỏ hàng
                 cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
                 cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
 
-                _context.SaveChanges(); // Lưu thay đổi vào cơ sở dữ liệu
+                _context.SaveChanges(); 
+            }
+            return RedirectToAction("Product", "Product");
+        }
+        [HttpPost]
+        public IActionResult UpdateQuantity(int cartItemID, string action)
+        {
+            var cartItem = _context.CartItem.Find(cartItemID);
+            if (cartItem != null)
+            {
+                if (action == "increase")
+                {
+                    cartItem.quantity += 1;
+                }
+                else if (action == "decrease" && cartItem.quantity > 1)
+                {
+                    cartItem.quantity -= 1;
+                }
+                _context.SaveChanges();
+                // Tính lại tổng tiền và tổng số lượng
+                var cart = _context.ShoppingCart
+                                   .Include(c => c.cartItems)
+                                   .ThenInclude(ci => ci.products)
+                                   .FirstOrDefault(c => c.userID == HttpContext.Session.GetInt32("UserID"));
+
+                if (cart != null)
+                {
+                    cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
+                    cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
+                    _context.SaveChanges();
+                }
             }
 
-            // Chuyển hướng lại đến trang giỏ hàng
             return RedirectToAction("Index", "ShoppingCart");
         }
 
+        [HttpPost]
+        public IActionResult RemoveFromCart(int cartItemID)
+        {
+            var cartItem = _context.CartItem.Find(cartItemID);
+            if (cartItem != null)
+            {
+                _context.CartItem.Remove(cartItem);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index", "ShoppingCart");
+        }
     }
 }

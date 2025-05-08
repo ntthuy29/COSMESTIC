@@ -2,13 +2,13 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+    
 <div class="container my-5">
     <div class="card shadow-sm">
         <div class="card-header text-white" style="background-color: #B27474;">
             <h4 class="mb-0">🛒 Giỏ hàng (@Model.totalQuantity) sản phẩm</h4>
         </div>
-        <div class="card-body">
+        <div class="card-body" id="cartContent">
             @if (Model.cartItems.Count == 0)
             {
                 <div class="alert alert-info text-center">
@@ -35,11 +35,18 @@
                                 <tr>
                                     <td><img src="@Url.Content("~/" + item.products.imagePath)" style="width: 50px;height: 50px;" /></td>
                                     <td>@item.products.productName</td>
-                                    <td class="text-center">@item.quantity</td>
-                                    <td class="text-end">@item.unitprice.ToString("N0") ₫</td>
-                                    <td class="text-end">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
                                     <td class="text-center">
-                                        <form method="post" action="@Url.Action("RemoveFromCart", "Cart")">
+                                        <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" style="display: inline;" class="updateQuantityForm">
+                                            <input type="hidden" name="cartItemID" value="@item.cartItemID" />
+                                            <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary">-</button>
+                                            <input type="text" name="quantity" value="@item.quantity" class="quantityInput" style="width: 40px; text-align: center;" readonly />
+                                            <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-primary">+</button>
+                                        </form>
+                                    </td>
+                                    <td class="text-end" class="unitPrice">@item.unitprice.ToString("N0") ₫</td>
+                                    <td class="text-end totalPrice">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
+                                    <td class="text-center">
+                                        <form method="post" action="@Url.Action("RemoveFromCart", "ShoppingCart")">
                                             <input type="hidden" name="cartItemID" value="@item.cartItemID" />
                                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                                 <i class="bi bi-trash"></i> Xóa
@@ -55,19 +62,21 @@
                 <div class="row mt-4">
                     <div class="col-md-8">
                         <div class="p-3 bg-light rounded shadow-sm">
-                           
-                            <p><strong style="font-size: 20px; color: red">Tổng tiền:</strong> @Model.totalPrice.ToString("N0") ₫</p>
+                            <p><strong style="font-size: 20px; color: red">Tổng tiền:</strong> <span id="totalPrice">@Model.totalPrice.ToString("N0") ₫</span></p>
                         </div>
                     </div>
+
                     <div class="col-md-4 d-flex align-items-center justify-content-end">
-                        <form method="post" action="@Url.Action("CreateOrder", "Order")">
-                            <button type="submit" class="btn  btn-lg" style="background-color: darkred;color: white;">
+                        <form method="post" action="@Url.Action("ShippingInformation", "Order")">
+                            <button type="submit" class="btn btn-lg" style="background-color: darkred;color: white;">
                                 <i class="bi bi-credit-card"></i> Đặt hàng
                             </button>
                         </form>
+
                     </div>
                 </div>
             }
         </div>
     </div>
 </div>
+

@@ -8,6 +8,14 @@
 
     <div class="card shadow rounded">
         <div class="card-body">
+            <!-- Thông tin người mua -->
+            <div class="mb-4">
+                <h5><strong>Thông tin người mua:</strong></h5>
+                <p><strong>Họ và tên:</strong> @Model.Delivery.deliveryName</p>
+                <p><strong>Số điện thoại:</strong> @Model.Delivery.deliveryPhone</p>
+                <p><strong>Địa chỉ giao hàng:</strong> @Model.Delivery.deliveryAddress</p>
+            </div>
+            <!--Chi tiết đơn hàng-->
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-primary">
                     <tr>
