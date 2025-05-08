@@ -1,5 +1,10 @@
 ﻿@model COSMESTIC.Models.Data.Products;
 
+    @{
+    var role = Context.Session.GetString("role");
+
+
+}
 <div class="container product-detail">
     <div class="row mt-5">
         <div class="col-md-5 product-image">
@@ -25,9 +30,24 @@
                 <strong>Mô tả:</strong> @Model.productDescription
             </div>
 
-            <div class="action-buttons">
-                <button class="btn btn-success me-2">Mua ngay</button>
-                <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+            <div class="action-buttons d-flex gap-5">
+                <div class=""> <button class="btn btn-success me-2">Mua ngay</button></div>
+                @if (role == "Customer")
+                {
+                    <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
+                        <div class="">
+                            <input  type="hidden" name="productId" value="@Model.productID" />
+                            <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="" onclick="alertLogin()">
+                        <input type="hidden" name="productId" value="@Model.productID" />
+                        <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+                    </div>
+                }
             </div>
         </div>
     </div>
