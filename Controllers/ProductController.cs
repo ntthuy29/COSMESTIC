@@ -18,9 +18,9 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Product()
+        public async Task<IActionResult> Product()
         {
-            var products = _context.Products.ToList(); // Lấy tất cả sản phẩm từ DB
+            var products = await _context.Products.ToListAsync(); // Lấy tất cả sản phẩm từ DB
             return View(products); // Truyền danh sách qua View
         }
     }

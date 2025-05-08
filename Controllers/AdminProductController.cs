@@ -124,7 +124,7 @@ namespace COSMESTIC.Controllers
                 }
 
                 // Gán đường dẫn tương đối để lưu vào CSDL (ví dụ: /Uploads/abc123.jpg)
-                imagePath = "/Img/" + uniqueFileName;
+                imagePath = "Img/" + uniqueFileName;
             }
 
             // Ánh xạ view model sang entity
@@ -142,6 +142,19 @@ namespace COSMESTIC.Controllers
             await dbContext.SaveChangesAsync();
 
             return RedirectToAction("Index"); // Điều chỉnh theo trang bạn muốn chuyển hướng
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var art = await dbContext.Products.FindAsync(id);
+            if (art != null)
+            {
+                dbContext.Products.Remove(art);
+                await dbContext.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Sản phẩm đã được xóa thành công";
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("Index");
         }
     }
 }
