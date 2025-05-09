@@ -28,7 +28,7 @@
                         break;
                     case "Cancelled":
                         <span class="badge bg-danger">Đã hủy</span>
-                        <p><strong>Ngày hủy:</strong> @Model.endDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong>Ngày hủy:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
                         break;
                     default:

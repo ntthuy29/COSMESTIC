@@ -32,18 +32,18 @@
 
             <div class="action-buttons d-flex gap-5">
 
-                <div class="">
-                    <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")">
-                        <input type="hidden" name="productId" value="@Model.productID" />
-                        <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
-                        <button type="submit" class="btn btn-success me-2">Mua ngay</button>
-                    </form>
-                </div>
+                
 
 
                 @if (role == "Customer")
                 {
-                    <div class=""> <button class="btn btn-success me-2">Mua ngay</button></div>
+                    <div class="">
+                        <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")">
+                            <input type="hidden" name="productId" value="@Model.productID" />
+                            <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
+                            <button type="submit" class="btn btn-success me-2">Mua ngay</button>
+                        </form>
+                    </div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <input type="hidden" name="productId" value="@Model.productID" />
                         <button class="btn btn-danger">Thêm vào giỏ hàng</button>
@@ -196,6 +196,6 @@
     </style>
 }
 
-}
+
 <script src="~/js/alertLogin.js"></script>
 

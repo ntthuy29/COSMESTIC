@@ -46,7 +46,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("Account");
+                    b.ToTable("Account", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.CartItem", b =>
@@ -75,7 +75,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("CartItem");
+                    b.ToTable("CartItem", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Catalogs", b =>
@@ -96,7 +96,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("catalogID");
 
-                    b.ToTable("Catalog");
+                    b.ToTable("Catalog", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.DeliveryIFMT", b =>
@@ -126,7 +126,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("DeliveryIFMT");
+                    b.ToTable("DeliveryIFMT", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Discount", b =>
@@ -158,7 +158,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("discountID");
 
-                    b.ToTable("Discount");
+                    b.ToTable("Discount", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Invoice", b =>
@@ -177,7 +177,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("orderID")
                         .IsUnique();
 
-                    b.ToTable("Invoice");
+                    b.ToTable("Invoice", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
@@ -194,10 +194,7 @@ namespace COSMESTIC.Migrations
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
-
-                 
-                    b.Property<DateTime?>("endDate")
-
+                    b.Property<DateTime>("endDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("orderDate")
@@ -257,7 +254,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("ProductReView");
+                    b.ToTable("ProductReView", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -293,7 +290,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("catalogID");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Revenue", b =>
@@ -327,7 +324,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("orderID");
 
-                    b.ToTable("Revenue");
+                    b.ToTable("Revenue", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.ShoppingCart", b =>
@@ -352,7 +349,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("ShoppingCart");
+                    b.ToTable("ShoppingCart", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
@@ -388,7 +385,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("userID");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.orderDetail", b =>
@@ -417,7 +414,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("OrderDetail");
+                    b.ToTable("OrderDetail", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Account", b =>
