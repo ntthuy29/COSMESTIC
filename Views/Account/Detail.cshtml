@@ -1,0 +1,25 @@
+﻿@model COSMESTIC.Models.Data.Users
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <h3 class="text-center text-primary fw-bold mb-4">Thông tin tài khoản cá nhân</h3>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">📌 Thông tin cá nhân</h5>
+
+            <p><strong>Họ và tên:</strong> @Model.fullName</p>
+            <p><strong>Email:</strong> @Model.email</p>
+            <p><strong>Số điện thoại:</strong> @Model.phoneNumber</p>
+            <p><strong>Ngày sinh:</strong> @Model.dateOfBirth.ToString("dd/MM/yyyy")</p>
+
+            <div class="d-flex gap-3">
+                <a href="@Url.Action("Edit", "Account")" class="btn btn-warning">Chỉnh sửa thông tin</a>
+                <a href="@Url.Action("ChangePassword", "Account")" class="btn btn-info">Đổi mật khẩu</a>
+            </div>
+        </div>
+    </div>
+</div>

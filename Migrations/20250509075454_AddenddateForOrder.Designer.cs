@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250509075454_AddenddateForOrder")]
+    partial class AddenddateForOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,10 +197,7 @@ namespace COSMESTIC.Migrations
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
-
-                 
-                    b.Property<DateTime?>("endDate")
-
+                    b.Property<DateTime>("endDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("orderDate")
@@ -224,40 +224,6 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID");
 
                     b.ToTable("Order", (string)null);
-                });
-
-            modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
-                {
-                    b.Property<int>("reviewID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("reviewID"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("comment")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("productID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("userID")
-                        .HasColumnType("int");
-
-                    b.HasKey("reviewID");
-
-                    b.HasIndex("productID");
-
-                    b.HasIndex("userID");
-
-                    b.ToTable("ProductReView");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -495,25 +461,6 @@ namespace COSMESTIC.Migrations
                     b.Navigation("users");
                 });
 
-            modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
-                {
-                    b.HasOne("COSMESTIC.Models.Data.Products", "product")
-                        .WithMany("ProductReviews")
-                        .HasForeignKey("productID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("COSMESTIC.Models.Data.Users", "user")
-                        .WithMany("ProductReviews")
-                        .HasForeignKey("userID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("product");
-
-                    b.Navigation("user");
-                });
-
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
                 {
                     b.HasOne("COSMESTIC.Models.Data.Catalogs", "catalog")
@@ -588,8 +535,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
                 {
-                    b.Navigation("ProductReviews");
-
                     b.Navigation("cartItems");
 
                     b.Navigation("orderDetails");
@@ -602,8 +547,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
                 {
-                    b.Navigation("ProductReviews");
-
                     b.Navigation("ShoppingCart")
                         .IsRequired();
 

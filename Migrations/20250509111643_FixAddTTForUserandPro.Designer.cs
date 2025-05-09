@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250509111643_FixAddTTForUserandPro")]
+    partial class FixAddTTForUserandPro
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,10 +197,7 @@ namespace COSMESTIC.Migrations
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
-
-                 
-                    b.Property<DateTime?>("endDate")
-
+                    b.Property<DateTime>("endDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("orderDate")

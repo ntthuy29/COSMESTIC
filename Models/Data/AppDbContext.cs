@@ -17,14 +17,13 @@ namespace COSMESTIC.Models.Data
         public DbSet <orderDetail> orderDetails { get; set; }
         public DbSet<Invoice> Invoice { get; set; }
         public DbSet<DeliveryIFMT> DeliveryIFMT { get; set; }
-        public DbSet<DiscountProduct> DiscountProduct { get; set; }
-        public DbSet<CatalogRevenue> CatalogRevenue { get; set; }
         public DbSet<Revenue> Revenue { get; set; }
         public DbSet<Discount> Discount
         {
             get; set;
 
         }
+        public DbSet<ProductReView> ProductReView { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -129,26 +128,6 @@ namespace COSMESTIC.Models.Data
                     .WithMany(u => u.deliverys)
                     .HasForeignKey(d => d.userID).IsRequired();
             });
-            modelBuilder.Entity<DiscountProduct>(entity=>
-            {
-                entity.Property(dp => dp.discountProductID)
-                    .UseIdentityColumn(9000, 1);
-                entity.HasOne(dp => dp.products)
-                    .WithMany(p => p.discountProducts)
-                    .HasForeignKey(dp => dp.productID).IsRequired();
-            });
-            modelBuilder.Entity<CatalogRevenue>(
-                entity =>
-                {
-                    entity.Property(cr => cr.catalogRevenueID)
-                        .UseIdentityColumn(500, 1);
-                    entity.HasOne(cr => cr.catalog)
-                        .WithMany(c => c.catalogRevenues)
-                        .HasForeignKey(cr => cr.catalogID).IsRequired();
-                    entity.HasOne(cr => cr.revenue)
-                        .WithOne(r => r.catalogRevenue)
-                        .HasForeignKey<CatalogRevenue>(cr=>cr.revenueID).IsRequired();
-                });
             modelBuilder.Entity<Revenue>(entity =>
             {
                 entity.Property(r => r.revenueID)

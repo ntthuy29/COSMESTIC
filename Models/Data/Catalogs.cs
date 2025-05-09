@@ -13,6 +13,5 @@ namespace COSMESTIC.Models.Data
         public string catalogName { get; set; }
         public string catalogDescription { get; set; }
         public ICollection<Products> products { get; set; }
-        public ICollection<CatalogRevenue> catalogRevenues { get; set; }
     }
 }
