@@ -19,7 +19,7 @@ namespace COSMESTIC.Controllers
 
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account"); 
+                return RedirectToAction("Login", "Login"); 
             }
 
             var cart = _context.ShoppingCart
@@ -48,7 +48,7 @@ namespace COSMESTIC.Controllers
 
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account"); 
+                return RedirectToAction("Login", "Login"); 
             }
 
             var product = _context.Products.Find(productId);
@@ -59,7 +59,6 @@ namespace COSMESTIC.Controllers
                                    .Include(c => c.cartItems)
                                    .FirstOrDefault(c => c.userID == userId);
 
-                // Nếu không có giỏ hàng, tạo mới giỏ hàng
                 if (cart == null)
                 {
                     cart = new ShoppingCart
@@ -78,7 +77,6 @@ namespace COSMESTIC.Controllers
 
                 if (existingCartItem != null)
                 {
-                    // Nếu sản phẩm đã có trong giỏ, tăng số lượng lên 1
                     existingCartItem.quantity += 1;
                 }
                 else

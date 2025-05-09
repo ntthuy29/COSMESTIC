@@ -17,6 +17,5 @@ namespace COSMESTIC.Models.Data
         [ForeignKey("orderID")]
         public int orderID { get; set; }
         public virtual Orders orders { get; set; }
-        public virtual CatalogRevenue catalogRevenue { get; set; }  
     }
 }

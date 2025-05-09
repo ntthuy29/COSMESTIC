@@ -22,5 +22,6 @@ namespace COSMESTIC.Models.Data
         public virtual ICollection< DeliveryIFMT >deliverys { get; set; }
         public virtual ICollection<Orders> orders { get; set; }
         public virtual ShoppingCart ShoppingCart { get; set; }
+        public virtual ICollection<ProductReView> ProductReviews { get; set; }
     }
 }

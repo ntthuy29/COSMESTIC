@@ -19,8 +19,6 @@ namespace COSMESTIC.Models.Data
         public virtual Catalogs catalog { get; set; }
         public virtual ICollection<orderDetail> orderDetails { get; set; }
         public virtual ICollection <CartItem> cartItems { get; set; }
-        public virtual ICollection <DiscountProduct> discountProducts { get; set; }
-
-
+        public virtual ICollection<ProductReView> ProductReviews { get; set; }
     }
 }
