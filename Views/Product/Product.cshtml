@@ -11,7 +11,7 @@
 <div id="ads">
     <img id="ads-img" src="/Img/images.jpg" alt="Ad Image" style="width: 100%; height: 100%; object-fit: contain; " />
 </div>
-    <!--hihihi-->
+<!--hihihi-->
 @if (ViewBag.Message != null)
 {
     <div class="alert alert-warning">
@@ -22,35 +22,55 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         @foreach(var product in Model)
         {
-            
-
-                <div class="col " onclick="getDetail(@product.productID,'@product.productName')">
-                    <div class="card h-100 shadow-sm card-radius">
-                        <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top" style="height: 200px; object-fit: contain;" />
-                        <div class="card-body">
-                            <h6 class="card-title text-truncate" title="@product.productName">@product.productName</h6>
 
 
-                            <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
-                            @if (role == "Customer")
-                            { 
-                                <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
-                                    <input type="hidden" name="productId" value="@product.productID" />
-                                    <button type="submit" class="btn btn-outline-warning w-100">🛒 Thêm vào giỏ</button>
-                                </form>
-                            }else
-                            {
+            <div class="col " onclick="getDetail(@product.productID,'@product.productName')">
+                <div class="card h-100 shadow-sm card-radius">
+                    <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top" style="height: 200px; object-fit: contain;" />
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate" title="@product.productName">@product.productName</h6>
+
+
+                        <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
+                        @if (role == "Customer")
+                        { 
+                            <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                                 <input type="hidden" name="productId" value="@product.productID" />
                                 <button type="submit" class="btn btn-outline-warning w-100">🛒 Thêm vào giỏ</button>
-                            }
-                        </div>
-                        </div>
+                            </form>
+                        }else
+                        {
+
+                            <input type="hidden" name="productId" value="@product.productID" />
+                            <button type="button" onclick="event.stopPropagation(); alertLogin()"  class="btn btn-outline-warning w-100">🛒 Thêm vào giỏ</button>
+                        }
                     </div>
-                
-          
-            }
+                </div>
+            </div>
 
 
+        }
+
+        @if(role == null)
+        {
+            <div id="deleteModal" class="modal" style="display: none;">
+               
+                <div class="modal-content">
+                    <span class="material-symbols-outlined" style="color: black; margin-right: auto;" id="close" onclick="setCursor()">
+                        close
+                    </span>
+                    <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
+                   <div class="d-flex justify-content-sm-between">
+                        <form action="/Login/Login" method="get">
+                            <button type="submit" class="btn btn-danger" id="confirmDelete">Đăng nhập</button>
+                        </form>
+
+
+                        <form action="/Register/Register"> <button id="cancelDelete" class="btn btn-secondary">Đăng ký tài khoản</button> </form>
+                   </div>
+                </div>
+            </div>
+        }
             </div>
 
         </div>
@@ -64,4 +84,5 @@ function getDetail(productId, productName) {
 </script>
 
       <script src="~/js/product.js"></script>
+      <script src="~/js/alertLogin.js"></script>
     

@@ -31,9 +31,10 @@
             </div>
 
             <div class="action-buttons d-flex gap-5">
-                <div class=""> <button class="btn btn-success me-2">Mua ngay</button></div>
+              
                 @if (role == "Customer")
                 {
+                    <div class=""> <button class="btn btn-success me-2">Mua ngay</button></div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <div class="">
                             <input  type="hidden" name="productId" value="@Model.productID" />
@@ -43,6 +44,7 @@
                 }
                 else
                 {
+                    <div class="" onclick="alertLogin()"> <button class="btn btn-success me-2">Mua ngay</button></div>
                     <div class="" onclick="alertLogin()">
                         <input type="hidden" name="productId" value="@Model.productID" />
                         <button class="btn btn-danger">Thêm vào giỏ hàng</button>
@@ -50,8 +52,30 @@
                 }
             </div>
         </div>
+        @if (role == null)
+        {
+            <div id="deleteModal" class="modal" style="display: none;">
+
+                <div class="modal-content">
+                    <span class="material-symbols-outlined" style="color: black; margin-right: auto;" id="close" onclick="setCursor()">
+                        close
+                    </span>
+                    <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
+                    <div class="d-flex justify-content-sm-between">
+                        <form action="/Login/Login" method="get">
+                            <button type="submit" class="btn btn-danger" id="confirmDelete">Đăng nhập</button>
+                        </form>
+
+
+                        <form action="/Register/Register"> <button id="cancelDelete" class="btn btn-secondary">Đăng ký tài khoản</button> </form>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+    
 </div>
+
 
 @section Scripts {
     <script src="~/js/productDetail.js"></script>
@@ -59,3 +83,4 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/productDetail.css" />
 }
+<script src="~/js/alertLogin.js"></script>

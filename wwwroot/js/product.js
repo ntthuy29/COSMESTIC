@@ -22,3 +22,5 @@ setInterval(() => {
     }
     showImage(current);
 }, 3000);
+
+
