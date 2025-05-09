@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250509110819_AddProductReView")]
+    partial class AddProductReView
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +49,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("Account", (string)null);
+                    b.ToTable("Account");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.CartItem", b =>
@@ -75,7 +78,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("CartItem", (string)null);
+                    b.ToTable("CartItem");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Catalogs", b =>
@@ -96,7 +99,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("catalogID");
 
-                    b.ToTable("Catalog", (string)null);
+                    b.ToTable("Catalog");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.DeliveryIFMT", b =>
@@ -126,7 +129,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("DeliveryIFMT", (string)null);
+                    b.ToTable("DeliveryIFMT");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Discount", b =>
@@ -158,7 +161,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("discountID");
 
-                    b.ToTable("Discount", (string)null);
+                    b.ToTable("Discount");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Invoice", b =>
@@ -177,7 +180,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("orderID")
                         .IsUnique();
 
-                    b.ToTable("Invoice", (string)null);
+                    b.ToTable("Invoice");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
@@ -254,7 +257,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("ProductReView", (string)null);
+                    b.ToTable("ProductReView");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -290,7 +293,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("catalogID");
 
-                    b.ToTable("Product", (string)null);
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Revenue", b =>
@@ -324,7 +327,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("orderID");
 
-                    b.ToTable("Revenue", (string)null);
+                    b.ToTable("Revenue");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.ShoppingCart", b =>
@@ -349,7 +352,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("ShoppingCart", (string)null);
+                    b.ToTable("ShoppingCart");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
@@ -385,7 +388,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("userID");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.orderDetail", b =>
@@ -414,7 +417,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("OrderDetail", (string)null);
+                    b.ToTable("OrderDetail");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Account", b =>
@@ -495,13 +498,13 @@ namespace COSMESTIC.Migrations
             modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
                 {
                     b.HasOne("COSMESTIC.Models.Data.Products", "product")
-                        .WithMany("ProductReviews")
+                        .WithMany()
                         .HasForeignKey("productID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("COSMESTIC.Models.Data.Users", "user")
-                        .WithMany("ProductReviews")
+                        .WithMany()
                         .HasForeignKey("userID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -585,8 +588,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
                 {
-                    b.Navigation("ProductReviews");
-
                     b.Navigation("cartItems");
 
                     b.Navigation("orderDetails");
@@ -599,8 +600,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
                 {
-                    b.Navigation("ProductReviews");
-
                     b.Navigation("ShoppingCart")
                         .IsRequired();
 

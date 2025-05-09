@@ -1,0 +1,61 @@
+﻿@model List<COSMESTIC.Models.Data.Orders>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <h3 class="text-center text-primary fw-bold mb-4">📦 Đơn hàng của tôi</h3>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            Bạn chưa có đơn hàng nào.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-success">
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Ngày đặt</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.orderID</td>
+                        <td>@order.orderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-end">@order.totalAmount.ToString("N0") ₫</td>
+                        <td>
+                            @switch (order.status)
+                            {
+                                case "Pending":
+                                    <span class="badge bg-warning text-dark">Đang xử lý</span>
+                                    ; break;
+                                case "Shipped":
+                                    <span class="badge bg-info text-dark">Đã giao</span>
+                                    ; break;
+                                case "Cancelled":
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                    ; break;
+                                default:
+                                    <span class="badge bg-secondary">Không xác định</span>
+                                    ; break;
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Order", new { id = order.orderID })">
+                                <i class="bi bi-eye"></i> Xem chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

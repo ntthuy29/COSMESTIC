@@ -15,7 +15,7 @@ namespace COSMESTIC.Migrations
                 name: "endDate",
                 table: "Order",
                 type: "datetime2",
-                nullable: true);
+                nullable: false);
         }
 
         /// <inheritdoc />

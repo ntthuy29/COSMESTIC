@@ -1,101 +1,100 @@
-﻿body {
+﻿/* General body styling for the login page */
+body {
     width: 100%;
-    height: 100vh; /* hoặc chiều cao cụ thể */
-    background-image: url('/Img/anhnen2.png');
-    background-repeat: no-repeat;
-    background-size: cover;
-    backdrop-filter: blur(2px);
-    overflow: hidden;
+    height: 100vh; /* Full viewport height */
+    background-image: url('/Img/anhnen2.png'); /* Background image for the login page */
+    background-repeat: no-repeat; /* Prevents the background image from repeating */
+    background-size: cover; /* Ensures the background image covers the entire viewport */
+    backdrop-filter: blur(2px); /* Adds a slight blur effect to the background */
+    overflow: hidden; /* Prevents scrolling */
 }
-*{
+
+/* Resetting default margin and padding for all elements */
+* {
     margin: 0;
     padding: 0;
 }
+
+/* Styling for the background image container */
 #bg-img-lg {
-/*    background-image: url('/Img/Anh-my-pham-3.jpg');*/
-    background-size: cover;
-    background-position: center;
-    height: 100vh;
-    width: 100%;
-   
+    background-size: cover; /* Ensures the image covers the container */
+    background-position: center; /* Centers the image */
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full width */
 }
-#nav-lg{
-    padding-top: 300px;
+
+/* Styling for the navigation section */
+#nav-lg {
+    padding-top: 300px; /* Adds spacing at the top */
 }
-/*@keyframes agetinfor {
-    from {
-        opacity: 0.8;
-        transform: scale(0);
+
+/* Styling for the Home button */
+#home-back {
+    border: none; /* Removes border */
+    background-color: #ffffff; /* White background for better contrast */
+    color: #346A54; /* Matches the green theme of the page */
+    font-weight: bold; /* Makes the text bold */
+    border-radius: 5px; /* Adds rounded corners */
+    padding: 5px 10px; /* Adds padding for better appearance */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+    /* Hover effect for the Home button */
+    #home-back:hover {
+        background-color: #346A54; /* Changes background to green on hover */
+        color: #ffffff; /* Changes text color to white on hover */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow effect */
     }
 
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}*/
-
+/* Styling for the login box */
 .login-box {
-    animation: agetinfor 1.1s ease-in;
-    margin: 70px;
-}
-/*body {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    animation: agetinfor 1.1s ease-in; /* Adds an animation effect */
+    margin: 70px; /* Adds margin around the login box */
+    background-color: white; /* White background for the login box */
+    padding: 2rem; /* Adds padding inside the login box */
+    border-radius: 1rem; /* Adds rounded corners */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow effect */
+    width: 100%; /* Full width */
+    max-width: 400px; /* Maximum width for the login box */
 }
 
-.login-box {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 400px;
-}*/
-/*body, html {
-    height: 100%;
-    margin: 0;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}*/
-
-.login-box {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-}
-.col1{
-    width: 400px;
-    height: 600px;
-}
+/* Styling for the text inside the login box */
 .h2-text {
-    top: 20px; 
+    top: 20px;
     left: 20px;
-    font-size: 35px;
-    color: red;
-  padding-top: 300px;
+    font-size: 35px; /* Large font size */
+    color: red; /* Red text color */
+    padding-top: 300px;
     padding-left: 200px;
     border-radius: 5px;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; /* Custom font */
 }
 
+/* Styling for navigation arrows */
+.next, .prev {
+    font-weight: 900; /* Bold text */
+    font-size: 30px; /* Large font size */
+    padding-top: 300px; /* Adds spacing at the top */
+}
 
+/* Specific styling for the next arrow */
 .next {
     right: 10px;
-    padding-top: 300px;
-    font-weight: 900;
-    font-size: 30px;
 }
+
+/* Specific styling for the previous arrow */
 .prev {
     left: 10px;
-    padding-top: 300px;
-    font-weight: 900!important;
-    font-size: 30px !important;
 }
+/* Styling for the Home icon */
+.home-container .material-symbols-outlined {
+    font-size: 30px; /* Adjust the size of the icon */
+    color: #346A54; /* Matches the green theme of the page */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+    /* Hover effect for the Home icon */
+    .home-container .material-symbols-outlined:hover {
+        color: #ffffff; /* Changes the icon color to white on hover */
+        transform: scale(1.2); /* Slightly enlarges the icon on hover */
+    }
