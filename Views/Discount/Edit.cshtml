@@ -1,7 +1,9 @@
 ﻿@model COSMESTIC.Models.Discount.CreateModel;
 
+
 @{
     ViewData["Title"] = "Chỉnh sửa mã giảm giá";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml"; // Áp dụng layout admin
 }
 @if (TempData["SuccessMessage"] != null)
 {
@@ -9,6 +11,10 @@
     @TempData["SuccessMessage"]
 
 }
+
+
+<h2>Admin Product Index</h2>
+<!-- Nội dung của trang -->
 <form asp-action="Edit" asp-controller="Discount" method="post">
     @Html.AntiForgeryToken() <!-- Bảo vệ chống CSRF -->
 

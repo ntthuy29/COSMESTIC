@@ -184,7 +184,7 @@ namespace COSMESTIC.Controllers
 
         }
 
-
+        //Controller delete này chưa hoạt động được vì còn phải chờ bảng đơn hàng seed dữ liệu để kiểm tra 
         public async Task<IActionResult> Delete(int id)
         {
             var art = await dbContext.Discount.FindAsync(id);

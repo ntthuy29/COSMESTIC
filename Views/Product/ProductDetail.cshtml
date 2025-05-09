@@ -31,6 +31,7 @@
             </div>
 
             <div class="action-buttons d-flex gap-5">
+
                 <div class="">
                     <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")">
                         <input type="hidden" name="productId" value="@Model.productID" />
@@ -39,8 +40,10 @@
                     </form>
                 </div>
 
+
                 @if (role == "Customer")
                 {
+                    <div class=""> <button class="btn btn-success me-2">Mua ngay</button></div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <input type="hidden" name="productId" value="@Model.productID" />
                         <button class="btn btn-danger">Thêm vào giỏ hàng</button>
@@ -48,6 +51,7 @@
                 }
                 else
                 {
+                    <div class="" onclick="alertLogin()"> <button class="btn btn-success me-2">Mua ngay</button></div>
                     <div class="" onclick="alertLogin()">
                         <input type="hidden" name="productId" value="@Model.productID" />
                         <button class="btn btn-danger">Thêm vào giỏ hàng</button>
@@ -55,7 +59,28 @@
                 }
             </div>
         </div>
+        @if (role == null)
+        {
+            <div id="deleteModal" class="modal" style="display: none;">
+
+                <div class="modal-content">
+                    <span class="material-symbols-outlined" style="color: black; margin-right: auto;" id="close" onclick="setCursor()">
+                        close
+                    </span>
+                    <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
+                    <div class="d-flex justify-content-sm-between">
+                        <form action="/Login/Login" method="get">
+                            <button type="submit" class="btn btn-danger" id="confirmDelete">Đăng nhập</button>
+                        </form>
+
+
+                        <form action="/Register/Register"> <button id="cancelDelete" class="btn btn-secondary">Đăng ký tài khoản</button> </form>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+
     <!-- Hiển thị các đánh giá của sản phẩm -->
     <div class="product-reviews mt-5">
         <h5>Đánh giá sản phẩm</h5>
@@ -107,7 +132,10 @@
             }
         }
     </div>
+
+
 </div>
+
 
 @section Scripts {
     <script>
@@ -157,6 +185,7 @@
 }
 @section Styles {
     <link rel="stylesheet" href="~/css/productDetail.css" />
+
     <style>
         /* CSS nhỏ để căn chỉnh số lượng cho đẹp hơn nếu cần */
         .quantity-selector span {
@@ -166,3 +195,7 @@
         }
     </style>
 }
+
+}
+<script src="~/js/alertLogin.js"></script>
+

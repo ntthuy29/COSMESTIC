@@ -1,6 +1,15 @@
 ﻿using COSMESTIC.Models.Data;
+using COSMESTIC.Models.Product;
 using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+
+
 
 
 namespace COSMESTIC.Controllers
@@ -13,12 +22,14 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Product()
-        {
-            var catalogs = _context.Catalogs.ToList();
-            ViewBag.Catalogs = catalogs;
 
-            var products = _context.Products.ToList(); // Lấy tất cả sản phẩm từ DB
+        public async Task<IActionResult> Product()
+        {
+
+            var products = await _context.Products.ToListAsync(); // Lấy tất cả sản phẩm từ DB
+
+            var catalogs = await _context.Catalogs.ToListAsync();
+            ViewBag.Catalogs = catalogs;
             return View(products); // Truyền danh sách qua View
         }
         public IActionResult ProductDetail(int id)
