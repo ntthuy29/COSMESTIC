@@ -71,7 +71,7 @@ namespace COSMESTIC.Controllers
         public async Task<IActionResult> GetByCatalog(int catalogId)
         {
             Console.WriteLine(catalogId);  // Kiểm tra catalogId
-            var products = await _context.Products
+            var products = await _context.Products.Include(p=>p.catalog)
                 .Where(p => p.catalogID == catalogId)
                 .ToListAsync();
 

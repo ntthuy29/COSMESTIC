@@ -7,10 +7,15 @@
 @{
     var role = Context.Session.GetString("role");
 }
-
-<div id="ads">
-    <img id="ads-img" src="/Img/images.jpg" alt="Ad Image" style="width: 100%; height: 100%; object-fit: contain; " />
+<div id="ads" class="ads-container">
+    <div class="ads-overlay">
+        <h2>Khuyến mãi đặc biệt</h2>
+        <p>Khám phá các sản phẩm mới nhất của chúng tôi!</p>
+    </div>
 </div>
+
+
+
 <!--hihihi-->
 @if (ViewBag.Message != null)
 {
