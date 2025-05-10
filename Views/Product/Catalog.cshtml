@@ -1,50 +1,32 @@
 ﻿@model List<COSMESTIC.Models.Data.Products>
 <div>
-    
     @if (Model != null && Model.Any() && Model[0]?.catalog != null)
     {
-        
-       <div style="border: inherit;" class="d-flex">
+        <div style="border: inherit;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); margin-bottom: 50px; background-color: #D9D9D9; padding: 10px; border-radius: 10px;" class="d-flex">
             <div>
                 @Model[0].catalog.catalogName <span>(<span style="opacity: 0.5;">@Model.Count() sản phẩm</span>)</span>
             </div>
 
-            <div class="flex-column flex-column">
-                <div>
-                    Khoảng giá
-                </div>
-                <div>
-                    <div>
-                       
-                        <input name="min" id="min" type="number" style="width: 50px;" placeholder="TỪ" />
-                        
-                        <input name="max" id="max" type="number" style="width: 50px;" placeholder="ĐẾN"/>
-                    </div>
-
+            <div class="flex-column flex-column" style="margin-left: 50px;">
+                <div class="d-flex align-items-center gap-2">
+                    <label>Khoảng giá: </label>
+                    <form asp-action="filterProductFollowPrice" asp-controller="Product" method="get">
+                        <input type="number" class="form-control" id="min" name="min" placeholder="TỪ..đ" style="width: 80px; height: 25px;">
+                        -
+                        <input type="number" class="form-control" id="max" name="max" placeholder="ĐẾN...đ" style="width: 80px; height: 25px;">
+                        <input type="hidden" name="catalogID" value="@Model[0].catalogID" />
+                        <button type="submit" class="btn btn-warning" style="margin-inline:100px; margin-top: 10px;">Áp dụng</button>
+                    </form>
                 </div>
             </div>
-       </div>
+        </div>
     }
     else
     {
         <div>Rỗng</div>
     }
 
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        @foreach (var product in Model)
-        {
-            <div class="col" onclick="getDetail(@product.productID, '@product.productName')">
-                <div class="card h-100 shadow-sm card-radius">
-                    <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top" style="height: 200px; object-fit: contain;" />
-                    <div class="card-body">
-                        <h6 class="card-title text-truncate" title="@product.productName">@product.productName</h6>
-                        <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
-                        <div class="mt-3 d-grid">
-                            <button class="btn btn-outline-warning button">🛒 Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
+    <div id="product-list">
+        @await Html.PartialAsync("_partListProduct", Model)
     </div>
 </div>

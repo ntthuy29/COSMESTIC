@@ -94,6 +94,8 @@ namespace COSMESTIC.Controllers
                 // Cập nhật tổng số lượng và tổng giá trị giỏ hàng
                 cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
                 cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
+                ViewBag.TotalQuantity = cart.totalQuantity;
+                ViewBag.TotalPrice = cart.totalPrice;
 
                 _context.SaveChanges(); 
             }

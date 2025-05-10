@@ -61,7 +61,9 @@
                             <i class="fas fa-user me-2"></i> @Context.Session.GetString("Username")
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-outline-light btn-sm" href="/Login/Logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                           <form asp-action="logout" asp-controller="Account">
+                            <button class="btn btn-outline-light btn-sm" ><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                           </form>
                         </li>
                     </ul>
                 </div>
