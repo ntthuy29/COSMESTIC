@@ -235,7 +235,7 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
-                    b.Property<int>("DeliveryID")
+                    b.Property<int?>("DeliveryID")
                         .HasColumnType("int");
 
                     b.Property<int?>("discountID")
@@ -524,9 +524,7 @@ namespace COSMESTIC.Migrations
                 {
                     b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
                         .WithMany()
-                        .HasForeignKey("DeliveryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DeliveryID");
 
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")

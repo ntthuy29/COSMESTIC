@@ -21,8 +21,8 @@ namespace COSMESTIC.Models.Data
         public virtual ICollection<orderDetail> orderDetails { get; set; }
         public virtual ICollection <Revenue> revenues { get; set; }
         // Thêm thuộc tính DeliveryIFMT để lưu thông tin giao hàng'
-        [ForeignKey("DeliveryID")]
-        public int DeliveryID { get; set; }
+        public int? DeliveryID { get; set; }
+
         public virtual DeliveryIFMT Delivery { get; set; } // Liên kết với bảng DeliveryIFMT
 
     }

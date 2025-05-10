@@ -1,4 +1,5 @@
 ﻿using COSMESTIC.Models.Data;
+using COSMESTIC.Models.Order;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 namespace COSMESTIC.Controllers
@@ -98,6 +99,115 @@ namespace COSMESTIC.Controllers
                 return NotFound();
             }
             return View(order);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
+        {
+          
+            var query = _context.Orders
+                .Include(o => o.users)
+                .Select(o => new ListOrderModel
+                {
+                    OrderID = o.orderID,
+                    UserID = o.userID,
+                    CustomerName = o.users.fullName, 
+                    TotalAmount = o.totalAmount,
+                    OrderDate = o.orderDate,
+                    EndDate = o.endDate,
+                    Status = o.status,
+                    DeliveryID = o.DeliveryID
+                });
+
+            
+            if (!string.IsNullOrEmpty(status) && status != "Tất cả trạng thái")
+            {
+                query = query.Where(o => o.Status == status);
+            }
+            
+            if (!string.IsNullOrEmpty(searchCustomer))
+            {
+                query = query.Where(o => o.CustomerName.Contains(searchCustomer));
+            }
+            var orders = await query.ToListAsync();
+            ViewBag.Statuses = new[] {"Chờ xử lý","Đang giao", "Bị Từ chối", "Đã hoàn thành" }; // Danh sách trạng thái
+            ViewBag.SelectedStatus = status;
+            ViewBag.SearchCustomer = searchCustomer;
+
+            return View(orders);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            order.status = "Đang giao";
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đơn hàng được duyệt thành công";
+            return RedirectToAction("IndexAdminOrder");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.status = "Bị từ chối";
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đơn hàng đã bị từ chối";
+
+            return RedirectToAction ("IndexAdminOrder");
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            if (order.status != "Rejected")
+            {
+                TempData["Error"] = "Đơn hàng ở trạng thái không cho phép xóa";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public async Task<IActionResult> BulkApprove(int[] selectedOrders)
+        {
+            if (selectedOrders == null || !selectedOrders.Any())
+            {
+               TempData["SuccessMessage"] = "Không có đơn hàng nào dc chọn";
+                return RedirectToAction(nameof(Index));
+            }
+            int count = 0;
+            foreach (var id in selectedOrders)
+            {
+                var article = _context.Orders.Find(id);
+                if (article != null && article.status == "Chờ xử lý")
+                {
+                    article.status = "Đang giao";
+                    count++;
+                }
+            }
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"{count} đơn hàng đã được duyệt thành công";
+            return RedirectToAction("IndexAdminOrder");
         }
     }
 }

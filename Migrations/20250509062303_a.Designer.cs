@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250507065920_userNotLoginKly")]
-    partial class userNotLoginKly
+    [Migration("20250509062303_a")]
+    partial class a
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,8 +69,8 @@ namespace COSMESTIC.Migrations
                     b.Property<int>("quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("unitprice")
-                        .HasColumnType("int");
+                    b.Property<decimal>("unitprice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("cartItemID");
 
@@ -238,8 +238,14 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
+                    b.Property<int?>("DeliveryID")
+                        .HasColumnType("int");
+
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("endDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("orderDate")
                         .ValueGeneratedOnAdd()
@@ -258,11 +264,13 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("orderID");
 
+                    b.HasIndex("DeliveryID");
+
                     b.HasIndex("discountID");
 
                     b.HasIndex("userID");
 
-                    b.ToTable("Order");
+                    b.ToTable("Order", (string)null);
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -517,6 +525,10 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
                 {
+                    b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
+                        .WithMany()
+                        .HasForeignKey("DeliveryID");
+
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")
                         .HasForeignKey("discountID");
@@ -526,6 +538,8 @@ namespace COSMESTIC.Migrations
                         .HasForeignKey("userID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Delivery");
 
                     b.Navigation("users");
                 });

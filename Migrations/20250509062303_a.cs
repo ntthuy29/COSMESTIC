@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace COSMESTIC.Migrations
 {
     /// <inheritdoc />
-    public partial class FixMigrationBidien : Migration
+    public partial class a : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,8 +15,9 @@ namespace COSMESTIC.Migrations
                 name: "DeliveryID",
                 table: "Order",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
+
+            
 
             migrationBuilder.CreateIndex(
                 name: "IX_Order_DeliveryID",
@@ -27,8 +29,7 @@ namespace COSMESTIC.Migrations
                 table: "Order",
                 column: "DeliveryID",
                 principalTable: "DeliveryIFMT",
-                principalColumn: "deliveryID",
-                onDelete: ReferentialAction.NoAction);
+                principalColumn: "deliveryID");
         }
 
         /// <inheritdoc />
@@ -45,6 +46,8 @@ namespace COSMESTIC.Migrations
             migrationBuilder.DropColumn(
                 name: "DeliveryID",
                 table: "Order");
+
+            
         }
     }
 }
