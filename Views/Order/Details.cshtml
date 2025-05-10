@@ -1,0 +1,86 @@
+﻿@model COSMESTIC.Models.Data.Orders
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-5">
+    <h3 class="text-success text-center fw-bold mb-4">🧾 Chi tiết đơn hàng #@Model.orderID</h3>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">📌 Thông tin người nhận</h5>
+            <p><strong>Họ và tên:</strong> @Model.Delivery.deliveryName</p>
+            <p><strong>Số điện thoại:</strong> @Model.Delivery.deliveryPhone</p>
+            <p><strong>Địa chỉ giao hàng:</strong> @Model.Delivery.deliveryAddress</p>
+            <p><strong>Ngày đặt:</strong> @Model.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
+            <p>
+                <strong>Trạng thái:</strong>
+                @switch (Model.status)
+                {
+                    case "Pending":
+                        <span class="badge bg-warning text-dark">Đang xử lý</span>
+                        ;
+                        break;
+                    case "Shipped":
+                        <span class="badge bg-info text-dark">Đã giao</span>
+                        ;
+                        break;
+                    case "Cancelled":
+                        <span class="badge bg-danger">Đã hủy</span>
+                        <p><strong>Ngày hủy:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
+                        ;
+                        break;
+                    default:
+                        <span class="badge bg-secondary">Không xác định</span>
+                        ;
+                        break;
+                }
+            </p>
+            <!-- Nút hủy đơn hàng nếu trạng thái là "Pending" -->
+            @if (Model.status == "Pending")
+            {
+                <form method="post" action="@Url.Action("CancelOrder", "Order")" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
+                    <input type="hidden" name="id" value="@Model.orderID" />
+                    <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">📦 Danh sách sản phẩm</h5>
+
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center">Ảnh</th>
+                        <th>Sản phẩm</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.orderDetails)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <img src="@Url.Content("~/" + item.products.imagePath)" style="width: 60px; height: 60px; object-fit: cover;" class="rounded" />
+                            </td>
+                            <td>@item.products.productName</td>
+                            <td class="text-center">@item.quantity</td>
+                            <td class="text-end">@item.unitPrice.ToString("N0") ₫</td>
+                            <td class="text-end">@((item.unitPrice * item.quantity).ToString("N0")) ₫</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="text-end mt-3">
+                <h4 class="text-danger fw-bold">Tổng cộng: @Model.totalAmount.ToString("N0") ₫</h4>
+            </div>
+        </div>
+    </div>
+</div>

@@ -24,6 +24,7 @@
     </PackageReference>
   </ItemGroup>
 
+
   <ItemGroup>
 
     <Folder Include="wwwroot\Img\" />
@@ -36,5 +37,6 @@
     <Folder Include="Views\Customer\" />
 
   </ItemGroup>
+
 
 </Project>
