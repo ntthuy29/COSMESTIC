@@ -102,6 +102,15 @@ namespace COSMESTIC.Controllers
             ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
             return View(); // Trả về view và hiển thị thông báo thành công ngay lập tức
         }
+        [HttpPost]
+        public IActionResult logout()
+        {
+            
+            HttpContext.Session.Clear();
+
+          
+            return RedirectToAction("Product", "Product");
+        }
 
 
     }

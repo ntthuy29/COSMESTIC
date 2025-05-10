@@ -17,5 +17,13 @@ namespace COSMESTIC.Controllers
         {
             return RedirectToAction("Index", "Discount");
         }
+        public IActionResult User()
+        {
+            return RedirectToAction("Index", "User");
+        }
+        public IActionResult Order()
+        {
+            return RedirectToAction("IndexAdminOrder", "Order");
+        }
     }
 }

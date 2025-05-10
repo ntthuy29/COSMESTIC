@@ -6,7 +6,7 @@ body {
     background-repeat: no-repeat; /* Prevents the background image from repeating */
     background-size: cover; /* Ensures the background image covers the entire viewport */
     backdrop-filter: blur(2px); /* Adds a slight blur effect to the background */
-    overflow: hidden; /* Prevents scrolling */
+   /* Prevents scrolling */
 }
 
 /* Resetting default margin and padding for all elements */
@@ -98,3 +98,9 @@ body {
         color: #ffffff; /* Changes the icon color to white on hover */
         transform: scale(1.2); /* Slightly enlarges the icon on hover */
     }
+.carousel-inner img {
+    width: 100%; /* Đảm bảo ảnh chiếm toàn bộ chiều rộng của container */
+    height: 500px; /* Đảm bảo ảnh chiếm toàn bộ chiều cao của container */
+    object-fit: cover; /* Đảm bảo ảnh bao phủ toàn bộ container mà không bị méo */
+    display: block; /* Đảm bảo ảnh không bị méo, cắt phần thừa để vừa khung */
+}

@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
 </head>
+
 <body>
     @{
         var catalogs = ViewBag.Catalogs as List<COSMESTIC.Models.Data.Catalogs>;
@@ -21,10 +22,16 @@
         var role = Context.Session.GetString("role");
         var id = Context.Session.GetString("UserID");
         var username = Context.Session.GetString("Username");
+        var countItem = Context.Session.GetInt32("CartItemCount");
+        if (countItem == null)
+        {
+            Console.WriteLine("huhu");
+        }
+
 
 
     }
-    <header class="header_nav">
+    <header class="header_nav fixed-top">
         <nav class="navbar  navbar-expand-sm navbar-toggleable-sm h-100 navbar-light  border-bottom box-shadow " style="background-color: #346A54;">
             <div class="container-fluid h-100 d-flex ">
                 <div class="col-3" style="padding-left: 10px;">
@@ -85,7 +92,7 @@
                                             <li><a class="dropdown-item" href="/ShoppingCart/Index">Giỏ hàng</a></li>
                                             <li><a class="dropdown-item" href="/Order/MyOrders">Đơn hàng của tôi</a></li>
                                             <li>
-                                                <form asp-action="Logout" asp-controller="Account" method="post">
+                                                <form asp-action="logout" asp-controller="Account" method="post">
                                                     <button type="submit" class="dropdown-item">Đăng xuất</button>
                                                 </form>
                                             </li>
@@ -111,8 +118,13 @@
                     @if (role != null)
                     {
                         <div class="cart-icon" onclick="openCart()">
-                            <span class="material-symbols-outlined" style="width: 100px; height: 100px; font-size: 40px; padding-top: 30px;">
+                           
+                            <span type="button" class="position-relative material-symbols-outlined" style="font-size: 30px;">
                                 add_shopping_cart
+                                <span id="countItemCart" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px;">
+                                    @countItem
+                                    <span class="visually-hidden">unread messages</span>
+                                </span>
                             </span>
                             <span id="cart-count">@ViewBag.CartItemCount</span> <!-- Hiển thị số sản phẩm trong giỏ -->
                         </div>
@@ -152,6 +164,5 @@
     <script src="~/js/search-product.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
     @RenderSection("Styles", required: false)
-
 </body>
 </html>

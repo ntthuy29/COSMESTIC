@@ -22,3 +22,22 @@ setInterval(() => {
     }
     changeBackgroundImage(current);
 }, 3000);
+const applyButton = document.getElementById('apply-filter');
+console.log(applyButton);
+console.log('hihii')
+if (applyButton) {
+    applyButton.addEventListener('click', function () {
+        console.log("ĐÃ NHẤN ÁP DỤNG GIÁ RỒI");
+        const minPrice = parseFloat(document.getElementById('min').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('max').value) || Infinity;
+
+        fetch(`/Product/filerProductFollowPrice?min=${minPrice}&max=${maxPrice}&catalogID=@Model[0].catalogID`)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('product-list').innerHTML = html;
+            })
+            .catch(error => console.error('Error:', error));
+    });
+} else {
+    console.log("khong click duoc");
+}

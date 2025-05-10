@@ -156,5 +156,104 @@ namespace COSMESTIC.Controllers
             }
             return RedirectToAction("Index");
         }
+        // còn thiếu 2 controller edit, detail
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await dbContext.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var model = new CreateProduct
+            {
+                DanhMucDuocChon = product.catalogID, // Giả định có CategoryId trong Product
+                productName = product.productName,
+                productDescription = product.productDescription,
+                price = product.price,
+                // imageFile không cần gán vì không gửi file trong GET
+                DanhMucs = await dbContext.Catalogs
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.catalogID.ToString(),
+                        Text = c.catalogName
+                    }).ToListAsync()
+            };
+            // Truyền ImagePath qua ViewBag
+            ViewBag.ImagePath = product.imagePath;
+
+            return View(model);
+        }
+        [HttpPost]
+     
+        public async Task<IActionResult> Edit(int id, CreateProduct model)
+        {
+           
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var product = await dbContext.Products.FindAsync(id);
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+
+                    product.catalogID = model.DanhMucDuocChon;
+                    product.productName = model.productName;
+                    product.productDescription = model.productDescription;
+                    product.price = model.price;
+
+                    // Xử lý hình ảnh nếu có
+                    if (model.imageFile != null && model.imageFile.Length > 0)
+                    {
+                        var fileName = Path.GetFileName(model.imageFile.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Img", fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.imageFile.CopyToAsync(stream);
+                        }
+                        product.imagePath = "Img/" + fileName;
+                    }
+
+                    dbContext.Update(product);
+                    await dbContext.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProductExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            // Nếu ModelState không hợp lệ, tải lại danh sách danh mục
+            model.DanhMucs = await dbContext.Catalogs
+                .Select(c => new SelectListItem
+                {
+                    Value = c.catalogID.ToString(),
+                    Text = c.catalogName
+                }).ToListAsync();
+
+            return View(model);
+        }
+
+        private bool ProductExists(int id)
+        {
+            return dbContext.Products.Any(e => e.productID == id);
+        }
     }
 }

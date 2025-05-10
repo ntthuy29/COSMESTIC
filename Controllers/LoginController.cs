@@ -29,7 +29,15 @@ namespace COSMESTIC.Controllers
 
            
             var ktrauser = db.Accounts.Include(u=>u.user).FirstOrDefault(u => u.username == models.username && u.password == models.password);
+            if(ktrauser.user.role == "Customer")
+            {
+                var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
+                // Giả sử bạn có bảng Cart với userID
 
+                // Lưu số lượng sản phẩm vào session
+                HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+
+            }
             if (ktrauser == null)
             {
                 // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
@@ -51,6 +59,7 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Product", "Product");
 
             }
+            
         }
     }
 }
