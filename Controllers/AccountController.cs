@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using BCrypt.Net;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 namespace COSMESTIC.Controllers
 {
     public class AccountController : Controller
@@ -103,12 +105,13 @@ namespace COSMESTIC.Controllers
             return View(); // Trả về view và hiển thị thông báo thành công ngay lập tức
         }
         [HttpPost]
-        public IActionResult logout()
+        public async Task<IActionResult> logout()
         {
-            
-            HttpContext.Session.Clear();
 
-          
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear(); // Xóa session
+
+
             return RedirectToAction("Product", "Product");
         }
 

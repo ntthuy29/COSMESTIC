@@ -38,10 +38,11 @@
 
                         <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
                         @if (role == "Customer")
-                        { 
+                        {
                             <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                                 <input type="hidden" name="productId" value="@product.productID" />
-                                <button type="submit" class="btn btn-outline-warning w-100" onclick="addToCart">🛒 Thêm vào giỏ</button>
+                                <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
+                                <button type="submit" class="btn btn-outline-warning w-100">🛒 Thêm vào giỏ</button>
                             </form>
                         }else
                         {

@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,48 +194,42 @@
 
         /* Responsive Adjustments */
         @@media (max-width: 768px) {
-            .sidebar
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
 
-        {
-            width: 70px;
-            overflow: hidden;
-        }
+                .sidebar a span {
+                    display: none;
+                }
 
-        .sidebar a span {
-            display: none;
-        }
+                .sidebar a i {
+                    margin-right: 0;
+                    font-size: 1.2rem;
+                }
 
-        .sidebar a i {
-            margin-right: 0;
-            font-size: 1.2rem;
-        }
+                .sidebar a {
+                    justify-content: center;
+                    padding: 15px 0;
+                    margin: 4px 0;
+                }
 
-        .sidebar a {
-            justify-content: center;
-            padding: 15px 0;
-            margin: 4px 0;
-        }
-
-        .content {
-            padding: 20px 15px;
-        }
-
+            .content {
+                padding: 20px 15px;
+            }
         }
 
         /* Animation for sidebar items */
         @@keyframes fadeIn {
-            from
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
 
-        {
-            opacity: 0;
-            transform: translateX(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .sidebar a {
@@ -286,10 +280,12 @@
                         </div>
                     </li>
                     <li class="nav-item ms-2">
-                        <a class="btn btn-outline-danger btn-sm" href="/Login/Logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>
-                            <span class="d-none d-md-inline">Đăng xuất</span>
-                        </a>
+                       <form asp-action="logout" asp-controller="Account">
+                            <button class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                <span class="d-none d-md-inline">Đăng xuất</span>
+                            </button>
+                       </form>
                     </li>
                 </ul>
             </div>
@@ -322,6 +318,11 @@
                 <i class="fas fa-tag"></i>
                 <span>Quản lý đơn hàng</span>
             </a>
+            <a href="/Admin/Revenue">
+                <i class="fas fa-tag"></i>
+                <span>Thống kê</span>
+            </a>
+
         </div>
 
         <!-- Main Content -->
