@@ -12,12 +12,10 @@ namespace COSMESTIC.Models.Data
         [ForeignKey("userID")]
         public int userID { get; set; }
         public decimal totalAmount { get; set; }
+        //Thêm trường lưu tổng số lượng sản phẩm
+        public int? totalItems { get; set; }
         public DateTime orderDate {get;set;}
-
-
         public DateTime? endDate { get; set; }
-
-
         public string status { get; set; }
         public virtual Users users { get; set; }
         public virtual Invoice invoice { get; set; }
@@ -25,7 +23,6 @@ namespace COSMESTIC.Models.Data
         public virtual ICollection <Revenue> revenues { get; set; }
         // Thêm thuộc tính DeliveryIFMT để lưu thông tin giao hàng'
         public int? DeliveryID { get; set; }
-
         public virtual DeliveryIFMT Delivery { get; set; } // Liên kết với bảng DeliveryIFMT
 
     }
