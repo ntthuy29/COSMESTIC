@@ -46,7 +46,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("Account", (string)null);
+                    b.ToTable("Account");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.CartItem", b =>
@@ -75,7 +75,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("CartItem", (string)null);
+                    b.ToTable("CartItem");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Catalogs", b =>
@@ -96,7 +96,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("catalogID");
 
-                    b.ToTable("Catalog", (string)null);
+                    b.ToTable("Catalog");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.DeliveryIFMT", b =>
@@ -126,7 +126,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("DeliveryIFMT", (string)null);
+                    b.ToTable("DeliveryIFMT");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Discount", b =>
@@ -158,7 +158,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("discountID");
 
-                    b.ToTable("Discount", (string)null);
+                    b.ToTable("Discount");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Invoice", b =>
@@ -177,7 +177,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("orderID")
                         .IsUnique();
 
-                    b.ToTable("Invoice", (string)null);
+                    b.ToTable("Invoice");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
@@ -194,7 +194,7 @@ namespace COSMESTIC.Migrations
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("endDate")
+                    b.Property<DateTime?>("endDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("orderDate")
@@ -208,6 +208,9 @@ namespace COSMESTIC.Migrations
 
                     b.Property<decimal>("totalAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("totalItems")
+                        .HasColumnType("int");
 
                     b.Property<int>("userID")
                         .HasColumnType("int");
@@ -254,7 +257,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("userID");
 
-                    b.ToTable("ProductReView", (string)null);
+                    b.ToTable("ProductReView");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -290,7 +293,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("catalogID");
 
-                    b.ToTable("Product", (string)null);
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Revenue", b =>
@@ -324,7 +327,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("orderID");
 
-                    b.ToTable("Revenue", (string)null);
+                    b.ToTable("Revenue");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.ShoppingCart", b =>
@@ -349,7 +352,7 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("userID")
                         .IsUnique();
 
-                    b.ToTable("ShoppingCart", (string)null);
+                    b.ToTable("ShoppingCart");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
@@ -359,6 +362,9 @@ namespace COSMESTIC.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
+
+                    b.Property<DateTime?>("createdDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -385,7 +391,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("userID");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.orderDetail", b =>
@@ -414,7 +420,7 @@ namespace COSMESTIC.Migrations
 
                     b.HasIndex("productID");
 
-                    b.ToTable("OrderDetail", (string)null);
+                    b.ToTable("OrderDetail");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Account", b =>

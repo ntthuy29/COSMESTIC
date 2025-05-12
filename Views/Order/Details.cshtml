@@ -40,10 +40,13 @@
             <!-- Nút hủy đơn hàng nếu trạng thái là "Pending" -->
             @if (Model.status == "Pending")
             {
-                <form method="post" action="@Url.Action("CancelOrder", "Order")" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
-                    <input type="hidden" name="id" value="@Model.orderID" />
-                    <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
-                </form>
+               
+                <a href="javascript:void(0);"
+                   class="btn btn-sm btn-outline-danger rounded-circle btn-delete"
+                   data-url="@Url.Action("CancelOrder", "Order", new { id = @Model.orderID })"
+                   title="Xóa">
+                    <span  class="btn btn-danger">Hủy đơn hàng</span>
+                </a>
             }
         </div>
     </div>
@@ -84,3 +87,30 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+
+                    Swal.fire({
+                        title: 'Xác nhận xóa?',
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,220 @@
+﻿@model COSMESTIC.Models.Revenue.RevenueReportViewModel
+
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    
+      
+        <!-- Main content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Thống kê doanh thu</h1>
+            </div>
+
+            <!-- Form lựa chọn thời gian -->
+            <form asp-action="Revenue" method="post" class="mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Từ ngày</label>
+                        <input type="date" name="startDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label>Đến ngày</label>
+                        <input type="date" name="endDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label> </label>
+                        <button type="submit" class="btn btn-primary form-control">Thống kê</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Thống kê theo danh mục -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Thống kê theo danh mục</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Danh mục</th>
+                                <th>Doanh thu</th>
+                                <th>Số lượng đơn hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.CategoryStats)
+                            {
+                                <tr>
+                                    <td>@item.Key</td>
+                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
+                                    <td>@item.OrderCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <canvas id="categoryChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Thống kê theo trạng thái -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Thống kê theo trạng thái đơn hàng</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Trạng thái</th>
+                                <th>Doanh thu</th>
+                                <th>Số lượng đơn hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.StatusStats)
+                            {
+                                <tr>
+                                    <td>@item.Key</td>
+                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
+                                    <td>@item.OrderCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <canvas id="statusChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Thống kê toàn hệ thống -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Thống kê toàn hệ thống</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tổng</th>
+                                <th>Doanh thu</th>
+                                <th>Số lượng đơn hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.TotalStats)
+                            {
+                                <tr>
+                                    <td>@item.Key</td>
+                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
+                                    <td>@item.OrderCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <canvas id="totalChart" height="100"></canvas>
+                </div>
+            </div>
+        </main>
+    
+</div>
+
+<!-- Bootstrap CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Biểu đồ theo danh mục
+    var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    var categoryChart = new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(Model.CategoryLabels)),
+            datasets: [
+                {
+                    label: 'Doanh thu (đ)',
+                    data: @Html.Raw(Json.Serialize(Model.CategoryRevenueData)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Số lượng đơn hàng',
+                    data: @Html.Raw(Json.Serialize(Model.CategoryOrderCountData)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Biểu đồ theo trạng thái
+    var statusCtx = document.getElementById('statusChart').getContext('2d');
+    var statusChart = new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(Model.StatusLabels)),
+            datasets: [
+                {
+                    label: 'Doanh thu (đ)',
+                    data: @Html.Raw(Json.Serialize(Model.StatusRevenueData)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Số lượng đơn hàng',
+                    data: @Html.Raw(Json.Serialize(Model.StatusOrderCountData)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Biểu đồ toàn hệ thống
+    var totalCtx = document.getElementById('totalChart').getContext('2d');
+    var totalChart = new Chart(totalCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Serialize(Model.TotalLabels)),
+            datasets: [
+                {
+                    label: 'Doanh thu (đ)',
+                    data: @Html.Raw(Json.Serialize(Model.TotalRevenueData)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Số lượng đơn hàng',
+                    data: @Html.Raw(Json.Serialize(Model.TotalOrderCountData)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
