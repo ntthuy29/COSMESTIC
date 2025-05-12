@@ -46,7 +46,7 @@
                     </div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <input type="hidden" name="productId" value="@Model.productID" />
-                        <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+                        <button class="btn btn-danger " >Thêm vào giỏ hàng</button>
                     </form>
                 }
                 else
@@ -179,6 +179,9 @@
                 });
             }
         });
+        function alert(){
+
+        }
     </script>
 }
 @section Styles {

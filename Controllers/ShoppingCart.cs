@@ -101,6 +101,7 @@ namespace COSMESTIC.Controllers
                 _context.SaveChanges(); 
             }
             return RedirectToAction("Product", "Product");
+
         }
         [HttpPost]
         public IActionResult UpdateQuantity(int cartItemID, string action)

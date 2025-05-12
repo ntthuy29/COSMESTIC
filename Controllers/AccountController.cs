@@ -18,7 +18,7 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Detail()
+        public IActionResult Detail(int i)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -30,7 +30,9 @@ namespace COSMESTIC.Controllers
             {
                 return NotFound();
             }
+            ViewBag.value = i;
             return View(user);
+           
         }
         [HttpGet]
         public IActionResult Edit()
@@ -69,11 +71,13 @@ namespace COSMESTIC.Controllers
         }
         public IActionResult ChangePassword()
         {
+            Console.WriteLine("ChangePassword action called");
             return View();
         }
         [HttpPost]
-        public IActionResult ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        public IActionResult ResetPassword(string oldPassword, string newPassword, string confirmPassword)
         {
+            Console.WriteLine("ChangePassword POST action called"); 
             var userId = HttpContext.Session.GetInt32("UserID");
 
             if (userId == null)
@@ -81,7 +85,7 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            var account = _context.Accounts.FirstOrDefault(a => a.userID == userId);
+            var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
             if (account == null)
             {
                 return NotFound();
@@ -90,13 +94,13 @@ namespace COSMESTIC.Controllers
             if (account.password != oldPassword)
             {
                 ModelState.AddModelError("", "Mật khẩu cũ không đúng.");
-                return View(); 
+                return RedirectToAction("Detail", i); 
             }
 
             if (newPassword != confirmPassword)
             {
                 ModelState.AddModelError("", "Mật khẩu mới không khớp.");
-                return View();
+                return RedirectToAction("Detail");
             }
 
             account.password = newPassword;
@@ -104,7 +108,7 @@ namespace COSMESTIC.Controllers
 
             // Lưu thông báo thành công vào ViewData
             ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
-            return View(); // Trả về view và hiển thị thông báo thành công ngay lập tức
+            return RedirectToAction("Detail"); // Trả về view và hiển thị thông báo thành công ngay lập tức
         }
         [HttpPost]
         public async Task<IActionResult> logout()

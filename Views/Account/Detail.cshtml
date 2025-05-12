@@ -91,7 +91,7 @@
                                         @ViewData["SuccessMessage"]
                                     </div>
                                 }
-                                <form asp-action="ChangePassword" asp-controller="Account">
+                                <form asp-action="ResetPassword" asp-controller="Account" method="post">
                                     <div>
                                         <label for="oldPassword" class="form-label">Mật khẩu hiện tại</label>
                                         <input type="password" id="oldPassword" class="form-control" name="oldPassword">
