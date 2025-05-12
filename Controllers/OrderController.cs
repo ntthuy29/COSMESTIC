@@ -1,5 +1,6 @@
 ﻿using COSMESTIC.Models.Data;
 using COSMESTIC.Models.Order;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.WebSockets;
@@ -129,7 +130,7 @@ namespace COSMESTIC.Controllers
             {
                 userID = userId.Value,
                 orderDate = DateTime.Now,
-                status = "Pending",
+                status = "Chờ xử lý",
                 totalAmount = 0, 
                 DeliveryID = delivery.deliveryID 
             };
@@ -226,9 +227,9 @@ namespace COSMESTIC.Controllers
             }
             order.endDate = DateTime.Now;
             _context.SaveChanges();
-            if (order.status == "Pending")
+            if (order.status == "Chờ xử lý")
             {
-                order.status = "Cancelled";
+                order.status = "Bị từ chối";
                 _context.SaveChanges();
                 //Hoàn sản phẩm vào kho
                 foreach (var item in order.orderDetails)
@@ -307,7 +308,7 @@ namespace COSMESTIC.Controllers
             {
                 userID = userId.Value,
                 orderDate = DateTime.Now,
-                status = "Pending",  // Trạng thái đang chờ duyệt
+                status = "Chờ xử lý",  // Trạng thái đang chờ duyệt
                 totalAmount = 0,
                 DeliveryID = delivery.deliveryID
             };
@@ -353,6 +354,7 @@ namespace COSMESTIC.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
         {
 
@@ -388,6 +390,7 @@ namespace COSMESTIC.Controllers
             return View(orders);
         }
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Approve(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -402,6 +405,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Reject(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -417,6 +421,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -437,6 +442,7 @@ namespace COSMESTIC.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> BulkApprove(int[] selectedOrders)
         {
             if (selectedOrders == null || !selectedOrders.Any())
