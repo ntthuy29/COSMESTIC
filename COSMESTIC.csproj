@@ -22,8 +22,6 @@
 
 
   <ItemGroup>
-
-    <Folder Include="wwwroot\Img\" />
     <Folder Include="wwwroot\Uploads\" />
   </ItemGroup>
 

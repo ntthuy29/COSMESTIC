@@ -2,8 +2,9 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var i = ViewBag.value;
 }
-<a href="@Url.Action("ChangePassword", "Account")" class="btn btn-info">Đổi mật khẩu</a>
+
 <div style="margin-top: 100px;">
     <div class="d-flex justify-content-center gap-5" style="margin-top: 120px;">
         <!-- Cột bên trái -->
@@ -15,7 +16,7 @@
                 <div>
                     <div style="font-weight: bold; font-size: 18px;">Chào @Model.fullName</div>
                     <div>
-                        <a href="@Url.Action("Edit", "Account")" style="color: forestgreen; font-size: 13px;">Chỉnh sửa thông tin</a>
+                        <a onclick="showTab('edit')"  style="color: forestgreen; font-size: 13px;">Chỉnh sửa thông tin</a>
                     </div>
                 </div>
             </div>
@@ -85,75 +86,162 @@
                             <div class="card-body">
                                 <h5 class="card-title text-center mb-4 fw-bold text-danger">Đổi mật khẩu</h5>
                                 <!-- Nội dung đổi mật khẩu -->
-                                @if (ViewData["SuccessMessage"] != null)
-                                {
-                                    <div class="alert alert-success text-center">
-                                        @ViewData["SuccessMessage"]
-                                    </div>
-                                }
-                                <form asp-action="ResetPassword" asp-controller="Account" method="post">
+                                
+                                <form id="changePasswordForm">
+                                    @Html.AntiForgeryToken()
                                     <div>
                                         <label for="oldPassword" class="form-label">Mật khẩu hiện tại</label>
-                                        <input type="password" id="oldPassword" class="form-control" name="oldPassword">
-                                        @if (ViewData.ModelState["oldPassword"]?.Errors.Count > 0)
-                                        {
-                                            <div class="text-danger">@ViewData.ModelState["oldPassword"]?.Errors[0].ErrorMessage</div>
-                                        }
+                                        <input type="password" id="oldPassword" class="form-control" name="OldPassword">
+                                        <div class="text-danger" id="oldPasswordError"></div>
                                     </div>
                                     <div>
                                         <label for="newPassword" class="form-label">Mật khẩu mới</label>
-                                        <input type="password" id="newPassword" class="form-control" name="newPassword">
+                                        <input type="password" id="newPassword" class="form-control" name="NewPassword">
                                     </div>
                                     <div>
                                         <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
-                                        <input type="password" id="confirmPassword" class="form-control" name="confirmPassword">
-                                        @if (ViewData.ModelState["confirmPassword"]?.Errors.Count > 0)
-                                        {
-                                            <div class="text-danger">@ViewData.ModelState["confirmPassword"]?.Errors[0].ErrorMessage</div>
-                                        }
+                                        <input type="password" id="confirmPassword" class="form-control" name="ConfirmPassword">
+                                        <div class="text-danger" id="confirmPasswordError"></div>
                                     </div>
+                                    <div class="alert alert-success text-center d-none" id="successMessage"></div>
                                     <button type="submit" class="btn btn-danger mt-3">Lưu thay đổi</button>
                                 </form>
+
                             </div>
                         </div>
                     </div>
                </div>
+               <!--Chỉnh sửa thông tin-->
+               <div style="display: none" id="editInfo">
+                    <div class="d-flex justify-content-center tab-content" style="padding: 20px;">
+                        <div class="card shadow-sm" style="width: 400px; border-radius: 12px;">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4 fw-bold text-danger">Thông tin cá nhân</h5>
+                                <form class="d-flex flex-column gap-3" method="post" asp-action="Edit" asp-controller="Account" asp-Users="@Model">
+                                    <div>
+                                        <label for="name" class="form-label">Họ và tên</label>
+                                        <input type="text" id="name" class="form-control" value="@Model.fullName" name="fullName" required>
+                                    </div>
+                                    <div>
+                                        <label for="mail" class="form-label">Email</label>
+                                        <input type="email" id="mail" class="form-control" value="@Model.email" name="email" required >
+                                    </div>
+                                    <div>
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="text" id="phone" class="form-control" value="@Model.phoneNumber" name="phoneNumber" required>
+                                    </div>
+                                    <div>
+                                        <label for="birth" class="form-label">Ngày sinh</label>
+                                        <input type="text" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" name="dateOfBirth" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+                                </form>
+                            </div>
+                        </div>
+                        </div>
+                </div>
+               <div>
 
+               </div>
             </div>
         </div>
     </div>
 </div>
+@section Scripts{
 
-<script>
-    function showTab(str) {
-        var tabInfor = document.getElementById('info');
-        var tabOrder = document.getElementById('orders');
-        var tabPass = document.getElementById('password');
-        console.log(tabInfor);
-        console.log(tabOrder);
-        console.log(tabPass);
-        // Ẩn tất cả các tab
-       if(str === "Infor"){
-           console.log("info")
-           tabInfor.style.display='block';
-           tabOrder.style.display='none';
-           tabPass.style.display='none';
+    <script>
+        document.getElementById("changePasswordForm").addEventListener("submit", function (e) {
+            e.preventDefault(); // không gửi form theo cách thông thường
+            console.log("hihihi");
 
-       }
-        if(str == "order"){
-            console.log("orders")
-            tabInfor.style.display='none';
-           tabOrder.style.display='block';
-           tabPass.style.display='none';
+       const formData = new FormData();
+        formData.append("oldPassword", document.getElementById("oldPassword").value);
+        formData.append("newPassword", document.getElementById("newPassword").value);
+        formData.append("confirmPassword", document.getElementById("confirmPassword").value);
+
+        fetch("/Account/ResetPassword", {
+            method: "POST",
+            headers: {
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(result => {
+                // Reset lỗi
+                document.getElementById("oldPasswordError").innerText = "";
+                document.getElementById("confirmPasswordError").innerText = "";
+                document.getElementById("successMessage").classList.add("d-none");
+
+                if (result.success) {
+                    console.log("result.sucess")
+                    document.getElementById("successMessage").classList.remove("d-none");
+                    document.getElementById("successMessage").innerText = result.message;
+                    document.getElementById("changePasswordForm").reset();
+                          setTimeout(() => {
+          document.getElementById("successMessage").classList.add("d-none");
+        }, 3000);
+
+                } else {
+                    if (result.errors.oldPassword) {
+                         console.log("chạy vô result.errors.oldPassword");
+                        document.getElementById("oldPasswordError").innerText = result.errors.oldPassword;
+                    }
+                    if (result.errors.confirmPassword) {
+                        console.log("chạy vô result.errors.confirmPassword");
+                        document.getElementById("confirmPasswordError").innerText = result.errors.confirmPassword;
+                    }
+                }
+            });
+        });
+        var i = @ViewBag.value ?? 0;
+        console.log(i+"hihi")
+        if(i==1){
+            console.log(i);
+            document.getElementById('password').style.display='block';
+            document.getElementById('info').style.display='none';
         }
-        if(str == "changePass"){
-            console.log("chane")
-            tabInfor.style.display='none';
-           tabOrder.style.display='none';
-           tabPass.style.display='block';
-        }
+        function showTab(str) {
+            var tabInfor = document.getElementById('info');
+            var tabOrder = document.getElementById('orders');
+            var tabPass = document.getElementById('password');
+            var tabEdit = document.getElementById('editInfo')
+            console.log(tabInfor);
+            console.log(tabOrder);
+            console.log(tabPass);
+            // Ẩn tất cả các tab
+           if(str === "Infor"){
+               console.log("info")
+               tabInfor.style.display='block';
+               tabOrder.style.display='none';
+               tabPass.style.display='none';
+                tabEdit.style.display='none';
 
-    }
-        // Hiển thị tab được chọn
-        
-</script>
+           }
+            if(str == "order"){
+                console.log("orders")
+                tabInfor.style.display='none';
+               tabOrder.style.display='block';
+               tabPass.style.display='none';
+                tabEdit.style.display='none';
+            }
+            if(str == "changePass"){
+                console.log("chane")
+                tabInfor.style.display='none';
+               tabOrder.style.display='none';
+               tabPass.style.display='block';
+                tabEdit.style.display='none';
+            }
+             if(str == "edit"){
+                 console.log("chane")
+                 tabInfor.style.display='none';
+                tabOrder.style.display='none';
+                tabPass.style.display='none';
+                  tabEdit.style.display='block';
+             }
+
+        }
+            // Hiển thị tab được chọn
+
+    </script>
+}

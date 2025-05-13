@@ -14,7 +14,24 @@
     </div>
 </div>
 
+<div style=" margin-top: 20px; border: inherit;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); margin-bottom: 50px; background-color: #D9D9D9; padding: 10px; border-radius: 10px;" class="d-flex" .">
+    <div>
+     (@Model.Count() sản phẩm)
+    </div>
 
+    <div class="flex-column flex-column" style="margin-left: 50px;">
+        <div class="d-flex align-items-center gap-2">
+            <label>Khoảng giá: </label>
+
+            <input type="number" class="form-control" id="mins" name="min" placeholder="TỪ ..000đ" style="width: 100px; height: 25px;">
+            -
+            <input type="number" class="form-control" id="maxs" name="max" placeholder="ĐẾN ...000đ" style="width: 100px; height: 25px;">
+            <input type="hidden" name="catalogID" value="@Model[0].catalogID" />
+            <button id="btnPrices" class="btn btn-warning" style="margin-inline:100px; margin-top: 10px;">Áp dụng</button>
+
+        </div>
+    </div>
+</div>
 
 <!--hihihi-->
 @if (ViewBag.Message != null)
@@ -30,7 +47,7 @@
             var product = Model[i];
 
 
-            <div class="col product-item @(i >= 8 ? "d-none" : "")" onclick="getDetail(@product.productID,'@product.productName')" id="@product.productID" >
+            <div data-price="@product.price" class="  items col product-item @(i >= 8 ? "d-none" : "")" onclick="getDetail(@product.productID,'@product.productName')" id="@product.productID">
                 <div class="card h-100 shadow-sm card-radius">
                     <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;" />
                     <div class="card-body">
@@ -124,6 +141,47 @@
                 loadMoreBtn.style.display = 'none';
             }
         });
+                       document.addEventListener('click', function(e) {
+            if (e.target.id === 'btnPrices') {
+                const min = document.getElementById('mins').value;
+                const max = document.getElementById('maxs').value;
+
+                // Xử lý giá trị nhập vào (bỏ "000" nếu cần)
+                const minPrice = min ? parseInt(min) * 1000 : 0;
+                const maxPrice = max ? parseInt(max) * 1000 : Infinity;
+
+                filterByPrice(minPrice, maxPrice);
+            }
+        });
+        function filterByPrice(minPrice, maxPrice) {
+            const items = document.querySelectorAll('.items');
+            items.forEach(item => {
+                const price = parseInt(item.getAttribute('data-price')); // Lấy giá từ data-price
+                const isInRange = (isNaN(minPrice) || price >= minPrice) &&
+                                 (isNaN(maxPrice) || price <= maxPrice);
+
+                // Chỉ sử dụng một cách ẩn (nên dùng .d-none để đồng bộ với load more)
+                if (!isInRange) {
+                    item.classList.add('d-none');
+                } else {
+                    item.classList.remove('d-none');
+                }
+            });
+
+            // Ẩn nút "Load More" nếu tất cả sản phẩm đã được lọc
+            updateLoadMoreButton();
+        }
+
+        function updateLoadMoreButton() {
+            const visibleItems = document.querySelectorAll('.items:not(.d-none)').length;
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (visibleItems <= 8) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+        
     </script>
 
 }

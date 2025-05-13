@@ -75,41 +75,87 @@ namespace COSMESTIC.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult ResetPassword(string oldPassword, string newPassword, string confirmPassword)
-        {
-            Console.WriteLine("ChangePassword POST action called"); 
-            var userId = HttpContext.Session.GetInt32("UserID");
+        //public IActionResult ResetPassword(string oldPassword, string newPassword, string confirmPassword)
+        //{
+        //    Console.WriteLine("ChangePassword POST action called"); 
+        //    var userId = HttpContext.Session.GetInt32("UserID");
+        //    int id = 1;
+        //    if (userId == null)
+        //    {
+        //        return RedirectToAction("Login", "Login");
+        //    }
 
+        //    var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
+        //    if (account == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (account.password != oldPassword)
+        //    {
+        //        ModelState.AddModelError("", "Mật khẩu cũ không đúng.");
+        //        return RedirectToAction("Detail", new {i=id}); 
+        //    }
+
+        //    if (newPassword != confirmPassword)
+        //    {
+        //        ModelState.AddModelError("", "Mật khẩu mới không khớp.");
+        //        return RedirectToAction("Detail", new {i=id});
+        //    }
+
+        //    account.password = newPassword;
+        //    _context.SaveChanges();
+
+        //    // Lưu thông báo thành công vào ViewData
+        //    ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
+        //    return RedirectToAction("Detail"); // Trả về view và hiển thị thông báo thành công ngay lập tức
+        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ResetPassword(ChangePasswordViewModel model)
+        {
+            Console.WriteLine(model.NewPassword);
+            Console.WriteLine(model.OldPassword);
+            Console.WriteLine(model.ConfirmPassword);
+            Console.WriteLine("ChangePassword POST action called");
+
+            var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
             {
-                return RedirectToAction("Login", "Login");
+                return Json(new { success = false, redirect = Url.Action("Login", "Login") });
             }
 
-            var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
+            var account = _context.Accounts.Include(c => c.user).FirstOrDefault(a => a.userID == userId);
             if (account == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Tài khoản không tồn tại." });
             }
 
-            if (account.password != oldPassword)
+            var errors = new Dictionary<string, string>();
+
+            if (account.password != model.OldPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu cũ không đúng.");
-                return RedirectToAction("Detail", i); 
+                Console.WriteLine(account.password);
+                Console.WriteLine(model.OldPassword);
+                errors["oldPassword"] = "Mật khẩu cũ không đúng.";
             }
 
-            if (newPassword != confirmPassword)
+            if (model.NewPassword != model.ConfirmPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu mới không khớp.");
-                return RedirectToAction("Detail");
+                errors["confirmPassword"] = "Mật khẩu mới không khớp.";
             }
 
-            account.password = newPassword;
+            if (errors.Count > 0)
+            {
+                return Json(new { success = false, errors });
+            }
+
+            account.password = model.NewPassword;
             _context.SaveChanges();
 
-            // Lưu thông báo thành công vào ViewData
-            ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
-            return RedirectToAction("Detail"); // Trả về view và hiển thị thông báo thành công ngay lập tức
+            return Json(new { success = true, message = "Mật khẩu của bạn đã được thay đổi thành công!" });
         }
+
         [HttpPost]
         public async Task<IActionResult> logout()
         {
