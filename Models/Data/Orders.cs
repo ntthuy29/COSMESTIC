@@ -27,6 +27,6 @@ namespace COSMESTIC.Models.Data
         [ForeignKey("DeliveryID")]
         public int DeliveryID { get; set; }
         public virtual DeliveryIFMT Delivery { get; set; } // Liên kết với bảng DeliveryIFMT
-
+        public ICollection<ProductReView> ProductReView { get; set; } // Liên kết với bảng ProductReView
     }
 }

@@ -1,4 +1,5 @@
-﻿@model COSMESTIC.Models.Data.Orders
+﻿@using System.Web
+@model COSMESTIC.Models.Data.Orders
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,9 +11,9 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5 class="fw-bold mb-3">📌 Thông tin người nhận</h5>
-            <p><strong>Họ và tên:</strong> @Model.Delivery.deliveryName</p>
-            <p><strong>Số điện thoại:</strong> @Model.Delivery.deliveryPhone</p>
-            <p><strong>Địa chỉ giao hàng:</strong> @Model.Delivery.deliveryAddress</p>
+            <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
+            <p><strong>Số điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
+            <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
             <p><strong>Ngày đặt:</strong> @Model.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
             <p>
                 <strong>Trạng thái:</strong>

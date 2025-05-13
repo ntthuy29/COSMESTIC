@@ -26,6 +26,7 @@ namespace COSMESTIC.Controllers
             {
                 return NotFound();
             }
+            UpdateCustomerStatus(userId.Value);
             return View(user);
         }
         [HttpGet]
@@ -102,7 +103,32 @@ namespace COSMESTIC.Controllers
             ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
             return View(); // Trả về view và hiển thị thông báo thành công ngay lập tức
         }
-
+        public void UpdateCustomerStatus(int userId)
+        {
+            var user = _context.Users.Include(u => u.orders)
+                                     .FirstOrDefault(u => u.userID == userId);
+            if (user == null)
+            {
+                return;
+            }
+            decimal totalSpent = _context.Orders
+                .Where(o => o.userID == userId && o.status == "Shipped")
+                .Sum(o => o.totalAmount);
+            user.TotalSpent += totalSpent;
+            if (totalSpent >= 5000000)
+            {
+                user.status = "Vàng";
+            }
+            else if (totalSpent >= 1000000)
+            {
+                user.status = "Bạc";
+            }
+            else
+            {
+                user.status = "Đồng";
+            }
+            _context.SaveChanges();
+        }
 
     }
 }

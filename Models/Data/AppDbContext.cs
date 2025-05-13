@@ -142,9 +142,13 @@ namespace COSMESTIC.Models.Data
                     .UseIdentityColumn(80000, 1);
 
             });
+            // Cấu hình mối quan hệ giữa ProductReView và Order
+            modelBuilder.Entity<ProductReView>()
+                .HasOne(pr => pr.order)
+                .WithMany(o => o.ProductReView)
+                .HasForeignKey(pr => pr.orderID)
+                .OnDelete(DeleteBehavior.NoAction);
         }
-
-
     }
 }
           

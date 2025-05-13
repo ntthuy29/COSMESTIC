@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 
-
-
-
 namespace COSMESTIC.Controllers
 {
     public class ProductController: Controller
@@ -43,13 +40,24 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Product", "Product");
             }
             bool hasPurchased = false;
-            if(userId != null)
+            bool hasReviewed = false;
+            if (userId != null)
             {
+                var userOrders = _context.Orders
+                    .Where(o => o.userID == userId && o.status == "Shipped")
+                    .Include(o => o.orderDetails)
+                    .ToList();
                 hasPurchased = _context.Orders
                                        .Where(o => o.userID == userId && o.status == "Shipped")
                                        .Any(o => o.orderDetails.Any(od => od.productID == id));
+                // Nếu có bất kỳ đơn hàng nào chưa được đánh giá thì hasReviewed sẽ là true
+                hasReviewed = userOrders.Any(o => o.orderDetails != null && o.orderDetails.Any(od => od.productID == id) &&
+                                       !_context.ProductReView
+                                           .Any(r => r.userID == userId && r.productID == id && r.orderID == o.orderID));
+
             }
             ViewBag.HasPurchased = hasPurchased;
+            ViewBag.HasReviewed = hasReviewed;
             return View(product);
         }
         [HttpPost]
@@ -68,13 +76,30 @@ namespace COSMESTIC.Controllers
                 TempData["ErrorMessage"] = "Bạn phải mua sản phẩm trước khi đánh giá.";
                 return RedirectToAction("ProductDetail", new { productID = productID });
             }
+            var lastOrder = _context.Orders
+                .Where(o => o.userID == userId && o.status == "Shipped")
+                .OrderByDescending(o => o.orderDate)
+                .FirstOrDefault();
+            if (lastOrder == null)
+            {
+                TempData["ErrorMessage"] = "Bạn chưa có đơn hàng đã giao để đánh giá.";
+                return RedirectToAction("ProductDetail", new { productID = productID });
+            }
+            var hasReviewed = _context.ProductReView
+                .Any(r => r.userID == userId && r.productID == productID && r.orderID == lastOrder.orderID);
+            if (hasReviewed)
+            {
+                TempData["ErrorMessage"] = "Bạn đã đánh giá sản phẩm này rồi. Bạn có thể đánh giá lại ở lần mua sau!";
+                return RedirectToAction("ProductDetail", new { productID = productID });
+            }
             var review = new ProductReView
             {
                 userID = userId.Value,
                 productID = productID,
                 rating = rating,
                 comment = comment,
-                CreateDate = DateTime.Now
+                CreateDate = DateTime.Now,
+                orderID = lastOrder.orderID
             };
             _context.ProductReView.Add(review);
             _context.SaveChanges();
@@ -119,8 +144,5 @@ namespace COSMESTIC.Controllers
 
             return PartialView("Catalog", products);
         }
-
-
-
     }
 }

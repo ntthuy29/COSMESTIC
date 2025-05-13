@@ -42,13 +42,13 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int productId)
+        public IActionResult AddToCart(int productId, int quantity)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
 
             if (userId == null)
             {
-                return RedirectToAction("Login", "Login"); 
+                return RedirectToAction("Login", "Login");
             }
 
             var product = _context.Products.Find(productId);
@@ -69,7 +69,7 @@ namespace COSMESTIC.Controllers
                         cartItems = new List<CartItem>()
                     };
                     _context.ShoppingCart.Add(cart);
-                    _context.SaveChanges(); 
+                    _context.SaveChanges();
                 }
 
                 var existingCartItem = cart.cartItems
@@ -77,28 +77,28 @@ namespace COSMESTIC.Controllers
 
                 if (existingCartItem != null)
                 {
-                    existingCartItem.quantity += 1;
+                    existingCartItem.quantity += quantity;
                 }
                 else
                 {
-                    // Nếu chưa có trong giỏ, thêm sản phẩm mới vào giỏ hàng
                     var cartItem = new CartItem
                     {
                         productID = productId,
-                        quantity = 1,
+                        quantity = quantity,
                         unitprice = product.price
                     };
-                    cart.cartItems.Add(cartItem); 
+                    cart.cartItems.Add(cartItem);
                 }
 
-                // Cập nhật tổng số lượng và tổng giá trị giỏ hàng
                 cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
                 cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
 
-                _context.SaveChanges(); 
+                _context.SaveChanges();
             }
+
             return RedirectToAction("Product", "Product");
         }
+
         [HttpPost]
         public IActionResult UpdateQuantity(int cartItemID, string action)
         {

@@ -25,8 +25,6 @@ namespace COSMESTIC.Controllers
         {
             Console.WriteLine("Username: " + models.username);
             Console.WriteLine("Password: " + models.password);
-
-
            
             var ktrauser = db.Accounts.Include(u=>u.user).FirstOrDefault(u => u.username == models.username && u.password == models.password);
 

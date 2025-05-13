@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace COSMESTIC.Models.Data
@@ -18,6 +16,7 @@ namespace COSMESTIC.Models.Data
         public DateTime dateOfBirth { get; set; }
         public string role { get;set; }
         public string status { get; set; }
+        public decimal TotalSpent { get; set; }
         public  virtual Account account { get; set; }
         public virtual ICollection< DeliveryIFMT >deliverys { get; set; }
         public virtual ICollection<Orders> orders { get; set; }

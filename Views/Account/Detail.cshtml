@@ -15,6 +15,8 @@
             <p><strong>Email:</strong> @Model.email</p>
             <p><strong>Số điện thoại:</strong> @Model.phoneNumber</p>
             <p><strong>Ngày sinh:</strong> @Model.dateOfBirth.ToString("dd/MM/yyyy")</p>
+            <p><strong>Xếp hạng:</strong> @Model.status</p>
+            <p><strong>Số tiền đã mua:</strong> @Model.TotalSpent</p>
 
             <div class="d-flex gap-3">
                 <a href="@Url.Action("Edit", "Account")" class="btn btn-warning">Chỉnh sửa thông tin</a>
