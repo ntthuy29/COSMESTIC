@@ -24,6 +24,6 @@ namespace COSMESTIC.Models.Data
         // Thêm thuộc tính DeliveryIFMT để lưu thông tin giao hàng'
         public int? DeliveryID { get; set; }
         public virtual DeliveryIFMT Delivery { get; set; } // Liên kết với bảng DeliveryIFMT
-
+        public ICollection<ProductReView> ProductReView { get; set; } // Liên kết với bảng ProductReView
     }
 }

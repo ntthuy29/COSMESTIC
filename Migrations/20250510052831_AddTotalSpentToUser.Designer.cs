@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250507075003_themthuoctinhOrder")]
-    partial class themthuoctinhOrder
+    [Migration("20250510052831_AddTotalSpentToUser")]
+    partial class AddTotalSpentToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,8 +69,8 @@ namespace COSMESTIC.Migrations
                     b.Property<int>("quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("unitprice")
-                        .HasColumnType("int");
+                    b.Property<decimal>("unitprice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("cartItemID");
 
@@ -79,30 +79,6 @@ namespace COSMESTIC.Migrations
                     b.HasIndex("productID");
 
                     b.ToTable("CartItem");
-                });
-
-            modelBuilder.Entity("COSMESTIC.Models.Data.CatalogRevenue", b =>
-                {
-                    b.Property<int>("catalogRevenueID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("catalogRevenueID"), 500L);
-
-                    b.Property<int>("catalogID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("revenueID")
-                        .HasColumnType("int");
-
-                    b.HasKey("catalogRevenueID");
-
-                    b.HasIndex("catalogID");
-
-                    b.HasIndex("revenueID")
-                        .IsUnique();
-
-                    b.ToTable("CatalogRevenue");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Catalogs", b =>
@@ -188,29 +164,6 @@ namespace COSMESTIC.Migrations
                     b.ToTable("Discount");
                 });
 
-            modelBuilder.Entity("COSMESTIC.Models.Data.DiscountProduct", b =>
-                {
-                    b.Property<int>("discountProductID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("discountProductID"), 9000L);
-
-                    b.Property<int>("discountID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("productID")
-                        .HasColumnType("int");
-
-                    b.HasKey("discountProductID");
-
-                    b.HasIndex("discountID");
-
-                    b.HasIndex("productID");
-
-                    b.ToTable("DiscountProduct");
-                });
-
             modelBuilder.Entity("COSMESTIC.Models.Data.Invoice", b =>
                 {
                     b.Property<int>("invoiceID")
@@ -238,6 +191,9 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
+                    b.Property<int>("DeliveryID")
+                        .HasColumnType("int");
+
                     b.Property<int?>("discountID")
                         .HasColumnType("int");
 
@@ -261,11 +217,52 @@ namespace COSMESTIC.Migrations
 
                     b.HasKey("orderID");
 
+                    b.HasIndex("DeliveryID");
+
                     b.HasIndex("discountID");
 
                     b.HasIndex("userID");
 
-                    b.ToTable("Order");
+                    b.ToTable("Order", (string)null);
+                });
+
+            modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
+                {
+                    b.Property<int>("reviewID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("reviewID"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("orderID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("productID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("userID")
+                        .HasColumnType("int");
+
+                    b.HasKey("reviewID");
+
+                    b.HasIndex("orderID");
+
+                    b.HasIndex("productID");
+
+                    b.HasIndex("userID");
+
+                    b.ToTable("ProductReView");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -293,6 +290,9 @@ namespace COSMESTIC.Migrations
                     b.Property<string>("productName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("quantity")
+                        .HasColumnType("int");
 
                     b.HasKey("productID");
 
@@ -367,6 +367,9 @@ namespace COSMESTIC.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
+
+                    b.Property<decimal>("TotalSpent")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -455,25 +458,6 @@ namespace COSMESTIC.Migrations
                     b.Navigation("products");
                 });
 
-            modelBuilder.Entity("COSMESTIC.Models.Data.CatalogRevenue", b =>
-                {
-                    b.HasOne("COSMESTIC.Models.Data.Catalogs", "catalog")
-                        .WithMany("catalogRevenues")
-                        .HasForeignKey("catalogID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("COSMESTIC.Models.Data.Revenue", "revenue")
-                        .WithOne("catalogRevenue")
-                        .HasForeignKey("COSMESTIC.Models.Data.CatalogRevenue", "revenueID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("catalog");
-
-                    b.Navigation("revenue");
-                });
-
             modelBuilder.Entity("COSMESTIC.Models.Data.DeliveryIFMT", b =>
                 {
                     b.HasOne("COSMESTIC.Models.Data.Users", "user")
@@ -483,25 +467,6 @@ namespace COSMESTIC.Migrations
                         .IsRequired();
 
                     b.Navigation("user");
-                });
-
-            modelBuilder.Entity("COSMESTIC.Models.Data.DiscountProduct", b =>
-                {
-                    b.HasOne("COSMESTIC.Models.Data.Discount", "discount")
-                        .WithMany()
-                        .HasForeignKey("discountID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("COSMESTIC.Models.Data.Products", "products")
-                        .WithMany("discountProducts")
-                        .HasForeignKey("productID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("discount");
-
-                    b.Navigation("products");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Invoice", b =>
@@ -517,6 +482,12 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
                 {
+                    b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
+                        .WithMany()
+                        .HasForeignKey("DeliveryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")
                         .HasForeignKey("discountID");
@@ -527,7 +498,36 @@ namespace COSMESTIC.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Delivery");
+
                     b.Navigation("users");
+                });
+
+            modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
+                {
+                    b.HasOne("COSMESTIC.Models.Data.Orders", "order")
+                        .WithMany("ProductReView")
+                        .HasForeignKey("orderID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("COSMESTIC.Models.Data.Products", "product")
+                        .WithMany("ProductReviews")
+                        .HasForeignKey("productID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("COSMESTIC.Models.Data.Users", "user")
+                        .WithMany("ProductReviews")
+                        .HasForeignKey("userID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("order");
+
+                    b.Navigation("product");
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
@@ -584,8 +584,6 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Catalogs", b =>
                 {
-                    b.Navigation("catalogRevenues");
-
                     b.Navigation("products");
                 });
 
@@ -596,6 +594,8 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
                 {
+                    b.Navigation("ProductReView");
+
                     b.Navigation("invoice")
                         .IsRequired();
 
@@ -606,17 +606,11 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Products", b =>
                 {
+                    b.Navigation("ProductReviews");
+
                     b.Navigation("cartItems");
 
-                    b.Navigation("discountProducts");
-
                     b.Navigation("orderDetails");
-                });
-
-            modelBuilder.Entity("COSMESTIC.Models.Data.Revenue", b =>
-                {
-                    b.Navigation("catalogRevenue")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("COSMESTIC.Models.Data.ShoppingCart", b =>
@@ -626,6 +620,8 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Users", b =>
                 {
+                    b.Navigation("ProductReviews");
+
                     b.Navigation("ShoppingCart")
                         .IsRequired();
 

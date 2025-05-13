@@ -11,6 +11,8 @@ namespace COSMESTIC.Models.Data
         public int userID { get; set; }
         [ForeignKey("productID")]
         public int productID { get; set; }
+        [ForeignKey("orderID")]
+        public int orderID { get; set; }
         [Range(1, 5)]
         public int rating { get; set; }
         [StringLength(1000)]
@@ -18,5 +20,6 @@ namespace COSMESTIC.Models.Data
         public DateTime CreateDate { get; set; }
         public virtual Users user { get; set; }
         public virtual Products product { get; set; }
+        public virtual Orders order { get; set; }
     }
 }

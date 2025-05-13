@@ -30,7 +30,11 @@ namespace COSMESTIC.Controllers
             {
                 return NotFound();
             }
+
+            UpdateCustomerStatus(userId.Value);
+
             ViewBag.value = i;
+
             return View(user);
            
         }
@@ -120,12 +124,13 @@ namespace COSMESTIC.Controllers
             Console.WriteLine("ChangePassword POST action called");
 
             var userId = HttpContext.Session.GetInt32("UserID");
+
             if (userId == null)
             {
                 return Json(new { success = false, redirect = Url.Action("Login", "Login") });
             }
 
-            var account = _context.Accounts.Include(c => c.user).FirstOrDefault(a => a.userID == userId);
+            var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
             if (account == null)
             {
                 return Json(new { success = false, message = "Tài khoản không tồn tại." });
@@ -154,6 +159,33 @@ namespace COSMESTIC.Controllers
             _context.SaveChanges();
 
             return Json(new { success = true, message = "Mật khẩu của bạn đã được thay đổi thành công!" });
+        }
+
+        public void UpdateCustomerStatus(int userId)
+        {
+            var user = _context.Users.Include(u => u.orders)
+                                     .FirstOrDefault(u => u.userID == userId);
+            if (user == null)
+            {
+                return;
+            }
+            decimal totalSpent = _context.Orders
+                .Where(o => o.userID == userId && o.status == "Shipped")
+                .Sum(o => o.totalAmount);
+            user.TotalSpent += totalSpent;
+            if (totalSpent >= 5000000)
+            {
+                user.status = "Vàng";
+            }
+            else if (totalSpent >= 1000000)
+            {
+                user.status = "Bạc";
+            }
+            else
+            {
+                user.status = "Đồng";
+            }
+            _context.SaveChanges();
         }
 
         [HttpPost]
@@ -187,6 +219,7 @@ namespace COSMESTIC.Controllers
             {
                 query = query.Where(u => u.status == status);
             }
+
 
             var users = await query
                 .Select(u => new UserViewModel
