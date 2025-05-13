@@ -1,0 +1,110 @@
+﻿@model List<COSMESTIC.Models.Discount.ListDiscountModel>
+
+@{
+    ViewData["Title"] = "Ưu đãi";
+}
+
+<div class="container my-5">
+    <h3 class="text-center mb-4">🎉 Ưu đãi</h3>
+
+    <div class="card p-4">
+        <div class="mb-3">
+            <input type="text" class="form-control mb-2" placeholder="Nhập mã khuyến mãi" id="manualDiscountCode" />
+            <button type="button" class="btn btn-link" onclick="applyManualDiscount()">Kiểm tra</button>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var discount in Model)
+            {
+                <div class="discount-item mb-3 p-3 border rounded">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-1">@discount.name</h6>
+                            <p class="text-muted mb-0">Giảm @discount.value%</p>
+                            <p class="text-muted mb-0">Hiệu lực: @discount.startDate - @discount.endDate</p>
+                            <button class="btn btn-sm btn-outline-primary mt-2" onclick="selectDiscount('@discount.name')">Chọn</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted text-center">Không có mã giảm giá nào đang hoạt động.</p>
+        }
+
+        @if (TempData["MinAmountMessage"] != null)
+        {
+            <div class="alert alert-warning d-flex align-items-center mt-3">
+                <span class="me-2">! </span>
+                <p class="mb-0">@TempData["MinAmountMessage"]</p>
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        @if (ViewBag.ReturnUrl == "ShippingInformationBuyNow")
+        {
+            <a href="@Url.Action("ShippingInformationBuyNow","Order"), new {productId = ViewBag.ProductId, quantity = ViewBag.Quantity} class="btn btn-primary">Quay lại</a>
+        }
+        else
+        {
+            <a href="@Url.Action("ConfirmOrder", "Order", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber })" class="btn btn-primary">Quay lại</a>
+        }
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        // Hàm chọn mã giảm giá
+        function selectDiscount(code) {
+            let returnUrl = '@ViewBag.ReturnUrl';
+            const actionType = '@ViewBag.ActionType';
+            if (!returnUrl) {
+                returnUrl = '@Url.Action("ConfirmOrder", "Order")';
+            }
+
+            let url = returnUrl + (returnUrl.includes('?') ? '&' : '?') +
+                'discountCode=' + encodeURIComponent(code) +
+                '&address=' + encodeURIComponent('@ViewBag.Address') +
+                '&fullName=' + encodeURIComponent('@ViewBag.FullName') +
+                '&phoneNumber=' + encodeURIComponent('@ViewBag.PhoneNumber');
+
+            if (actionType === 'ShippingInformationBuyNow') {
+                url += '&productId=@ViewBag.ProductId' +
+                       '&quantity=@ViewBag.Quantity';
+            }
+
+            window.location.href = url;
+        }
+
+        // Hàm áp dụng mã giảm giá nhập tay
+        function applyManualDiscount() {
+            const manualCode = document.getElementById('manualDiscountCode').value;
+            if (manualCode) {
+                let returnUrl = '@ViewBag.ReturnUrl';
+                const actionType = '@ViewBag.ActionType';
+                if (!returnUrl) {
+                    returnUrl = '@Url.Action("ConfirmOrder", "Order")';
+                }
+
+                let url = returnUrl + (returnUrl.includes('?') ? '&' : '?') +
+                    'discountCode=' + encodeURIComponent(manualCode) +
+                    '&address=' + encodeURIComponent('@ViewBag.Address') +
+                    '&fullName=' + encodeURIComponent('@ViewBag.FullName') +
+                    '&phoneNumber=' + encodeURIComponent('@ViewBag.PhoneNumber');
+
+                if (actionType === 'ShippingInformationBuyNow') {
+                    url += '&productId=@ViewBag.ProductId' +
+                           '&quantity=@ViewBag.Quantity';
+                }
+
+                window.location.href = url;
+            } else {
+                alert("Vui lòng nhập mã khuyến mãi!");
+            }
+        }
+    </script>
+}

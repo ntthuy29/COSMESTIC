@@ -1,8 +1,11 @@
 ﻿using COSMESTIC.Models.Data;
 using COSMESTIC.Models.Order;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 using System.Net.WebSockets;
+using System.Linq;
 namespace COSMESTIC.Controllers
 {
     public class OrderController : Controller
@@ -26,12 +29,16 @@ namespace COSMESTIC.Controllers
                 .ToList();
             return View(orders);
         }
-        public IActionResult ShippingInformation()
+        public async Task<IActionResult> ShippingInformation()
         {
-            return View();
+            var userId = HttpContext.Session.GetInt32("UserID");
+            var deliveryAddesses = await _context.DeliveryIFMT
+                                                 .Where(d => d.userID == userId).ToListAsync();
+            return View(deliveryAddesses);
         }
+        [HttpGet]
         [HttpPost]
-        public IActionResult ConfirmOrder(string fullName, string address, string phoneNumber, string discountCode, bool applyDiscount)
+        public IActionResult ConfirmOrder(string fullName, string address, string phoneNumber, string discountCode)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -49,7 +56,7 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Index", "ShoppingCart");
             }
             decimal TotaldiscountAmount = 0;
-            if (applyDiscount && !string.IsNullOrEmpty(discountCode))
+            if (!string.IsNullOrEmpty(discountCode))
             {
                 var discount = _context.Discount.FirstOrDefault(d => d.isActive == true && d.discountType == discountCode && d.startDate <= DateTime.Now && d.endDate >= DateTime.Now);
                 if (discount != null)
@@ -62,24 +69,32 @@ namespace COSMESTIC.Controllers
                     else
                     {
                         TempData["ErrorMessage"] = "Đơn hàng của bạn chưa đủ điều kiện để áp dụng mã giảm giá này.";
+                        discount = null; // Xóa mã giảm giá nếu không hợp lệ
                     }
                 }
                 else
                 {
                     TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
+                    discount = null; // Xóa mã giảm giá nếu không hợp lệ
                 }
             }
-            cart.totalPrice -= TotaldiscountAmount;
+            decimal totalAmount = cart.totalPrice;
+
+            decimal finalTotal = totalAmount - TotaldiscountAmount;
 
             ViewBag.Cart = cart;
             ViewBag.FullName = fullName;
             ViewBag.Address = address;
             ViewBag.PhoneNumber = phoneNumber;
+            ViewBag.finalTotal = finalTotal;
+            ViewBag.DiscountCode = discountCode;
+            ViewBag.TotalAmount = totalAmount;
+            ViewBag.DiscountAmount = TotaldiscountAmount;
 
             return View();
         }
         [HttpPost]
-        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode)
+        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -114,24 +129,33 @@ namespace COSMESTIC.Controllers
                     TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
                 }
             }
-
-            var delivery = new DeliveryIFMT
+            // Nếu người dùng không chọn địa chỉ đã lưu, tạo mới địa chỉ
+            if (savedAddress == null)
             {
-                deliveryName = fullName,
-                deliveryAddress = address,
-                deliveryPhone = phoneNumber,
-                userID = userId.Value
-            };
-            _context.DeliveryIFMT.Add(delivery);
-            _context.SaveChanges();
+                var delivery = new DeliveryIFMT
+                {
+                    deliveryName = fullName,
+                    deliveryAddress = address,
+                    deliveryPhone = phoneNumber,
+                    userID = userId.Value
+                };
+                _context.DeliveryIFMT.Add(delivery);
+                _context.SaveChanges();
+            }
 
             var newOrder = new Orders
             {
                 userID = userId.Value,
                 orderDate = DateTime.Now,
-                status = "Pending",
-                totalAmount = 0, 
-                DeliveryID = delivery.deliveryID 
+
+                status = "Chờ xử lý",  // Trạng thái đang chờ duyệt
+                totalAmount = 0,
+                DeliveryID = savedAddress ?? _context.DeliveryIFMT
+                                                    .Where(d => d.userID == userId)
+                                                    .OrderBy(d => d.deliveryID)
+                                                    .Select(d => d.deliveryID)
+                                                    .LastOrDefault()
+
             };
             _context.Orders.Add(newOrder);
             _context.SaveChanges(); 
@@ -180,74 +204,6 @@ namespace COSMESTIC.Controllers
             }
             return View(order);
         }
-
-
-
-        [HttpGet]
-        public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
-        {
-          
-            var query = _context.Orders
-                .Include(o => o.users)
-                .Select(o => new ListOrderModel
-                {
-                    OrderID = o.orderID,
-                    UserID = o.userID,
-                    CustomerName = o.users.fullName, 
-                    TotalAmount = o.totalAmount,
-                    OrderDate = o.orderDate,
-                    EndDate = o.endDate,
-                    Status = o.status,
-                    DeliveryID = o.DeliveryID
-                });
-
-            
-            if (!string.IsNullOrEmpty(status) && status != "Tất cả trạng thái")
-            {
-                query = query.Where(o => o.Status == status);
-            }
-            
-            if (!string.IsNullOrEmpty(searchCustomer))
-            {
-                query = query.Where(o => o.CustomerName.Contains(searchCustomer));
-            }
-            var orders = await query.ToListAsync();
-            ViewBag.Statuses = new[] {"Chờ xử lý","Đang giao", "Bị Từ chối", "Đã hoàn thành" }; // Danh sách trạng thái
-            ViewBag.SelectedStatus = status;
-            ViewBag.SearchCustomer = searchCustomer;
-
-            return View(orders);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Approve(int id)
-        {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            order.status = "Đang giao";
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Đơn hàng được duyệt thành công";
-            return RedirectToAction("IndexAdminOrder");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Reject(int id)
-        {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null){
-                return NotFound();
-            }
-             order.status = "Bị từ chối";
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Đơn hàng đã bị từ chối";
-
-            return RedirectToAction ("IndexAdminOrder");
-        }
-        
-            
-          
         public IActionResult MyOrders()
         {
             var userId = HttpContext.Session.GetInt32("UserID");
@@ -294,9 +250,9 @@ namespace COSMESTIC.Controllers
             }
             order.endDate = DateTime.Now;
             _context.SaveChanges();
-            if (order.status == "Pending")
+            if (order.status == "Chờ xử lý")
             {
-                order.status = "Cancelled";
+                order.status = "Bị từ chối";
                 _context.SaveChanges();
                 //Hoàn sản phẩm vào kho
                 foreach (var item in order.orderDetails)
@@ -311,23 +267,253 @@ namespace COSMESTIC.Controllers
             }
             return RedirectToAction("MyOrders");
         }
+        [HttpGet]
         [HttpPost]
-        public IActionResult ShippingInformationBuyNow(int productId, int quantity)
+        public async Task<IActionResult> ShippingInformationBuyNow(int productId, int quantity, string discountCode = null, string address = null, string fullName = null, string phoneNumber = null)
         {
-            var product = _context.Products.Find(productId);
+            var userId = HttpContext.Session.GetInt32("UserID");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            var deliveryAddresses = await _context.DeliveryIFMT
+                .Where(d => d.userID == userId)
+                .ToListAsync();
+
+            var product = await _context.Products.FindAsync(productId);
 
             if (product == null)
             {
                 return NotFound();
             }
-            // Truyền thông tin sản phẩm và số lượng đến View
+
+
+            decimal totalAmount = product.price * quantity;
+            decimal totalDiscountAmount = 0;
+
+            if (!string.IsNullOrEmpty(discountCode))
+            {
+                var discount = await _context.Discount.FirstOrDefaultAsync(d => d.isActive == true &&
+                    d.discountType == discountCode &&
+                    d.startDate <= DateTime.Now &&
+                    d.endDate >= DateTime.Now);
+
+                if (discount != null)
+                {
+                    if (totalAmount >= discount.discountAmount)
+                    {
+                        totalDiscountAmount = totalAmount * (discount.value / 100);
+                        TempData["SuccessMessage"] = "Mã giảm giá đã được áp dụng!";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = $"Đơn hàng của bạn chưa đủ điều kiện (yêu cầu tối thiểu {discount.discountAmount:N0}đ).";
+                        discountCode = null;
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
+                    discountCode = null;
+                }
+            }
+
+
             ViewBag.Product = product;
             ViewBag.Quantity = quantity;
+            ViewBag.TotalAmount = totalAmount;
+            ViewBag.DiscountAmount = totalDiscountAmount;
+            ViewBag.FinalTotal = totalAmount - totalDiscountAmount;
+            ViewBag.DiscountCode = discountCode;
+            ViewBag.Address = address;
+            ViewBag.FullName = fullName;
+            ViewBag.PhoneNumber = phoneNumber;
 
-            return View();  
+            return View(deliveryAddresses);
         }
-        
         [HttpPost]
+        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, int? savedAddress)
+        {
+            var userId = HttpContext.Session.GetInt32("UserID");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            var product = _context.Products.Find(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Tính tổng tiền trước khi áp dụng giảm giá
+            decimal totalAmount = product.price * quantity;
+            decimal totalDiscountAmount = 0;
+
+            // Kiểm tra và áp dụng mã giảm giá nếu có
+            if (!string.IsNullOrEmpty(discountCode))
+            {
+                var discount = _context.Discount.FirstOrDefault(d => d.isActive == true &&
+                    d.discountType == discountCode &&
+                    d.startDate <= DateTime.Now &&
+                    d.endDate >= DateTime.Now);
+
+                if (discount != null)
+                {
+                    if (totalAmount >= discount.discountAmount)
+                    {
+                        totalDiscountAmount = totalAmount * (discount.value / 100);
+                        TempData["SuccessMessage"] = "Mã giảm giá đã được áp dụng!";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Đơn hàng của bạn chưa đủ điều kiện để áp dụng mã giảm giá này.";
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
+                }
+            }
+
+            // Nếu người dùng không chọn địa chỉ đã lưu, tạo mới địa chỉ
+            if (savedAddress == null)
+            {
+                var delivery = new DeliveryIFMT
+                {
+                    deliveryName = fullName,
+                    deliveryAddress = address,
+                    deliveryPhone = phoneNumber,
+                    userID = userId.Value
+                };
+                _context.DeliveryIFMT.Add(delivery);
+                _context.SaveChanges();
+            }
+
+            // Tạo đơn hàng mới
+            var newOrder = new Orders
+            {
+                userID = userId.Value,
+                orderDate = DateTime.Now,
+
+                status = "Chờ xử lý",
+                totalAmount = totalAmount - totalDiscountAmount, // Áp dụng giảm giá ngay tại đây
+                DeliveryID = savedAddress ?? _context.DeliveryIFMT
+                                                    .Where(d => d.userID == userId)
+                                                    .OrderBy(d => d.deliveryID)
+                                                    .Select(d => d.deliveryID)
+                                                    .LastOrDefault()
+
+            };
+            _context.Orders.Add(newOrder);
+            _context.SaveChanges();
+
+            // Tạo chi tiết đơn hàng
+            var orderDetail = new orderDetail
+            {
+                orderID = newOrder.orderID,
+                productID = productId,
+                quantity = quantity,
+                unitPrice = product.price
+            };
+            _context.orderDetails.Add(orderDetail);
+
+            // Trừ sản phẩm khỏi kho
+            if (product != null)
+            {
+                product.quantity -= quantity;
+                if (product.quantity < 0)
+                {
+                    product.quantity = 0;
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
+        }
+
+      
+        
+        
+        
+        
+        
+        
+        //dưới đây là code của admin
+
+
+
+        [HttpGet]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
+        {
+
+            var query = _context.Orders
+                .Include(o => o.users)
+                .Select(o => new ListOrderModel
+                {
+                    OrderID = o.orderID,
+                    UserID = o.userID,
+                    CustomerName = o.users.fullName,
+                    TotalAmount = o.totalAmount,
+                    OrderDate = o.orderDate,
+                    EndDate = o.endDate,
+                    Status = o.status,
+                    DeliveryID = o.DeliveryID
+                });
+
+
+            if (!string.IsNullOrEmpty(status) && status != "Tất cả trạng thái")
+            {
+                query = query.Where(o => o.Status == status);
+            }
+
+            if (!string.IsNullOrEmpty(searchCustomer))
+            {
+                query = query.Where(o => o.CustomerName.Contains(searchCustomer));
+            }
+            var orders = await query.ToListAsync();
+            ViewBag.Statuses = new[] { "Chờ xử lý", "Đang giao", "Bị Từ chối", "Đã hoàn thành" }; // Danh sách trạng thái
+            ViewBag.SelectedStatus = status;
+            ViewBag.SearchCustomer = searchCustomer;
+
+            return View(orders);
+        }
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            order.status = "Đang giao";
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đơn hàng được duyệt thành công";
+            return RedirectToAction("IndexAdminOrder");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            order.status = "Bị từ chối";
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Đơn hàng đã bị từ chối";
+
+            return RedirectToAction("IndexAdminOrder");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -348,11 +534,12 @@ namespace COSMESTIC.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> BulkApprove(int[] selectedOrders)
         {
             if (selectedOrders == null || !selectedOrders.Any())
             {
-               TempData["SuccessMessage"] = "Không có đơn hàng nào dc chọn";
+                TempData["SuccessMessage"] = "Không có đơn hàng nào dc chọn";
                 return RedirectToAction(nameof(Index));
             }
             int count = 0;
@@ -370,84 +557,6 @@ namespace COSMESTIC.Controllers
             return RedirectToAction("IndexAdminOrder");
         }
 
-        [HttpPost]
-        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, bool applyDiscount)
-        {
-            var userId = HttpContext.Session.GetInt32("UserID");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Login");
-            }
-            var product = _context.Products.Find(productId);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            decimal TotaldiscountAmount = 0;
-            if(applyDiscount && !string.IsNullOrEmpty(discountCode))
-            {
-                var discount = _context.Discount.FirstOrDefault(d => d.isActive == true && d.discountType == discountCode && d.startDate <= DateTime.Now && d.endDate >= DateTime.Now);
-                if (discount != null)
-                {
-                    if (product.price * quantity >= discount.discountAmount)
-                    {
-                        TotaldiscountAmount = product.price * quantity * (discount.value / 100);
-                        TempData["SuccessMessage"] = "Mã giảm giá đã được áp dụng!";
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Đơn hàng của bạn chưa đủ điều kiện để áp dụng mã giảm giá này.";
-                    }
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
-                }
-            }
 
-            var delivery = new DeliveryIFMT
-            {
-                deliveryName = fullName,
-                deliveryAddress = address,
-                deliveryPhone = phoneNumber,
-                userID = userId.Value
-            };
-            _context.DeliveryIFMT.Add(delivery);
-            _context.SaveChanges();
-
-            var newOrder = new Orders
-            {
-                userID = userId.Value,
-                orderDate = DateTime.Now,
-                status = "Pending",  // Trạng thái đang chờ duyệt
-                totalAmount = 0,
-                DeliveryID = delivery.deliveryID
-            };
-            _context.Orders.Add(newOrder);
-            _context.SaveChanges();
-
-            var orderDetail = new orderDetail
-            {
-                orderID = newOrder.orderID,
-                productID = productId,
-                quantity = quantity,
-                unitPrice = product.price
-            };
-            newOrder.totalAmount = quantity * product.price - TotaldiscountAmount;
-            _context.orderDetails.Add(orderDetail);
-
-            // Trừ sản phẩm khỏi kho
-            if (product != null)
-            {
-                product.quantity -= quantity;
-                if (product.quantity < 0)
-                {
-                    product.quantity = 0;
-                }
-            }
-
-            _context.SaveChanges();
-            return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
-        }
     }
 }

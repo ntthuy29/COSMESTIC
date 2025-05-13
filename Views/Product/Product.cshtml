@@ -14,7 +14,24 @@
     </div>
 </div>
 
+<div style=" margin-top: 20px; border: inherit;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); margin-bottom: 50px; background-color: #D9D9D9; padding: 10px; border-radius: 10px;" class="d-flex" .">
+    <div>
+     (@Model.Count() sản phẩm)
+    </div>
 
+    <div class="flex-column flex-column" style="margin-left: 50px;">
+        <div class="d-flex align-items-center gap-2">
+            <label>Khoảng giá: </label>
+
+            <input type="number" class="form-control" id="mins" name="min" placeholder="TỪ ..000đ" style="width: 100px; height: 25px;">
+            -
+            <input type="number" class="form-control" id="maxs" name="max" placeholder="ĐẾN ...000đ" style="width: 100px; height: 25px;">
+            <input type="hidden" name="catalogID" value="@Model[0].catalogID" />
+            <button id="btnPrices" class="btn btn-warning" style="margin-inline:100px; margin-top: 10px;">Áp dụng</button>
+
+        </div>
+    </div>
+</div>
 
 <!--hihihi-->
 @if (ViewBag.Message != null)
@@ -25,11 +42,12 @@
 }
 <div class="container container-product">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        @foreach(var product in Model)
+        @for(var i=0;i<Model.Count();i++)
         {
+            var product = Model[i];
 
 
-            <div class="col " onclick="getDetail(@product.productID,'@product.productName')">
+            <div data-price="@product.price" class="  items col product-item @(i >= 8 ? "d-none" : "")" onclick="getDetail(@product.productID,'@product.productName')" id="@product.productID">
                 <div class="card h-100 shadow-sm card-radius">
                     <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;" />
                     <div class="card-body">
@@ -38,10 +56,14 @@
 
                         <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
                         @if (role == "Customer")
-                        { 
+                        {
                             <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                                 <input type="hidden" name="productId" value="@product.productID" />
-                                <button type="submit" class="btn btn-outline-warning w-100" onclick="addToCart">🛒 Thêm vào giỏ</button>
+                                <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
+
+
+                                <button type="submit" class="btn btn-outline-warning w-100" onclick="showalert()">🛒 Thêm vào giỏ</button>
+
                             </form>
                         }else
                         {
@@ -55,6 +77,10 @@
 
 
         }
+
+        <div class="text-center " style="margin-top: 30px; margin-inline: 500px;">
+            <button id="loadMoreBtn" class="btn btn-danger">Xem thêm</button>
+        </div>
 
         @if(role == null)
         {
@@ -76,17 +102,92 @@
             </div>
         }
             </div>
+    <div class="alert alert-info" id="alet" role="alert" style="display: none;">
+        Đã thêm sản phẩm vào giỏ hàng
+    </div>
+ </div>
+ 
 
-        </div>
-<script>
-   
-function getDetail(productId, productName) {
-    window.location.href = '@Url.Action("ProductDetail", "Product")/' + productId + '/' + encodeURIComponent(productName);
+@section Scripts{
+    <script>
+
+        function getDetail(productId, productName) {
+            window.location.href = '@Url.Action("ProductDetail", "Product")/' + productId + '/' + encodeURIComponent(productName);
+        }
+
+        function showalert(){
+            var alert = document.getElementById('alet');
+            alert.style.display='block';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const productItems = document.querySelectorAll('.product-item.d-none');
+            let itemsToShow = 4; 
+
+            loadMoreBtn.addEventListener('click', function() {
+                // Lấy các sản phẩm đang ẩn và hiển thị `itemsToShow` sản phẩm tiếp theo
+                const hiddenItems = Array.from(productItems).filter(item => item.classList.contains('d-none'));
+
+                hiddenItems.slice(0, itemsToShow).forEach(item => {
+                    item.classList.remove('d-none');
+                });
+
+                // Ẩn nút "Load More" nếu không còn sản phẩm nào ẩn
+                if (hiddenItems.length <= itemsToShow) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            });
+
+            // Ẩn nút "Load More" ngay từ đầu nếu không có sản phẩm ẩn
+            if (productItems.length === 0) {
+                loadMoreBtn.style.display = 'none';
+            }
+        });
+                       document.addEventListener('click', function(e) {
+            if (e.target.id === 'btnPrices') {
+                const min = document.getElementById('mins').value;
+                const max = document.getElementById('maxs').value;
+
+                // Xử lý giá trị nhập vào (bỏ "000" nếu cần)
+                const minPrice = min ? parseInt(min) * 1000 : 0;
+                const maxPrice = max ? parseInt(max) * 1000 : Infinity;
+
+                filterByPrice(minPrice, maxPrice);
+            }
+        });
+        function filterByPrice(minPrice, maxPrice) {
+            const items = document.querySelectorAll('.items');
+            items.forEach(item => {
+                const price = parseInt(item.getAttribute('data-price')); // Lấy giá từ data-price
+                const isInRange = (isNaN(minPrice) || price >= minPrice) &&
+                                 (isNaN(maxPrice) || price <= maxPrice);
+
+                // Chỉ sử dụng một cách ẩn (nên dùng .d-none để đồng bộ với load more)
+                if (!isInRange) {
+                    item.classList.add('d-none');
+                } else {
+                    item.classList.remove('d-none');
+                }
+            });
+
+            // Ẩn nút "Load More" nếu tất cả sản phẩm đã được lọc
+            updateLoadMoreButton();
+        }
+
+        function updateLoadMoreButton() {
+            const visibleItems = document.querySelectorAll('.items:not(.d-none)').length;
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (visibleItems <= 8) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'block';
+            }
+        }
+        
+    </script>
+
 }
-
-    
-</script>
-
       <script src="~/js/product.js"></script>
       <script src="~/js/alertLogin.js"></script>
     

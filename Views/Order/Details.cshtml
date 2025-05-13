@@ -1,4 +1,5 @@
-﻿@model COSMESTIC.Models.Data.Orders
+﻿@using System.Web
+@model COSMESTIC.Models.Data.Orders
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,23 +11,23 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5 class="fw-bold mb-3">📌 Thông tin người nhận</h5>
-            <p><strong>Họ và tên:</strong> @Model.Delivery.deliveryName</p>
-            <p><strong>Số điện thoại:</strong> @Model.Delivery.deliveryPhone</p>
-            <p><strong>Địa chỉ giao hàng:</strong> @Model.Delivery.deliveryAddress</p>
+            <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
+            <p><strong>Số điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
+            <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
             <p><strong>Ngày đặt:</strong> @Model.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
             <p>
                 <strong>Trạng thái:</strong>
                 @switch (Model.status)
                 {
-                    case "Pending":
+                    case "Chờ xử lý":
                         <span class="badge bg-warning text-dark">Đang xử lý</span>
                         ;
                         break;
-                    case "Shipped":
+                    case "Đang giao":
                         <span class="badge bg-info text-dark">Đã giao</span>
                         ;
                         break;
-                    case "Cancelled":
+                    case "Bị từ chối":
                         <span class="badge bg-danger">Đã hủy</span>
                         <p><strong>Ngày hủy:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
@@ -38,12 +39,21 @@
                 }
             </p>
             <!-- Nút hủy đơn hàng nếu trạng thái là "Pending" -->
-            @if (Model.status == "Pending")
+            @if (Model.status == "Chờ xử lý")
             {
-                <form method="post" action="@Url.Action("CancelOrder", "Order")" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
-                    <input type="hidden" name="id" value="@Model.orderID" />
-                    <button type="submit" class="btn btn-danger">Hủy đơn hàng</button>
+               
+                @* Nút "Hủy đơn" *@
+                <a href="javascript:void(0);" onclick="confirmCancel(@Model.orderID)" class="btn btn-danger btn-sm rounded-circle" title="Hủy đơn">
+                    <i class="fas fa-times"></i>
+                    <span>Hủy đơn hàng</span>
+
+                </a>
+
+                @* Form ẩn để gửi POST *@
+                <form id="cancelForm" method="post">
+                    <input type="hidden" name="id" id="cancelOrderId" />
                 </form>
+
             }
         </div>
     </div>
@@ -84,3 +94,26 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        function confirmCancel(orderId) {
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Hủy đơn hàng này không thể hoàn tác!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hủy đơn',
+                cancelButtonText: 'Thoát',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gán ID vào form và submit
+                    document.getElementById('cancelOrderId').value = orderId;
+                    document.getElementById('cancelForm').action = '/Order/CancelOrder'; // đúng controller/action
+                    document.getElementById('cancelForm').submit();
+                }
+            });
+        }
+    </script>
+}

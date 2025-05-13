@@ -1,6 +1,4 @@
-﻿
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace COSMESTIC.Models.Data
@@ -11,13 +9,17 @@ namespace COSMESTIC.Models.Data
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int userID { get; set; }
-
         public string fullName { get; set; }
         public string email { get; set; }
         public string phoneNumber { get; set; }
         public DateTime dateOfBirth { get; set; }
         public string role { get;set; }
         public string status { get; set; }
+
+        public decimal TotalSpent { get; set; }
+
+        public DateTime? createdDate { get; set; }
+
         public  virtual Account account { get; set; }
         public virtual ICollection< DeliveryIFMT >deliverys { get; set; }
         public virtual ICollection<Orders> orders { get; set; }
