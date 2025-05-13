@@ -25,24 +25,28 @@
 }
 <div class="container container-product">
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        @foreach(var product in Model)
+        @for(var i=0;i<Model.Count();i++)
         {
+            var product = Model[i];
 
 
-            <div class="col " onclick="getDetail(@product.productID,'@product.productName')">
+            <div class="col product-item @(i >= 8 ? "d-none" : "")" onclick="getDetail(@product.productID,'@product.productName')" id="@product.productID" >
                 <div class="card h-100 shadow-sm card-radius">
-                    <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top" style="height: 200px; object-fit: contain;" />
+                    <img src="@Url.Content("~/" + product.imagePath)" class="card-img-top img-fluid" style="height: 200px; object-fit: contain;" />
                     <div class="card-body">
                         <h6 class="card-title text-truncate" title="@product.productName">@product.productName</h6>
 
 
                         <p class="mb-1 text-danger fw-bold">@product.price.ToString("N0") ₫</p>
                         @if (role == "Customer")
-                        { 
+                        {
                             <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                                 <input type="hidden" name="productId" value="@product.productID" />
                                 <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
-                                <button type="submit" class="btn btn-outline-warning w-100">🛒 Thêm vào giỏ</button>
+
+
+                                <button type="submit" class="btn btn-outline-warning w-100" onclick="showalert()">🛒 Thêm vào giỏ</button>
+
                             </form>
                         }else
                         {
@@ -57,14 +61,17 @@
 
         }
 
+        <div class="text-center " style="margin-top: 30px; margin-inline: 500px;">
+            <button id="loadMoreBtn" class="btn btn-danger">Xem thêm</button>
+        </div>
+
         @if(role == null)
         {
             <div id="deleteModal" class="modal" style="display: none;">
                
                 <div class="modal-content">
-                    <span class="material-symbols-outlined" style="color: black; margin-right: auto;" id="close" onclick="setCursor()">
-                        close
-                    </span>
+                   
+                    <span type="button" class="btn-close" disabled aria-label="Close" style=" margin-right: auto;" id="close" onclick="setCursor()"></span>
                     <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
                    <div class="d-flex justify-content-sm-between">
                         <form action="/Login/Login" method="get">
@@ -78,17 +85,51 @@
             </div>
         }
             </div>
+    <div class="alert alert-info" id="alet" role="alert" style="display: none;">
+        Đã thêm sản phẩm vào giỏ hàng
+    </div>
+ </div>
+ 
 
-        </div>
-<script>
-   
-function getDetail(productId, productName) {
-    window.location.href = '@Url.Action("ProductDetail", "Product")/' + productId + '/' + encodeURIComponent(productName);
+@section Scripts{
+    <script>
+
+        function getDetail(productId, productName) {
+            window.location.href = '@Url.Action("ProductDetail", "Product")/' + productId + '/' + encodeURIComponent(productName);
+        }
+
+        function showalert(){
+            var alert = document.getElementById('alet');
+            alert.style.display='block';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const productItems = document.querySelectorAll('.product-item.d-none');
+            let itemsToShow = 4; 
+
+            loadMoreBtn.addEventListener('click', function() {
+                // Lấy các sản phẩm đang ẩn và hiển thị `itemsToShow` sản phẩm tiếp theo
+                const hiddenItems = Array.from(productItems).filter(item => item.classList.contains('d-none'));
+
+                hiddenItems.slice(0, itemsToShow).forEach(item => {
+                    item.classList.remove('d-none');
+                });
+
+                // Ẩn nút "Load More" nếu không còn sản phẩm nào ẩn
+                if (hiddenItems.length <= itemsToShow) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            });
+
+            // Ẩn nút "Load More" ngay từ đầu nếu không có sản phẩm ẩn
+            if (productItems.length === 0) {
+                loadMoreBtn.style.display = 'none';
+            }
+        });
+    </script>
+
 }
-
-    
-</script>
-
       <script src="~/js/product.js"></script>
       <script src="~/js/alertLogin.js"></script>
     

@@ -5,7 +5,7 @@ namespace COSMESTIC.Models
     
         public class TopProductViewModel
         {
-            public string ProductName { get; set; }
+            public string Name { get; set; }
             public int TotalSold { get; set; }
         }
     }

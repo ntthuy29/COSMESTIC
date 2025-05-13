@@ -47,8 +47,12 @@
                     </div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <input type="hidden" name="productId" value="@Model.productID" />
+
                         <input type="hidden" name="quantity" id="productQuantityAddToCart" value="1" />
                         <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+
+                       
+
                     </form>
                 }
                 else
@@ -66,9 +70,7 @@
             <div id="deleteModal" class="modal" style="display: none;">
 
                 <div class="modal-content">
-                    <span class="material-symbols-outlined" style="color: black; margin-right: auto;" id="close" onclick="setCursor()">
-                        close
-                    </span>
+                    <span type="button" class="btn-close" disabled aria-label="Close" style=" margin-right: auto;" id="close" onclick="setCursor()"></span>
                     <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
                     <div class="d-flex justify-content-sm-between">
                         <form action="/Login/Login" method="get">
@@ -190,6 +192,10 @@
                 });
             }
         });
+
+        function alert(){
+
+        }
 
     </script>
 }

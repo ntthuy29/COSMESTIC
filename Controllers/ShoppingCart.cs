@@ -52,7 +52,7 @@ namespace COSMESTIC.Controllers
             }
 
             var product = _context.Products.Find(productId);
-
+            
             if (product != null)
             {
                 var cart = _context.ShoppingCart
@@ -92,11 +92,15 @@ namespace COSMESTIC.Controllers
 
                 cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
                 cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
+                ViewBag.TotalQuantity = cart.totalQuantity;
+                HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                ViewBag.TotalPrice = cart.totalPrice;
 
                 _context.SaveChanges();
             }
 
             return RedirectToAction("Product", "Product");
+
         }
 
         [HttpPost]

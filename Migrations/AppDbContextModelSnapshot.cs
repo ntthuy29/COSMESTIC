@@ -188,7 +188,7 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
-                    b.Property<int>("DeliveryID")
+                    b.Property<int?>("DeliveryID")
                         .HasColumnType("int");
 
                     b.Property<int?>("discountID")
@@ -208,6 +208,9 @@ namespace COSMESTIC.Migrations
 
                     b.Property<decimal>("totalAmount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("totalItems")
+                        .HasColumnType("int");
 
                     b.Property<int>("userID")
                         .HasColumnType("int");
@@ -365,8 +368,13 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
 
+
                     b.Property<decimal>("TotalSpent")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("createdDate")
+                        .HasColumnType("datetime2");
+
 
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -481,9 +489,7 @@ namespace COSMESTIC.Migrations
                 {
                     b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
                         .WithMany()
-                        .HasForeignKey("DeliveryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DeliveryID");
 
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")

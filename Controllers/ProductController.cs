@@ -133,7 +133,7 @@ namespace COSMESTIC.Controllers
         public async Task<IActionResult> GetByCatalog(int catalogId)
         {
             Console.WriteLine(catalogId);  // Kiểm tra catalogId
-            var products = await _context.Products.Include(p=>p.catalog)
+            var products = await _context.Products.Include(p => p.catalog)
                 .Where(p => p.catalogID == catalogId)
                 .ToListAsync();
 
@@ -144,5 +144,20 @@ namespace COSMESTIC.Controllers
 
             return PartialView("Catalog", products);
         }
+
+            [HttpGet]
+            public async  Task<IActionResult> filterProductFollowPrice(decimal? min, decimal? max, int catalogID)
+        {
+            min ??= 0;
+            max ??= decimal.MaxValue;
+            var products = await _context.Products.Where(p => p.price >= min && p.price <= max && p.catalogID==catalogID)
+                .ToListAsync();
+            return PartialView("Catalog", products);
+
+        }
+       
+
+
+
     }
 }

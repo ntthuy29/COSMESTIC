@@ -21,7 +21,6 @@ namespace COSMESTIC.Controllers
             _logger = logger;
         }
 
-
         [HttpGet]//đây là controller để hiển thị ra danh sách sản phẩm
         public async Task<IActionResult> Index(string search, string duocsudung, string value)
         {
@@ -63,8 +62,6 @@ namespace COSMESTIC.Controllers
                     isActive = d.isActive // Giả sử isActive đã được ánh xạ từ kiểu bit sang string
                 })
                 .ToListAsync();
-
-          
             ViewData["Search"] = search;
             ViewData["StatusFilter"] = duocsudung; // Sử dụng duocsudung làm statusFilter
             ViewData["ValueFilter"] = value;
@@ -195,7 +192,7 @@ namespace COSMESTIC.Controllers
             {
                 dbContext.Discount.Remove(art);
                 await dbContext.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Bài viết đã được xóa thành công";
+                TempData["SuccessMessage"] = "Mã giảm giá đã được xóa thành công";
                 return RedirectToAction("Index");
             }
             return RedirectToAction("Index");
@@ -275,7 +272,9 @@ namespace COSMESTIC.Controllers
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.ActionType = actionType; // Lưu action type để sử dụng trong view
 
+
             return View(model);
         }
+
     }
 }

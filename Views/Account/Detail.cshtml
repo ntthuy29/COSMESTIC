@@ -3,25 +3,159 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<a href="@Url.Action("ChangePassword", "Account")" class="btn btn-info">Đổi mật khẩu</a>
+<div style="margin-top: 100px;">
+    <div class="d-flex justify-content-center gap-5" style="margin-top: 120px;">
+        <!-- Cột bên trái -->
+        <div class="d-flex flex-column gap-4" style="min-width: 250px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined" style="font-size: 40px; color: #dc3545;">
+                    account_circle
+                </span>
+                <div>
+                    <div style="font-weight: bold; font-size: 18px;">Chào @Model.fullName</div>
+                    <div>
+                        <a href="@Url.Action("Edit", "Account")" style="color: forestgreen; font-size: 13px;">Chỉnh sửa thông tin</a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <div class="btn-group-vertical w-100" role="group" aria-label="Vertical radio toggle button group">
+                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio1" autocomplete="off" checked onclick="showTab('Infor')">
+                        <label class="btn btn-outline-success" for="vbtn-radio1">Thông tin cá nhân</label>
+                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio2" autocomplete="off" onclick="showTab('order')">
+                        <label class="btn btn-outline-success" for="vbtn-radio2">Quản lý đơn hàng</label>
+                        <input type="radio" class="btn-check" name="vbtn-radio" id="vbtn-radio3" autocomplete="off" onclick="showTab('changePass')">
+                        <label class="btn btn-outline-success" for="vbtn-radio3">Đổi mật khẩu</label>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="container my-5">
-    <h3 class="text-center text-primary fw-bold mb-4">Thông tin tài khoản cá nhân</h3>
+        <!-- Cột bên phải -->
+        <div class="flex-grow-1 p-4" style="min-height: 300px;">
+            <div class="w-auto">
+                <!-- Tab Thông tin cá nhân -->
+                <div style="display: block" id="info">
+                    <div class="d-flex justify-content-center tab-content" style="padding: 20px;">
+                        <div class="card shadow-sm" style="width: 400px; border-radius: 12px;">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4 fw-bold text-danger">Thông tin cá nhân</h5>
+                                <form class="d-flex flex-column gap-3">
+                                    <div>
+                                        <label for="name" class="form-label">Họ và tên</label>
+                                        <input type="text" id="name" class="form-control" value="@Model.fullName" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="mail" class="form-label">Email</label>
+                                        <input type="email" id="mail" class="form-control" value="@Model.email" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="phone" class="form-label">Số điện thoại</label>
+                                        <input type="text" id="phone" class="form-control" value="@Model.phoneNumber" readonly>
+                                    </div>
+                                    <div>
+                                        <label for="birth" class="form-label">Ngày sinh</label>
+                                        <input type="text" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" readonly>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        </div>
+                </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3">📌 Thông tin cá nhân</h5>
+                <!-- Tab Quản lý đơn hàng -->
+                <div style="display: none" id="orders">
+                    <div  class="d-flex justify-content-center tab-content" style=" padding: 20px;">
+                        <div class="card shadow-sm" style="width: 400px; border-radius: 12px;">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4 fw-bold text-danger">Quản lý đơn hàng</h5>
+                                <!-- Nội dung quản lý đơn hàng -->
+                                <p>Danh sách đơn hàng của bạn sẽ hiển thị ở đây.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-            <p><strong>Họ và tên:</strong> @Model.fullName</p>
-            <p><strong>Email:</strong> @Model.email</p>
-            <p><strong>Số điện thoại:</strong> @Model.phoneNumber</p>
-            <p><strong>Ngày sinh:</strong> @Model.dateOfBirth.ToString("dd/MM/yyyy")</p>
-            <p><strong>Xếp hạng:</strong> @Model.status</p>
-            <p><strong>Số tiền đã mua:</strong> @Model.TotalSpent</p>
 
-            <div class="d-flex gap-3">
-                <a href="@Url.Action("Edit", "Account")" class="btn btn-warning">Chỉnh sửa thông tin</a>
-                <a href="@Url.Action("ChangePassword", "Account")" class="btn btn-info">Đổi mật khẩu</a>
+                <!-- Tab Đổi mật khẩu -->
+                <div style="display: none; " id="password">
+                    <div class="d-flex justify-content-center tab-content" style="padding: 20px;">
+                        <div class="card shadow-sm" style="width: 400px; border-radius: 12px; ">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4 fw-bold text-danger">Đổi mật khẩu</h5>
+                                <!-- Nội dung đổi mật khẩu -->
+                                @if (ViewData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success text-center">
+                                        @ViewData["SuccessMessage"]
+                                    </div>
+                                }
+                                <form asp-action="ResetPassword" asp-controller="Account" method="post">
+                                    <div>
+                                        <label for="oldPassword" class="form-label">Mật khẩu hiện tại</label>
+                                        <input type="password" id="oldPassword" class="form-control" name="oldPassword">
+                                        @if (ViewData.ModelState["oldPassword"]?.Errors.Count > 0)
+                                        {
+                                            <div class="text-danger">@ViewData.ModelState["oldPassword"]?.Errors[0].ErrorMessage</div>
+                                        }
+                                    </div>
+                                    <div>
+                                        <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                                        <input type="password" id="newPassword" class="form-control" name="newPassword">
+                                    </div>
+                                    <div>
+                                        <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                                        <input type="password" id="confirmPassword" class="form-control" name="confirmPassword">
+                                        @if (ViewData.ModelState["confirmPassword"]?.Errors.Count > 0)
+                                        {
+                                            <div class="text-danger">@ViewData.ModelState["confirmPassword"]?.Errors[0].ErrorMessage</div>
+                                        }
+                                    </div>
+                                    <button type="submit" class="btn btn-danger mt-3">Lưu thay đổi</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+               </div>
+
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function showTab(str) {
+        var tabInfor = document.getElementById('info');
+        var tabOrder = document.getElementById('orders');
+        var tabPass = document.getElementById('password');
+        console.log(tabInfor);
+        console.log(tabOrder);
+        console.log(tabPass);
+        // Ẩn tất cả các tab
+       if(str === "Infor"){
+           console.log("info")
+           tabInfor.style.display='block';
+           tabOrder.style.display='none';
+           tabPass.style.display='none';
+
+       }
+        if(str == "order"){
+            console.log("orders")
+            tabInfor.style.display='none';
+           tabOrder.style.display='block';
+           tabPass.style.display='none';
+        }
+        if(str == "changePass"){
+            console.log("chane")
+            tabInfor.style.display='none';
+           tabOrder.style.display='none';
+           tabPass.style.display='block';
+        }
+
+    }
+        // Hiển thị tab được chọn
+        
+</script>

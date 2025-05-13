@@ -1,4 +1,4 @@
-﻿@* 
+﻿﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,99 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .wrapper {
-            display: flex;
-            flex: 1;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #0f5a3b;
-            min-height: 100vh;
-            color: white;
-        }
-
-            .sidebar a {
-                color: white;
-                text-decoration: none;
-                padding: 10px 20px;
-                display: block;
-            }
-
-                .sidebar a:hover {
-                    background-color: #166b5dcb;
-                }
-
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-    </style>
-</head>
-<body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <span class="navbar-brand">Admin Dashboard</span>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Horizontal nav items if needed -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Admin/Home"><i class="fas fa-home"></i> Trang chủ</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item text-white me-3 d-flex align-items-center">
-                        <i class="fas fa-user me-2"></i> @Context.Session.GetString("Username")
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light btn-sm" href="/Login/Logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Wrapper: Sidebar + Content -->
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <a href="/Admin/Home"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
-            <a href="/Admin/Product"><i class="fas fa-users me-2"></i>Quản lý Sản phẩm</a>
-            <a href="/Admin/Discount"><i class="fas fa-users me-2"></i>Quản lý Mã giảm giá</a>
-        </div>
-
-        <!-- Main Content -->
-        <div class="content">
-            @RenderBody()
-        </div>
-    </div>
-    @RenderSection("Scripts", required: false)
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <!-- SweetAlert2 CSS và JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 
- *@
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewBag.Title - Admin Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
     <style>
         :root {
             --primary-color: #2e7d32; /* Main green color */
@@ -287,48 +198,42 @@
 
         /* Responsive Adjustments */
         @@media (max-width: 768px) {
-            .sidebar
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
 
-        {
-            width: 70px;
-            overflow: hidden;
-        }
+                .sidebar a span {
+                    display: none;
+                }
 
-        .sidebar a span {
-            display: none;
-        }
+                .sidebar a i {
+                    margin-right: 0;
+                    font-size: 1.2rem;
+                }
 
-        .sidebar a i {
-            margin-right: 0;
-            font-size: 1.2rem;
-        }
+                .sidebar a {
+                    justify-content: center;
+                    padding: 15px 0;
+                    margin: 4px 0;
+                }
 
-        .sidebar a {
-            justify-content: center;
-            padding: 15px 0;
-            margin: 4px 0;
-        }
-
-        .content {
-            padding: 20px 15px;
-        }
-
+            .content {
+                padding: 20px 15px;
+            }
         }
 
         /* Animation for sidebar items */
         @@keyframes fadeIn {
-            from
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
 
-        {
-            opacity: 0;
-            transform: translateX(-10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .sidebar a {
@@ -379,10 +284,12 @@
                         </div>
                     </li>
                     <li class="nav-item ms-2">
-                        <a class="btn btn-outline-danger btn-sm" href="/Login/Logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>
-                            <span class="d-none d-md-inline">Đăng xuất</span>
-                        </a>
+                       <form asp-action="logout" asp-controller="Account">
+                            <button class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-sign-out-alt me-1"></i>
+                                <span class="d-none d-md-inline">Đăng xuất</span>
+                            </button>
+                       </form>
                     </li>
                 </ul>
             </div>
@@ -411,6 +318,24 @@
                 <i class="fas fa-tag"></i>
                 <span>Quản lý Mã giảm giá</span>
             </a>
+            <a href="/Admin/Order">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Quản lý Đơn hàng</span>
+            </a>
+            <a href="/Admin/User">
+                <i class="fas fa-users"></i>
+                <span>Quản lý Người dùng</span>
+            </a>
+            <a href="/Admin/Catalog">
+                <i class="fas fa-box" "></i>
+                <span>Danh mục sản phẩm</span>
+            </a>
+
+            <a href="/Admin/Revenue">
+                <i class="fas fa-chart-line"></i>
+                <span>Thống kê</span>
+            </a>
+
         </div>
 
         <!-- Main Content -->
@@ -421,5 +346,15 @@
     @RenderSection("Scripts", required: false)
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Đảm bảo dropdown hiển thị giá trị đúng sau khi trang tải
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.querySelector('select[name="status"]');
+            if (statusSelect) {
+                statusSelect.value = '@ViewBag.SelectedStatus'; // Đặt giá trị dựa trên ViewBag.SelectedStatus
+            }
+        });
+    </script>
 </body>
 </html>

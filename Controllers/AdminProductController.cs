@@ -1,5 +1,6 @@
 ﻿using COSMESTIC.Models.Data;
 using COSMESTIC.Models.Product;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ namespace COSMESTIC.Controllers
             this.dbContext = dbContext;
             _environment = environment;
         }
-
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Index(string search, string danhmuc)
         {
             var viewModel = new ProductViewModel
@@ -69,6 +70,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create()
         {
 
@@ -86,7 +88,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-      
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(CreateProduct model)
         {
             if (!ModelState.IsValid)
@@ -143,7 +145,7 @@ namespace COSMESTIC.Controllers
 
             return RedirectToAction("Index"); // Điều chỉnh theo trang bạn muốn chuyển hướng
         }
-
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var art = await dbContext.Products.FindAsync(id);
@@ -155,6 +157,106 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Index");
             }
             return RedirectToAction("Index");
+        }
+        // còn thiếu 2 controller edit, detail
+        [HttpGet]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await dbContext.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var model = new CreateProduct
+            {
+                DanhMucDuocChon = product.catalogID, // Giả định có CategoryId trong Product
+                productName = product.productName,
+                productDescription = product.productDescription,
+                price = product.price,
+                // imageFile không cần gán vì không gửi file trong GET
+                DanhMucs = await dbContext.Catalogs
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.catalogID.ToString(),
+                        Text = c.catalogName
+                    }).ToListAsync()
+            };
+            // Truyền ImagePath qua ViewBag
+            ViewBag.ImagePath = product.imagePath;
+
+            return View(model);
+        }
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int id, CreateProduct model)
+        {
+           
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var product = await dbContext.Products.FindAsync(id);
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+
+                    product.catalogID = model.DanhMucDuocChon;
+                    product.productName = model.productName;
+                    product.productDescription = model.productDescription;
+                    product.price = model.price;
+
+                    // Xử lý hình ảnh nếu có
+                    if (model.imageFile != null && model.imageFile.Length > 0)
+                    {
+                        var fileName = Path.GetFileName(model.imageFile.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Img", fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.imageFile.CopyToAsync(stream);
+                        }
+                        product.imagePath = "Img/" + fileName;
+                    }
+
+                    dbContext.Update(product);
+                    await dbContext.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProductExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            // Nếu ModelState không hợp lệ, tải lại danh sách danh mục
+            model.DanhMucs = await dbContext.Catalogs
+                .Select(c => new SelectListItem
+                {
+                    Value = c.catalogID.ToString(),
+                    Text = c.catalogName
+                }).ToListAsync();
+
+            return View(model);
+        }
+        [Authorize(Roles = "admin")]
+        private bool ProductExists(int id)
+        {
+            return dbContext.Products.Any(e => e.productID == id);
         }
     }
 }
