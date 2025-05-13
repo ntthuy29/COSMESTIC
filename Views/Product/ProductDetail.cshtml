@@ -40,13 +40,19 @@
                     <div class="">
                         <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")">
                             <input type="hidden" name="productId" value="@Model.productID" />
-                            <input type="hidden" name="quantity" id="productQuantity" value="1" /> <!-- Số lượng (mặc định là 1) -->
+                            <input type="hidden" name="quantity" id="productQuantityBuyNow" value="1" /> <!-- Số lượng cho "Mua ngay" -->
                             <button type="submit" class="btn btn-success me-2">Mua ngay</button>
                         </form>
+
                     </div>
                     <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
                         <input type="hidden" name="productId" value="@Model.productID" />
-                        <button class="btn btn-danger " >Thêm vào giỏ hàng</button>
+
+                        <input type="hidden" name="quantity" id="productQuantityAddToCart" value="1" />
+                        <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+
+                       
+
                     </form>
                 }
                 else
@@ -102,31 +108,38 @@
 
         @if (role == "Customer")
         {
-            @if (!ViewBag.HasPurchased)
+            @if (ViewBag.HasPurchased == null || !(bool)ViewBag.HasPurchased)
             {
                 <p class="text-danger">Bạn phải mua sản phẩm trước khi đánh giá.</p>
             }
             else
             {
-                <h5>Đánh giá sản phẩm</h5>
-                <form method="post" action="@Url.Action("AddReview", "Product")">
-                    <input type="hidden" name="productID" value="@Model.productID" />
-                    <div class="mb-3">
-                        <label for="rating" class="form-label">Đánh giá</label>
-                        <select class="form-control" name="rating" required>
-                            <option value="1">1 Sao</option>
-                            <option value="2">2 Sao</option>
-                            <option value="3">3 Sao</option>
-                            <option value="4">4 Sao</option>
-                            <option value="5">5 Sao</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="comment" class="form-label">Nhận xét</label>
-                        <textarea class="form-control" name="comment" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
-                </form>
+                if (!ViewBag.HasReviewed)
+                {
+                    <p class="text-warning">Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi. Bạn có thể đánh giá lại ở lần mua sau.</p>
+                }
+                else
+                {
+                    <h5>Đánh giá sản phẩm</h5>
+                    <form method="post" action="@Url.Action("AddReview", "Product")">
+                        <input type="hidden" name="productID" value="@Model.productID" />
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Đánh giá</label>
+                            <select class="form-control" name="rating" required>
+                                <option value="1">1 Sao</option>
+                                <option value="2">2 Sao</option>
+                                <option value="3">3 Sao</option>
+                                <option value="4">4 Sao</option>
+                                <option value="5">5 Sao</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Nhận xét</label>
+                            <textarea class="form-control" name="comment" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                    </form>
+                }
             }
         }
     </div>
@@ -137,34 +150,34 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener('DOMContentLoaded', function () {
             const quantityDisplay = document.getElementById('quantity-display');
-            const productQuantityBuyNowInput = document.getElementById('productQuantity');
-            const productQuantityAddToCartInput = document.getElementById('productQuantityAddToCart'); // Input cho form "Thêm vào giỏ hàng"
+            const productQuantityBuyNowInput = document.getElementById('productQuantityBuyNow'); // Đảm bảo đúng form
+            const productQuantityAddToCartInput = document.getElementById('productQuantityAddToCart'); // Đảm bảo đúng form
             const increaseBtn = document.getElementById('increase-btn');
             const decreaseBtn = document.getElementById('decrease-btn');
 
             // Hàm cập nhật tất cả các input số lượng
             function updateQuantityInputs(newQuantity) {
                 if (productQuantityBuyNowInput) {
-                    productQuantityBuyNowInput.value = newQuantity;
+                    productQuantityBuyNowInput.value = newQuantity; // Cập nhật giá trị cho form "Mua ngay"
                 }
-                if (productQuantityAddToCartInput) { // Chỉ cập nhật nếu tồn tại (khi user là Customer)
+                if (productQuantityAddToCartInput) { // Cập nhật cho form "Thêm vào giỏ hàng"
                     productQuantityAddToCartInput.value = newQuantity;
                 }
             }
 
-            // Gán giá trị khởi tạo cho input ẩn (dù đã có value="1" trong HTML, nhưng đây là cách đảm bảo đồng bộ)
+            // Gán giá trị khởi tạo cho input ẩn
             let initialQuantity = parseInt(quantityDisplay.innerText) || 1;
-            quantityDisplay.innerText = initialQuantity; // Đảm bảo hiển thị là số
-            updateQuantityInputs(initialQuantity);
+            quantityDisplay.innerText = initialQuantity; // Hiển thị số lượng
+            updateQuantityInputs(initialQuantity); // Cập nhật giá trị trong form
 
             if (increaseBtn) {
                 increaseBtn.addEventListener('click', function () {
                     let currentQuantity = parseInt(quantityDisplay.innerText);
                     currentQuantity++;
                     quantityDisplay.innerText = currentQuantity;
-                    updateQuantityInputs(currentQuantity);
+                    updateQuantityInputs(currentQuantity); // Cập nhật giá trị trong form
                 });
             }
 
@@ -174,14 +187,16 @@
                     if (currentQuantity > 1) {  // Đảm bảo số lượng không nhỏ hơn 1
                         currentQuantity--;
                         quantityDisplay.innerText = currentQuantity;
-                        updateQuantityInputs(currentQuantity);
+                        updateQuantityInputs(currentQuantity); // Cập nhật giá trị trong form
                     }
                 });
             }
         });
+
         function alert(){
 
         }
+
     </script>
 }
 @section Styles {

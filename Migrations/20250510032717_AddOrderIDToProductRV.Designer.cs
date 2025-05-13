@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250510032717_AddOrderIDToProductRV")]
+    partial class AddOrderIDToProductRV
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,7 +191,7 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("orderID"), 60000L);
 
-                    b.Property<int?>("DeliveryID")
+                    b.Property<int>("DeliveryID")
                         .HasColumnType("int");
 
                     b.Property<int?>("discountID")
@@ -208,9 +211,6 @@ namespace COSMESTIC.Migrations
 
                     b.Property<decimal>("totalAmount")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("totalItems")
-                        .HasColumnType("int");
 
                     b.Property<int>("userID")
                         .HasColumnType("int");
@@ -368,14 +368,6 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
 
-
-                    b.Property<decimal>("TotalSpent")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("createdDate")
-                        .HasColumnType("datetime2");
-
-
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
 
@@ -489,7 +481,9 @@ namespace COSMESTIC.Migrations
                 {
                     b.HasOne("COSMESTIC.Models.Data.DeliveryIFMT", "Delivery")
                         .WithMany()
-                        .HasForeignKey("DeliveryID");
+                        .HasForeignKey("DeliveryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("COSMESTIC.Models.Data.Discount", null)
                         .WithMany("Orders")
@@ -511,7 +505,7 @@ namespace COSMESTIC.Migrations
                     b.HasOne("COSMESTIC.Models.Data.Orders", "order")
                         .WithMany("ProductReView")
                         .HasForeignKey("orderID")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("COSMESTIC.Models.Data.Products", "product")
