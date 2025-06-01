@@ -36,16 +36,17 @@ namespace COSMESTIC.Controllers
             return View(order);
 
         }
-        public async Task<IActionResult> ShippingInformation()
+        public async Task<IActionResult> ShippingInformation(int? savedAddress = null)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             var deliveryAddesses = await _context.DeliveryIFMT
                                                  .Where(d => d.userID == userId).ToListAsync();
+            ViewBag.savedAddress = savedAddress;
             return View(deliveryAddesses);
         }
         [HttpGet]
         [HttpPost]
-        public IActionResult ConfirmOrder(string fullName, string address, string phoneNumber, string discountCode)
+        public IActionResult ConfirmOrder(string fullName, string address, string phoneNumber, string discountCode, int? savedAddress)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -89,6 +90,7 @@ namespace COSMESTIC.Controllers
 
             decimal finalTotal = totalAmount - TotaldiscountAmount;
 
+            ViewBag.savedAddress = savedAddress;
             ViewBag.Cart = cart;
             ViewBag.FullName = fullName;
             ViewBag.Address = address;
@@ -194,6 +196,11 @@ namespace COSMESTIC.Controllers
             newOrder.totalAmount -= TotaldiscountAmount;
             _context.SaveChanges();
 
+
+            _context.CartItem.RemoveRange(cart.cartItems);
+            _context.SaveChanges();
+
+
             if (paymentMethod == "momo" || paymentMethod == "bankAccount")
             {
                 var invoice = new Invoice
@@ -204,9 +211,6 @@ namespace COSMESTIC.Controllers
                 _context.SaveChanges();
                 return RedirectToAction("InvoiceDetails", new { orderId = newOrder.orderID });
             }
-
-            _context.CartItem.RemoveRange(cart.cartItems);
-            _context.SaveChanges();
 
             return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
         }
@@ -318,7 +322,7 @@ namespace COSMESTIC.Controllers
         }
         [HttpGet]
         [HttpPost]
-        public async Task<IActionResult> ShippingInformationBuyNow(int productId, int quantity, string discountCode = null, string address = null, string fullName = null, string phoneNumber = null)
+        public async Task<IActionResult> ShippingInformationBuyNow(int productId, int quantity, string discountCode = null, string address = null, string fullName = null, string phoneNumber = null, int? savedAddress = null)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
 
@@ -369,7 +373,7 @@ namespace COSMESTIC.Controllers
                 }
             }
 
-
+            ViewBag.savedAddress = savedAddress;
             ViewBag.Product = product;
             ViewBag.Quantity = quantity;
             ViewBag.TotalAmount = totalAmount;
@@ -459,17 +463,6 @@ namespace COSMESTIC.Controllers
             _context.Orders.Add(newOrder);
             _context.SaveChanges();
 
-            if (paymentMethod == "momo" || paymentMethod == "bankAccount")
-            {
-                var invoice = new Invoice
-                {
-                    orderID = newOrder.orderID,
-                };
-                _context.Invoice.Add(invoice);
-                _context.SaveChanges();
-                return RedirectToAction("InvoiceDetails", new { orderId = newOrder.orderID });
-            }
-
             // Tạo chi tiết đơn hàng
             var orderDetail = new orderDetail
             {
@@ -489,7 +482,16 @@ namespace COSMESTIC.Controllers
                     product.quantity = 0;
                 }
             }
-
+            if (paymentMethod == "momo" || paymentMethod == "bankAccount")
+            {
+                var invoice = new Invoice
+                {
+                    orderID = newOrder.orderID,
+                };
+                _context.Invoice.Add(invoice);
+                _context.SaveChanges();
+                return RedirectToAction("InvoiceDetails", new { orderId = newOrder.orderID });
+            }
             _context.SaveChanges();
             return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
         }
