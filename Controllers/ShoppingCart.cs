@@ -138,12 +138,22 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public IActionResult RemoveFromCart(int cartItemID)
         {
+            var userID = HttpContext.Session.GetInt32("UserID");
             var cartItem = _context.CartItem.Find(cartItemID);
             if (cartItem != null)
             {
                 _context.CartItem.Remove(cartItem);
                 _context.SaveChanges();
             }
+            var cart = _context.ShoppingCart.Include(c => c.cartItems)
+                                                .ThenInclude(ci => ci.products)
+                                                .FirstOrDefault(c => c.userID == userID);
+            if (cart != null)
+            {
+                cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
+                cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
+            }
+            _context.SaveChanges();
             return RedirectToAction("Index", "ShoppingCart");
         }
     }

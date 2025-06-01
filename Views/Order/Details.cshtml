@@ -6,7 +6,7 @@
 }
 
 <div class="container my-5">
-    <h3 class="text-success text-center fw-bold mb-4">🧾 Chi tiết đơn hàng #@Model.orderID</h3>
+    <h3 class="text-success text-center fw-bold mb-4">🧾 Chi tiết đơn hàng</h3>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
@@ -24,10 +24,19 @@
                         ;
                         break;
                     case "Đang giao":
+                        <span class="badge bg-primary">Đang giao hàng</span>
+                        ;
+                        break;
+                    case "Đã hoàn thành":
                         <span class="badge bg-info text-dark">Đã giao</span>
+                        <p><strong>Ngày giao:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
                         break;
                     case "Bị từ chối":
+                        <span class="badge bg-danger">Bị từ chối</span>
+                        ;
+                        break;
+                    case "Đã hủy":
                         <span class="badge bg-danger">Đã hủy</span>
                         <p><strong>Ngày hủy:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
@@ -54,6 +63,16 @@
                     <input type="hidden" name="id" id="cancelOrderId" />
                 </form>
 
+            }
+            @if (Model.status == "Đang giao")
+            {
+                <a href="javascript:void(0);" onclick="confirmDelivered(@Model.orderID)" class="btn btn-success btn-sm rounded-circle" title="Đã giao">
+                    <i class="fas fa-check"></i>
+                    <span>Đã giao hàng</span>
+                </a>
+                <form id="deliveredForm" method="post" style="display:none;">
+                    <input type="hidden" name="id" id="deliveredOrderId" />
+                </form>
             }
         </div>
     </div>
@@ -112,6 +131,24 @@
                     document.getElementById('cancelOrderId').value = orderId;
                     document.getElementById('cancelForm').action = '/Order/CancelOrder'; // đúng controller/action
                     document.getElementById('cancelForm').submit();
+                }
+            });
+        }
+            function confirmDelivered(orderId) {
+            Swal.fire({
+                title: 'Xác nhận đã giao hàng',
+                text: "Bạn có chắc chắn đơn hàng này đã được giao thành công?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Đã giao',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deliveredOrderId').value = orderId;
+                    document.getElementById('deliveredForm').action = '/Order/MarkAsDelivered'; // Controller/Action xử lý
+                    document.getElementById('deliveredForm').submit();
                 }
             });
         }

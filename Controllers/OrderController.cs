@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.NetworkInformation;
 using System.Net.WebSockets;
 using System.Linq;
+using System.Web;
 namespace COSMESTIC.Controllers
 {
     public class OrderController : Controller
@@ -15,19 +16,25 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Index()
+        public IActionResult Index(int id)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
             {
                 return RedirectToAction("Login", "Login");
             }
-            var orders = _context.Orders
-                .Include(o => o.orderDetails)
-                .ThenInclude(oi => oi.products)
-                .Where(o => o.userID == userId)
-                .ToList();
-            return View(orders);
+            var order = _context.Orders
+                                 .Include(o => o.orderDetails)
+                                 .ThenInclude(od => od.products)
+                                 .Include(o => o.Delivery)
+                                 .FirstOrDefault(o => o.orderID == id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+
         }
         public async Task<IActionResult> ShippingInformation()
         {
@@ -69,13 +76,13 @@ namespace COSMESTIC.Controllers
                     else
                     {
                         TempData["ErrorMessage"] = "Đơn hàng của bạn chưa đủ điều kiện để áp dụng mã giảm giá này.";
-                        discount = null; // Xóa mã giảm giá nếu không hợp lệ
+                        discount = null; 
                     }
                 }
                 else
                 {
                     TempData["ErrorMessage"] = "Mã giảm giá không hợp lệ!";
-                    discount = null; // Xóa mã giảm giá nếu không hợp lệ
+                    discount = null;
                 }
             }
             decimal totalAmount = cart.totalPrice;
@@ -89,12 +96,12 @@ namespace COSMESTIC.Controllers
             ViewBag.finalTotal = finalTotal;
             ViewBag.DiscountCode = discountCode;
             ViewBag.TotalAmount = totalAmount;
-            ViewBag.DiscountAmount = TotaldiscountAmount;
+            ViewBag.DiscountAmount = TotaldiscountAmount; //Hiển thị qua ViewBag
 
             return View();
         }
         [HttpPost]
-        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress)
+        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress, string paymentMethod)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -134,8 +141,8 @@ namespace COSMESTIC.Controllers
             {
                 var delivery = new DeliveryIFMT
                 {
-                    deliveryName = fullName,
-                    deliveryAddress = address,
+                    deliveryName = HttpUtility.HtmlDecode(fullName),
+                    deliveryAddress = HttpUtility.HtmlDecode(address),
                     deliveryPhone = phoneNumber,
                     userID = userId.Value
                 };
@@ -150,6 +157,7 @@ namespace COSMESTIC.Controllers
 
                 status = "Chờ xử lý",  // Trạng thái đang chờ duyệt
                 totalAmount = 0,
+                payMethod = paymentMethod,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
                                                     .OrderBy(d => d.deliveryID)
@@ -158,7 +166,7 @@ namespace COSMESTIC.Controllers
 
             };
             _context.Orders.Add(newOrder);
-            _context.SaveChanges(); 
+            _context.SaveChanges();
 
             foreach (var item in cart.cartItems)
             {
@@ -174,10 +182,10 @@ namespace COSMESTIC.Controllers
                 _context.orderDetails.Add(orderDetail);
 
                 var product = _context.Products.Find(item.productID);
-                if(product != null)
+                if (product != null)
                 {
                     product.quantity -= item.quantity;
-                    if(product.quantity < 0)
+                    if (product.quantity < 0)
                     {
                         product.quantity = 0;
                     }
@@ -185,6 +193,17 @@ namespace COSMESTIC.Controllers
             }
             newOrder.totalAmount -= TotaldiscountAmount;
             _context.SaveChanges();
+
+            if (paymentMethod == "momo" || paymentMethod == "bankAccount")
+            {
+                var invoice = new Invoice
+                {
+                    orderID = newOrder.orderID,
+                };
+                _context.Invoice.Add(invoice);
+                _context.SaveChanges();
+                return RedirectToAction("InvoiceDetails", new { orderId = newOrder.orderID });
+            }
 
             _context.CartItem.RemoveRange(cart.cartItems);
             _context.SaveChanges();
@@ -203,6 +222,20 @@ namespace COSMESTIC.Controllers
                 return NotFound();
             }
             return View(order);
+        }
+        public IActionResult InvoiceDetails(int orderId)
+        {
+            var invoice = _context.Invoice
+                .Include(o => o.orders)
+                    .ThenInclude(od => od.orderDetails)
+                    .ThenInclude(od => od.products)
+                .Include(o => o.orders.Delivery)
+                .FirstOrDefault(o => o.orderID == orderId);
+            if (invoice == null)
+            {
+                return NotFound();
+            }
+            return View(invoice);
         }
         public IActionResult MyOrders()
         {
@@ -252,7 +285,7 @@ namespace COSMESTIC.Controllers
             _context.SaveChanges();
             if (order.status == "Chờ xử lý")
             {
-                order.status = "Bị từ chối";
+                order.status = "Đã hủy";
                 _context.SaveChanges();
                 //Hoàn sản phẩm vào kho
                 foreach (var item in order.orderDetails)
@@ -266,6 +299,22 @@ namespace COSMESTIC.Controllers
                 _context.SaveChanges();
             }
             return RedirectToAction("MyOrders");
+        }
+        [HttpPost]
+        public IActionResult MarkAsDelivered(int id)
+        {
+            var order = _context.Orders.Find(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            if(order.status == "Đang giao")
+            {
+                order.status = "Đã hoàn thành";
+                order.endDate = DateTime.Now;
+                _context.SaveChanges();
+            }
+            return RedirectToAction("MyOrders", new {id = id});
         }
         [HttpGet]
         [HttpPost]
@@ -327,14 +376,13 @@ namespace COSMESTIC.Controllers
             ViewBag.DiscountAmount = totalDiscountAmount;
             ViewBag.FinalTotal = totalAmount - totalDiscountAmount;
             ViewBag.DiscountCode = discountCode;
-            ViewBag.Address = address;
-            ViewBag.FullName = fullName;
-            ViewBag.PhoneNumber = phoneNumber;
+
+            //ViewBag là 1 đối tượng động dùng để truyền dữ liệu từ controller sang View 1 cách động
 
             return View(deliveryAddresses);
         }
         [HttpPost]
-        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, int? savedAddress)
+        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, int? savedAddress, string paymentMethod)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -383,8 +431,8 @@ namespace COSMESTIC.Controllers
             {
                 var delivery = new DeliveryIFMT
                 {
-                    deliveryName = fullName,
-                    deliveryAddress = address,
+                    deliveryName = HttpUtility.HtmlDecode(fullName),
+                    deliveryAddress = HttpUtility.HtmlDecode(address),
                     deliveryPhone = phoneNumber,
                     userID = userId.Value
                 };
@@ -400,6 +448,7 @@ namespace COSMESTIC.Controllers
 
                 status = "Chờ xử lý",
                 totalAmount = totalAmount - totalDiscountAmount, // Áp dụng giảm giá ngay tại đây
+                payMethod = paymentMethod,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
                                                     .OrderBy(d => d.deliveryID)
@@ -409,6 +458,17 @@ namespace COSMESTIC.Controllers
             };
             _context.Orders.Add(newOrder);
             _context.SaveChanges();
+
+            if (paymentMethod == "momo" || paymentMethod == "bankAccount")
+            {
+                var invoice = new Invoice
+                {
+                    orderID = newOrder.orderID,
+                };
+                _context.Invoice.Add(invoice);
+                _context.SaveChanges();
+                return RedirectToAction("InvoiceDetails", new { orderId = newOrder.orderID });
+            }
 
             // Tạo chi tiết đơn hàng
             var orderDetail = new orderDetail
@@ -433,18 +493,8 @@ namespace COSMESTIC.Controllers
             _context.SaveChanges();
             return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
         }
-
-      
-        
-        
-        
-        
-        
         
         //dưới đây là code của admin
-
-
-
         [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
@@ -475,7 +525,7 @@ namespace COSMESTIC.Controllers
                 query = query.Where(o => o.CustomerName.Contains(searchCustomer));
             }
             var orders = await query.ToListAsync();
-            ViewBag.Statuses = new[] { "Chờ xử lý", "Đang giao", "Bị Từ chối", "Đã hoàn thành" }; // Danh sách trạng thái
+            ViewBag.Statuses = new[] { "Chờ xử lý", "Đang giao", "Bị từ chối", "Đã hoàn thành", "Đã hủy" }; // Danh sách trạng thái
             ViewBag.SelectedStatus = status;
             ViewBag.SearchCustomer = searchCustomer;
 
@@ -556,7 +606,5 @@ namespace COSMESTIC.Controllers
             TempData["SuccessMessage"] = $"{count} đơn hàng đã được duyệt thành công";
             return RedirectToAction("IndexAdminOrder");
         }
-
-
     }
 }

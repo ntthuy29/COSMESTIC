@@ -49,13 +49,27 @@ namespace COSMESTIC.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
             }
+            if (ktrauser == null)
+            {
+                // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
+                TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
+                return RedirectToAction("Login");
+            }
             if (ktrauser.user.role == "Customer")
             {
                 var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
                 // Giả sử bạn có bảng Cart với userID
 
-                // Lưu số lượng sản phẩm vào session
-                HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                if (cart != null)
+                {
+                    HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                }
+                else
+                {
+                    // Handle the case where cart is null, e.g., set count to 0 or skip
+                    HttpContext.Session.SetInt32("CartItemCount", 0);
+                }
+
 
 
             }

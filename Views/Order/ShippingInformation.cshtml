@@ -54,7 +54,6 @@
         var selectedAddressId = selectElement.value;
 
         if (selectedAddressId) {
-            // Lấy thông tin địa chỉ từ ViewBag
             var deliveryAddresses = @Html.Raw(Json.Serialize(Model));
             var selectedAddress = deliveryAddresses.find(address => address.deliveryID == selectedAddressId);
 
@@ -70,41 +69,54 @@
     document.getElementById("orderForm").addEventListener("submit", function(event) {
         let isValid = true;
 
-        // Kiểm tra địa chỉ giao hàng đã lưu
-        if (document.getElementById("savedAddress").value === "") {
-            isValid = false;
-            document.getElementById("savedAddressError").style.display = "block";
-        } else {
-            document.getElementById("savedAddressError").style.display = "none";
-        }
+    const savedAddress = document.getElementById("savedAddress").value.trim();
+    const fullName = document.getElementById("fullName").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const phoneNumber = document.getElementById("phoneNumber").value.trim();
 
-        // Kiểm tra họ và tên
-        if (document.getElementById("fullName").value.trim() === "") {
+    document.getElementById("savedAddressError").style.display = "none";
+    document.getElementById("savedAddress").classList.remove("is-invalid");
+
+    if (savedAddress === "") {
+        if (fullName === "") {
             isValid = false;
             document.getElementById("fullNameError").style.display = "block";
+            document.getElementById("fullName").classList.add("is-invalid");
         } else {
             document.getElementById("fullNameError").style.display = "none";
+            document.getElementById("fullName").classList.remove("is-invalid");
         }
 
-        // Kiểm tra địa chỉ
-        if (document.getElementById("address").value.trim() === "") {
+        if (address === "") {
             isValid = false;
             document.getElementById("addressError").style.display = "block";
+            document.getElementById("address").classList.add("is-invalid");
         } else {
             document.getElementById("addressError").style.display = "none";
+            document.getElementById("address").classList.remove("is-invalid");
         }
 
-        // Kiểm tra số điện thoại
-        if (document.getElementById("phoneNumber").value.trim() === "") {
+        if (phoneNumber === "") {
             isValid = false;
             document.getElementById("phoneNumberError").style.display = "block";
+            document.getElementById("phoneNumber").classList.add("is-invalid");
         } else {
             document.getElementById("phoneNumberError").style.display = "none";
+            document.getElementById("phoneNumber").classList.remove("is-invalid");
         }
+    } else {
+        // Nếu đã chọn địa chỉ đã lưu, thì các trường fullName, address, phoneNumber có thể để trống hoặc điền tự do, bạn có thể bỏ validate ở đây nếu muốn
+        document.getElementById("fullNameError").style.display = "none";
+        document.getElementById("addressError").style.display = "none";
+        document.getElementById("phoneNumberError").style.display = "none";
 
-        // Nếu không hợp lệ, ngừng gửi form
-        if (!isValid) {
-            event.preventDefault();
-        }
+        document.getElementById("fullName").classList.remove("is-invalid");
+        document.getElementById("address").classList.remove("is-invalid");
+        document.getElementById("phoneNumber").classList.remove("is-invalid");
+    }
+
+    if (!isValid) {
+        event.preventDefault();
+    }
     });
 </script>

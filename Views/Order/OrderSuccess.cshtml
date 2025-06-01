@@ -15,6 +15,20 @@
                 <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
                 <p><strong>Số điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
                 <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
+                <p><strong>Phương thức thanh toán: </strong>
+                    @if (Model.payMethod == "cash")
+                    {
+                        <span>Thanh toán bằng tiền mặt</span>
+                    }
+                    else if (Model.payMethod == "momo")
+                    {
+                        <span>Thanh toán qua Momo</span>
+                    }
+                    else
+                    {
+                        <span>Thanh toán bằng tài khoản ngân hàng</span>
+                    }
+                </p>
             </div>
             <!--Chi tiết đơn hàng-->
             <table class="table table-striped table-hover align-middle">
