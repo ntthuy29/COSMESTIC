@@ -3,83 +3,143 @@
 @{
     ViewData["Title"] = "Hóa đơn - Invoice";
     var order = Model.orders;
-    var user = order.Delivery;
+    // var user = order.Delivery; // This variable 'user' wasn't used, order.Delivery is used directly.
 }
 
-<!-- Import Bootstrap CSS và file CSS riêng -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="~/css/custom.css" />
+@* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" /> *@
+<link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
 
-<div class="container my-4">
-    <h2 class="mb-4">Hóa đơn - Invoice</h2>
+<div class="invoice-container container my-5 p-4">
+    <div class="card shadow-sm invoice-card">
+        <div class="card-header bg-light p-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <img src="/Img/logo.png" alt="Cosmetic" style="max-height: 70px;" />
+                    <h1 class="invoice-title d-inline-block align-middle ms-3">INVOICE</h1>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-primary print-btn" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>In hóa đơn
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <div class="mb-3 text-end">
-        <button class="btn btn-primary" onclick="window.print()">🖨️ In hóa đơn</button>
-    </div>
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="section-title">Bill From:</h5>
+                    <address>
+                        <strong>Cosmetic</strong><br>
+                        123 Nguyễn Lương Bằng - Liên Chiểu<br>
+                        Đà Nẵng City<br>
+                        Phone: (+84) 329 773 944<br>
+                        Email: CosmeticCompany@gmail.com
+                    </address>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="section-title">Bill To:</h5>
+                    @if (order.Delivery != null)
+                    {
+                        <address>
+                            <strong>@order.Delivery.deliveryName</strong><br>
+                            @order.Delivery.deliveryAddress<br>
+                            Phone: @order.Delivery.deliveryPhone
+                        </address>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Delivery information not available.</p>
+                    }
+                </div>
+            </div>
 
-    <div class="mb-4">
-        <h4>Thông tin giao hàng</h4>
-        @if (order.Delivery != null)
-        {
-            <p><strong>Người nhận:</strong> @order.Delivery.deliveryName</p>
-            <p><strong>Địa chỉ:</strong> @order.Delivery.deliveryAddress</p>
-            <p><strong>Số điện thoại:</strong> @order.Delivery.deliveryPhone</p>
-        }
-        else
-        {
-            <p>Chưa có thông tin giao hàng.</p>
-        }
-    </div>
+            <div class="row mb-4 gy-3">
+                <div class="col-md-6">
+                    <div class="details-box p-3">
+                        <h5 class="section-title">Order Details</h5>
+                        <p><strong>Mã đơn hàng:</strong> @order.orderID</p>
+                        <p><strong>Ngày đặt hàng:</strong> @order.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p class="mb-0"><strong>Trạng thái:</strong> <span class="badge bg-info text-dark">@order.status</span></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="details-box p-3">
+                        <h5 class="section-title">Payment Method</h5>
+                        <p>
+                            @if (order.payMethod == "cash")
+                            {
+                                <span><i class="fas fa-money-bill-wave me-2"></i>Thanh toán bằng tiền mặt</span>
+                            }
+                            else if (order.payMethod == "momo")
+                            {
+                                <span><img src="~/images/momo-icon.png" alt="Momo" style="width:20px; height:20px; margin-right: 8px;" />Thanh toán qua Momo</span>
+                            }
+                            else
+                            {
+                                <span><i class="fas fa-credit-card me-2"></i>Thanh toán bằng tài khoản ngân hàng</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h4>Thông tin đơn hàng</h4>
-            <p><strong>Mã đơn hàng:</strong> @order.orderID</p>
-            <p><strong>Ngày đặt hàng:</strong> @order.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
-            <p><strong>Trạng thái:</strong> @order.status</p>
-            <p>
-                <strong>Phương thức thanh toán: </strong>
-                @if (order.payMethod == "cash")
-                {
-                    <span>Thanh toán bằng tiền mặt</span>
-                }
-                else if (order.payMethod == "momo")
-                {
-                    <span>Thanh toán qua Momo</span>
-                }
-                else
-                {
-                    <span>Thanh toán bằng tài khoản ngân hàng</span>
-                }
-            </p>
-            <p><strong>Tổng tiền:</strong> @order.totalAmount.ToString("C")</p>
+            <h5 class="section-title mt-5 mb-3">Order Summary</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle invoice-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center" style="width: 80px;">Ảnh</th>
+                            <th scope="col">Sản phẩm</th>
+                            <th scope="col" class="text-center">Số lượng</th>
+                            <th scope="col" class="text-end">Đơn giá</th>
+                            <th scope="col" class="text-end">Tổng tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.orderDetails)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <img src="@Url.Content("~/" + item.products.imagePath)" class="rounded img-fluid" style="width: 60px; height: 60px; object-fit: cover;" alt="@item.products.productName" />
+                                </td>
+                                <td>@item.products.productName</td>
+                                <td class="text-center">@item.quantity</td>
+                                <td class="text-end">@item.unitPrice.ToString("N0") ₫</td>
+                                <td class="text-end">@((item.quantity * item.unitPrice).ToString("N0")) ₫</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    @if (!string.IsNullOrEmpty(order.note))
+                    {
+                        <h6 class="section-title">Ghi chú:</h6>
+                        <p>@order.note</p>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <div class="text-end">
+                        @* You might have subtotal, tax, shipping etc. here if applicable *@
+                        @* <p class="mb-2">Subtotal: @order.orderDetails.Sum(od => od.quantity * od.unitPrice).ToString("N0") ₫</p> *@
+                        @* <p class="mb-2">Shipping: 0 ₫</p> *@
+                        @* <hr> *@
+                        <h4 class="fw-bold">Tổng cộng: @order.totalAmount.ToString("N0") ₫</h4>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="text-center">
+                <p class="text-muted">Cảm ơn bạn đã mua hàng!</p>
+                <p class="text-muted small">Nếu có bất kỳ câu hỏi nào về hóa đơn này, vui lòng liên hệ [Tên công ty của bạn] qua [Email hoặc SĐT]</p>
+            </div>
         </div>
     </div>
-
-    <!--Chi tiết đơn hàng-->
-    <table class="table table-striped table-hover align-middle">
-        <thead class="table-primary">
-            <tr>
-                <th class="text-center">Ảnh</th>
-                <th>Sản phẩm</th>
-                <th class="text-center">Số lượng</th>
-                <th class="text-end">Đơn giá</th>
-                <th class="text-end">Tổng tiền</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in order.orderDetails)
-            {
-                <tr>
-                    <td class="text-center">
-                        <img src="@Url.Content("~/" + item.products.imagePath)" class="rounded" style="width: 60px; height: 60px; object-fit: cover;" />
-                    </td>
-                    <td>@item.products.productName</td>
-                    <td class="text-center">@item.quantity</td>
-                    <td class="text-end">@item.unitPrice.ToString("N0") ₫</td>
-                    <td class="text-end">@((item.quantity * item.unitPrice).ToString("N0")) ₫</td>
-                </tr>
-            }
-        </tbody>
-    </table>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>

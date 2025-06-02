@@ -1,9 +1,131 @@
-﻿@media print {
-    button {
+﻿body {
+    background-color: #f8f9fa; /* Light gray background for the page */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A clean, modern font stack */
+}
+
+.invoice-container {
+    max-width: 900px; /* Or your preferred max width */
+}
+
+.invoice-card {
+    border: none; /* Remove default card border if using shadow for definition */
+    border-radius: 0.5rem; /* Slightly more rounded corners */
+}
+
+.invoice-title {
+    font-weight: 300; /* Lighter weight for the main "INVOICE" title */
+    color: #343a40;
+}
+
+.card-header .invoice-title {
+    font-size: 2.5rem; /* Larger title in header */
+}
+
+.card-header {
+    border-bottom: 1px solid #dee2e6; /* Subtle border for header */
+}
+
+.print-btn i {
+    margin-right: 8px;
+}
+
+.section-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: none !important;
+    display: inline-block;
+}
+
+address {
+    font-style: normal;
+    line-height: 1.6;
+    color: #555;
+}
+
+.details-box {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    border: 1px solid #e9ecef;
+}
+
+    .details-box p {
+        margin-bottom: 0.5rem;
+    }
+
+        .details-box p:last-child {
+            margin-bottom: 0;
+        }
+
+
+.invoice-table thead {
+    background-color: #e9ecef !important; /* Ensure Bootstrap override if necessary */
+    color: #212529;
+    font-weight: 600;
+}
+
+.invoice-table th {
+    padding: 0.75rem 1rem;
+}
+
+.invoice-table td {
+    vertical-align: middle;
+    padding: 0.75rem 1rem;
+}
+
+.invoice-table img.img-fluid {
+    border: 1px solid #ddd; /* Subtle border around product images */
+}
+
+.table-responsive {
+    margin-bottom: 1rem;
+}
+
+.totals-section {
+    /* background-color: #f8f9fa; */
+    /* padding: 15px; */
+    /* border-radius: 0.25rem; */
+}
+
+    .totals-section h4 {
+        color: #0d6efd; /* Primary color for the grand total */
+    }
+
+/* Print specific styles */
+@media print {
+    body {
+        background-color: #fff; /* White background for printing */
+        font-size: 10pt;
+    }
+
+    .invoice-container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .invoice-card {
+        box-shadow: none !important; /* Remove shadow for printing */
+        border: 1px solid #ccc; /* Add a border for printing if desired */
+    }
+
+    .print-btn, .sidebar, .navbar /* Add any other elements to hide */ {
         display: none !important;
     }
 
-    body {
-        margin: 1cm;
+    .card-header, .card-body {
+        padding: 15px !important; /* Adjust padding for print if needed */
+    }
+
+    .section-title {
+        border-bottom: 1px solid #000;
+        color: #000;
+    }
+
+    .details-box {
+        border: 1px solid #ccc;
+        background-color: #fff;
     }
 }
