@@ -10,10 +10,33 @@
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
+            @if (Model.payMethod == "momo" || Model.payMethod == "bankAccount")
+            {
+                <div style="position: absolute; top: 20px; right: 20px;">
+                    <a href="@Url.Action("InvoiceDetails", "Order", new { orderId = Model.orderID })" class="btn btn-info btn-sm" title="Xem hóa đơn">
+                        <i class="fas fa-file-alt me-2"></i>Xem hóa đơn
+                    </a>
+                </div>
+            }
+
             <h5 class="fw-bold mb-3">📌 Thông tin người nhận</h5>
             <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
             <p><strong>Số điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
             <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
+            <p><strong>Phương thức thanh toán:</strong> 
+                @if (@Model.payMethod == "cash")
+                {
+                    <span><i class="fas fa-money-bill-wave me-2"></i>Thanh toán bằng tiền mặt</span>
+                }
+                else if (@Model.payMethod == "momo")
+                {
+                    <span><img src="~/images/momo-icon.png" alt="Momo" style="width:20px; height:20px; margin-right: 8px;" />Thanh toán qua Momo</span>
+                }
+                else
+                {
+                    <span><i class="fas fa-credit-card me-2"></i>Thanh toán bằng tài khoản ngân hàng</span>
+                }
+            </p>
             <p><strong>Ngày đặt:</strong> @Model.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
             <p>
                 <strong>Trạng thái:</strong>
@@ -64,9 +87,9 @@
                 </form>
 
             }
-            @if (Model.status == "Đang giao")
+            @if (Model.status == "Đã hoàn thành")
             {
-                <a href="javascript:void(0);" onclick="confirmDelivered(@Model.orderID)" class="btn btn-success btn-sm rounded-circle" title="Đã giao">
+                <a href="javascript:void(0);" onclick="confirmDelivered(@Model.orderID)" class="btn btn-success btn-sm rounded-circle" title="Đã nhận hàng thành công">
                     <i class="fas fa-check"></i>
                     <span>Đã giao hàng</span>
                 </a>

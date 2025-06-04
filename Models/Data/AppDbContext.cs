@@ -41,7 +41,7 @@ namespace COSMESTIC.Models.Data
                 {
                     entity.Property(a => a.accountID)
                         .UseIdentityColumn(20000, 1);
-                    entity.Property(a => a.username).IsRequired();
+                    entity.Property(a => a.email).IsRequired();
                     entity.Property(a => a.password).IsRequired();
                     entity.HasOne(a => a.user)
                         .WithOne(u => u.account)

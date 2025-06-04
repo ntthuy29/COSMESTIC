@@ -77,7 +77,7 @@ namespace COSMESTIC.Controllers
                     else
                     {
                         TempData["ErrorMessage"] = "Đơn hàng của bạn chưa đủ điều kiện để áp dụng mã giảm giá này.";
-                        discount = null; 
+                        discount = null;
                     }
                 }
                 else
@@ -103,7 +103,7 @@ namespace COSMESTIC.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress, string paymentMethod, string? note)
+        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string discountCode, int? savedAddress, string paymentMethod, string? note)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -245,7 +245,7 @@ namespace COSMESTIC.Controllers
         public IActionResult MyOrders()
         {
             var userId = HttpContext.Session.GetInt32("UserID");
-            if(userId == null)
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Login");
             }
@@ -265,7 +265,7 @@ namespace COSMESTIC.Controllers
                                 .ThenInclude(od => od.products)
                                 .Include(o => o.Delivery)
                                 .FirstOrDefault(o => o.orderID == id && o.userID == userId);
-            if(order == null)
+            if (order == null)
             {
                 return NotFound();
             }
@@ -275,14 +275,14 @@ namespace COSMESTIC.Controllers
         public IActionResult CancelOrder(int id)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
-            if(userId == null)
+            if (userId == null)
             {
                 return RedirectToAction("Login", "Login");
             }
             var order = _context.Orders
                                 .Include(o => o.orderDetails)
                                 .FirstOrDefault(o => o.orderID == id && o.userID == userId);
-            if(order == null)
+            if (order == null)
             {
                 return NotFound();
             }
@@ -296,7 +296,7 @@ namespace COSMESTIC.Controllers
                 foreach (var item in order.orderDetails)
                 {
                     var product = _context.Products.Find(item.productID);
-                    if(product != null)
+                    if (product != null)
                     {
                         product.quantity += item.quantity;
                     }
@@ -313,13 +313,13 @@ namespace COSMESTIC.Controllers
             {
                 return NotFound();
             }
-            if(order.status == "Đang giao")
+            if (order.status == "Đang giao")
             {
                 order.status = "Đã hoàn thành";
                 order.endDate = DateTime.Now;
                 _context.SaveChanges();
             }
-            return RedirectToAction("MyOrders", new {id = id});
+            return RedirectToAction("MyOrders", new { id = id });
         }
         [HttpGet]
         [HttpPost]
@@ -497,7 +497,7 @@ namespace COSMESTIC.Controllers
             _context.SaveChanges();
             return RedirectToAction("OrderSuccess", new { orderId = newOrder.orderID });
         }
-        
+
         //dưới đây là code của admin
         [HttpGet]
         [Authorize(Roles = "admin")]
