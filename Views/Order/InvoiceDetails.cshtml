@@ -80,6 +80,11 @@
                                 <span><i class="fas fa-credit-card me-2"></i>Thanh toán bằng tài khoản ngân hàng</span>
                             }
                         </p>
+                        <!-- Thêm ghi chú khách hàng -->
+                        @if (!string.IsNullOrEmpty(order.note))
+                        {
+                            <p><strong>Ghi chú:</strong> @order.note</p>
+                        }
                     </div>
                 </div>
             </div>

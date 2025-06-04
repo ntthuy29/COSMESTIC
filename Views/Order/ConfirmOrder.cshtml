@@ -44,6 +44,7 @@
                         <div class="text-success">@TempData["SuccessMessage"]</div>
                     }
                 </div>
+
                 <!-- Phương thức thanh toán -->
                 <div class="mb-3">
                     <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -52,6 +53,12 @@
                         <option value="bankAccount">Thanh toán bằng tài khoản ngân hàng</option>
                         <option value="momo">Thanh toán qua Momo</option>
                     </select>
+                </div>
+
+                <!-- Thêm ô nhập ghi chú -->
+                <div class="mb-3">
+                    <label for="note" class="form-label">Ghi chú (nếu có)</label>
+                    <textarea class="form-control" id="note" name="note" rows="3" placeholder="Nhập ghi chú nếu cần"></textarea>
                 </div>
 
                 <!-- QR Code Modal -->

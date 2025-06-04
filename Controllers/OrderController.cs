@@ -103,7 +103,7 @@ namespace COSMESTIC.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress, string paymentMethod)
+        public IActionResult CreateOrder(string fullName, string address, string phoneNumber, string  discountCode, int? savedAddress, string paymentMethod, string? note)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -160,6 +160,7 @@ namespace COSMESTIC.Controllers
                 status = "Chờ xử lý",  // Trạng thái đang chờ duyệt
                 totalAmount = 0,
                 payMethod = paymentMethod,
+                note = note,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
                                                     .OrderBy(d => d.deliveryID)
@@ -386,7 +387,7 @@ namespace COSMESTIC.Controllers
             return View(deliveryAddresses);
         }
         [HttpPost]
-        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, int? savedAddress, string paymentMethod)
+        public IActionResult CreateOrderBuyNow(string fullName, string address, string phoneNumber, int productId, int quantity, string discountCode, int? savedAddress, string paymentMethod, string? note)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -453,6 +454,7 @@ namespace COSMESTIC.Controllers
                 status = "Chờ xử lý",
                 totalAmount = totalAmount - totalDiscountAmount, // Áp dụng giảm giá ngay tại đây
                 payMethod = paymentMethod,
+                note = note,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
                                                     .OrderBy(d => d.deliveryID)

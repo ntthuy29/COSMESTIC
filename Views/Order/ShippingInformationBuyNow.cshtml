@@ -68,6 +68,7 @@
                 <input type="hidden" name="quantity" value="@ViewBag.Quantity" />
                 <input type="hidden" name="discountCode" value="@ViewBag.DiscountCode" />
                 <input type="hidden" name="applyDiscount" value="@(ViewBag.DiscountAmount > 0)" />
+                <input type="hidden" name="savedAddress" value="@ViewBag.savedAddress" />
 
                 <!-- Mã giảm giá -->
                 <div class="mb-3">
@@ -95,6 +96,13 @@
                         <option value="momo">Thanh toán qua Momo</option>
                     </select>
                 </div>
+
+                <!-- Thêm ô nhập ghi chú -->
+                <div class="mb-3">
+                    <label for="note" class="form-label">Ghi chú (nếu có)</label>
+                    <textarea class="form-control" id="note" name="note" rows="3" placeholder="Nhập ghi chú nếu cần"></textarea>
+                </div>
+
 
                 <!-- QR Code Modal -->
                 <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
