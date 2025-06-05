@@ -346,8 +346,13 @@
     @RenderSection("Scripts", required: false)
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    @*<script>
+
         // Đảm bảo dropdown hiển thị giá trị đúng sau khi trang tải
         document.addEventListener('DOMContentLoaded', function() {
             const statusSelect = document.querySelector('select[name="status"]');
@@ -355,6 +360,6 @@
                 statusSelect.value = '@ViewBag.SelectedStatus'; // Đặt giá trị dựa trên ViewBag.SelectedStatus
             }
         });
-    </script>
+    </script>*@
 </body>
 </html>
