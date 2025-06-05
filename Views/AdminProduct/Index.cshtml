@@ -167,16 +167,18 @@
                                                title="Chỉnh sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a href="@Url.Action("Delete", "AdminProduct", new { id = sanPham.productID })"
-                                               class="btn btn-sm btn-outline-danger"
-                                               title="Xóa"
-                                               onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                                            <a href="javascript:void(0);"
+                                               class="btn btn-sm btn-outline-danger btn-delete"
+                                               data-url="@Url.Action("Delete", "AdminProduct", new { id = sanPham.productID })"
+                                               title="Xóa">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
                             }
+
                         }
                         else
                         {
@@ -216,3 +218,30 @@
         border: 1px solid #dee2e6;
     }
 </style>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+
+                    Swal.fire({
+                        title: 'Xác nhận xóa?',
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

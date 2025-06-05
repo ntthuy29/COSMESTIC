@@ -1,7 +1,7 @@
 ﻿const images = [
-    "/Img/images.jpg",
-    "/Img/ads05.jpg",
-    "/Img/ad04.jpg"
+    "/Img/haski1.jpg",
+    "/Img/mungkhaitruong.png",
+    "/Img/haski.jpg"
 ];
 
 let current = 0;
@@ -23,8 +23,7 @@ setInterval(() => {
     changeBackgroundImage(current);
 }, 3000);
 const applyButton = document.getElementById('apply-filter');
-console.log(applyButton);
-console.log('hihii')
+
 if (applyButton) {
     applyButton.addEventListener('click', function () {
         console.log("ĐÃ NHẤN ÁP DỤNG GIÁ RỒI");
@@ -41,3 +40,4 @@ if (applyButton) {
 } else {
     console.log("khong click duoc");
 }
+//đoạn code cho cata =log

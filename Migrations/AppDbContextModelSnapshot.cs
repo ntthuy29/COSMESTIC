@@ -242,6 +242,9 @@ namespace COSMESTIC.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<int>("orderID")
+                        .HasColumnType("int");
+
                     b.Property<int>("productID")
                         .HasColumnType("int");
 
@@ -252,6 +255,8 @@ namespace COSMESTIC.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("reviewID");
+
+                    b.HasIndex("orderID");
 
                     b.HasIndex("productID");
 
@@ -363,8 +368,13 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
 
+
+                    b.Property<decimal>("TotalSpent")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("createdDate")
                         .HasColumnType("datetime2");
+
 
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -498,6 +508,12 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.ProductReView", b =>
                 {
+                    b.HasOne("COSMESTIC.Models.Data.Orders", "order")
+                        .WithMany("ProductReView")
+                        .HasForeignKey("orderID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("COSMESTIC.Models.Data.Products", "product")
                         .WithMany("ProductReviews")
                         .HasForeignKey("productID")
@@ -509,6 +525,8 @@ namespace COSMESTIC.Migrations
                         .HasForeignKey("userID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("order");
 
                     b.Navigation("product");
 
@@ -579,6 +597,8 @@ namespace COSMESTIC.Migrations
 
             modelBuilder.Entity("COSMESTIC.Models.Data.Orders", b =>
                 {
+                    b.Navigation("ProductReView");
+
                     b.Navigation("invoice")
                         .IsRequired();
 

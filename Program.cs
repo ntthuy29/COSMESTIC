@@ -1,7 +1,16 @@
 ﻿using COSMESTIC.Models.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Login/Login";
+        options.AccessDeniedPath = "/Home/Index";
+    });
+
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -31,6 +40,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+
 
 app.UseSession();
 

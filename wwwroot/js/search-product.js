@@ -20,19 +20,11 @@
     }
 });
 function loadProducts(catalogId) {
-    console.log(catalogId);  
-
     fetch(`/Product/GetByCatalog/${catalogId}`)
-        .then(response => response.text())  
+        .then(response => response.text())
         .then(html => {
-            console.log(html);  
-
-            let productList = document.getElementById('main');
-
-            productList.innerHTML = html; 
-
+            document.getElementById('main').innerHTML = html;
+            // Không cần load script vì nó đã có sẵn trong layout
         })
-        .catch(error => console.error('Error:', error));  
+        .catch(error => console.error('Error:', error));
 }
-
-

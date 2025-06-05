@@ -2,7 +2,7 @@
 using COSMESTIC.Models.Revenue;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Authorization;
 namespace COSMESTIC.Controllers
 {
     public class AdminController : Controller
@@ -13,35 +13,42 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-
+        [Authorize(Roles = "admin")]
         public IActionResult Home()
         {
             return View();
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Product()
         {
             return RedirectToAction("Index", "AdminProduct");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Discount()
         {
             return RedirectToAction("Index", "Discount");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult User()
         {
             return RedirectToAction("Index", "Account");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Order()
         {
             return RedirectToAction("IndexAdminOrder", "Order");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Catalog()
         {
             return RedirectToAction("Index", "Catalog");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Statistics()
         {
             return RedirectToAction("Index", "Statistics");
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Revenue()
         {
             var model = new RevenueReportViewModel
@@ -64,6 +71,7 @@ namespace COSMESTIC.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> Revenue(DateTime? startDate, DateTime? endDate)
         {

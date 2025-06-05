@@ -7,6 +7,8 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using COSMESTIC.Models.User;
 using COSMESTIC.Models.Order;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 namespace COSMESTIC.Controllers
 {
     public class AccountController : Controller
@@ -16,7 +18,7 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        public IActionResult Detail()
+        public IActionResult Detail(int i)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
@@ -28,7 +30,13 @@ namespace COSMESTIC.Controllers
             {
                 return NotFound();
             }
+
+            UpdateCustomerStatus(userId.Value);
+
+            ViewBag.value = i;
+
             return View(user);
+           
         }
         [HttpGet]
         public IActionResult Edit()
@@ -67,50 +75,127 @@ namespace COSMESTIC.Controllers
         }
         public IActionResult ChangePassword()
         {
+            Console.WriteLine("ChangePassword action called");
             return View();
         }
         [HttpPost]
-        public IActionResult ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        //public IActionResult ResetPassword(string oldPassword, string newPassword, string confirmPassword)
+        //{
+        //    Console.WriteLine("ChangePassword POST action called"); 
+        //    var userId = HttpContext.Session.GetInt32("UserID");
+        //    int id = 1;
+        //    if (userId == null)
+        //    {
+        //        return RedirectToAction("Login", "Login");
+        //    }
+
+        //    var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
+        //    if (account == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (account.password != oldPassword)
+        //    {
+        //        ModelState.AddModelError("", "Mật khẩu cũ không đúng.");
+        //        return RedirectToAction("Detail", new {i=id}); 
+        //    }
+
+        //    if (newPassword != confirmPassword)
+        //    {
+        //        ModelState.AddModelError("", "Mật khẩu mới không khớp.");
+        //        return RedirectToAction("Detail", new {i=id});
+        //    }
+
+        //    account.password = newPassword;
+        //    _context.SaveChanges();
+
+        //    // Lưu thông báo thành công vào ViewData
+        //    ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
+        //    return RedirectToAction("Detail"); // Trả về view và hiển thị thông báo thành công ngay lập tức
+        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ResetPassword(ChangePasswordViewModel model)
         {
+            Console.WriteLine(model.NewPassword);
+            Console.WriteLine(model.OldPassword);
+            Console.WriteLine(model.ConfirmPassword);
+            Console.WriteLine("ChangePassword POST action called");
+
             var userId = HttpContext.Session.GetInt32("UserID");
 
             if (userId == null)
             {
-                return RedirectToAction("Login", "Login");
+                return Json(new { success = false, redirect = Url.Action("Login", "Login") });
             }
 
-            var account = _context.Accounts.FirstOrDefault(a => a.userID == userId);
+            var account = _context.Accounts.Include(c=>c.user).FirstOrDefault(a => a.userID == userId);
             if (account == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Tài khoản không tồn tại." });
             }
 
-            if (account.password != oldPassword)
+            var errors = new Dictionary<string, string>();
+
+            if (account.password != model.OldPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu cũ không đúng.");
-                return View(); 
+                Console.WriteLine(account.password);
+                Console.WriteLine(model.OldPassword);
+                errors["oldPassword"] = "Mật khẩu cũ không đúng.";
             }
 
-            if (newPassword != confirmPassword)
+            if (model.NewPassword != model.ConfirmPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu mới không khớp.");
-                return View();
+                errors["confirmPassword"] = "Mật khẩu mới không khớp.";
             }
 
-            account.password = newPassword;
+            if (errors.Count > 0)
+            {
+                return Json(new { success = false, errors });
+            }
+
+            account.password = model.NewPassword;
             _context.SaveChanges();
 
-            // Lưu thông báo thành công vào ViewData
-            ViewData["SuccessMessage"] = "Mật khẩu của bạn đã được thay đổi thành công!";
-            return View(); // Trả về view và hiển thị thông báo thành công ngay lập tức
+            return Json(new { success = true, message = "Mật khẩu của bạn đã được thay đổi thành công!" });
         }
-        [HttpPost]
-        public IActionResult logout()
-        {
-            
-            HttpContext.Session.Clear();
 
-          
+        public void UpdateCustomerStatus(int userId)
+        {
+            var user = _context.Users.Include(u => u.orders)
+                                     .FirstOrDefault(u => u.userID == userId);
+            if (user == null)
+            {
+                return;
+            }
+            decimal totalSpent = _context.Orders
+                .Where(o => o.userID == userId && o.status == "Shipped")
+                .Sum(o => o.totalAmount);
+            user.TotalSpent += totalSpent;
+            if (totalSpent >= 5000000)
+            {
+                user.status = "Vàng";
+            }
+            else if (totalSpent >= 1000000)
+            {
+                user.status = "Bạc";
+            }
+            else
+            {
+                user.status = "Đồng";
+            }
+            _context.SaveChanges();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> logout()
+        {
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear(); // Xóa session
+
+
             return RedirectToAction("Product", "Product");
         }
 
@@ -134,6 +219,7 @@ namespace COSMESTIC.Controllers
             {
                 query = query.Where(u => u.status == status);
             }
+
 
             var users = await query
                 .Select(u => new UserViewModel

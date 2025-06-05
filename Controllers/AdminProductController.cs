@@ -1,5 +1,6 @@
 ﻿using COSMESTIC.Models.Data;
 using COSMESTIC.Models.Product;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,8 @@ namespace COSMESTIC.Controllers
             _environment = environment;
         }
 
-        public async Task<IActionResult> Index(string search, string danhmuc, int page = 1)
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Index(string search, string danhmuc)
         {
             var viewModel = new ProductViewModel
             {
@@ -79,6 +81,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create()
         {
 
@@ -96,7 +99,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-      
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(CreateProduct model)
         {
             if (!ModelState.IsValid)
@@ -153,7 +156,7 @@ namespace COSMESTIC.Controllers
 
             return RedirectToAction("Index"); // Điều chỉnh theo trang bạn muốn chuyển hướng
         }
-
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var art = await dbContext.Products.FindAsync(id);
@@ -168,6 +171,7 @@ namespace COSMESTIC.Controllers
         }
         // còn thiếu 2 controller edit, detail
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -201,7 +205,7 @@ namespace COSMESTIC.Controllers
             return View(model);
         }
         [HttpPost]
-     
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int id, CreateProduct model)
         {
            
@@ -260,7 +264,7 @@ namespace COSMESTIC.Controllers
 
             return View(model);
         }
-
+        [Authorize(Roles = "admin")]
         private bool ProductExists(int id)
         {
             return dbContext.Products.Any(e => e.productID == id);

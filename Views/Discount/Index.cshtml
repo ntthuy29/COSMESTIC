@@ -128,12 +128,15 @@
                                                onclick="event.stopPropagation();">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </a>
+
                                             <a asp-controller="Discount" asp-action="Delete" asp-route-id="@item.discountID"
                                                class="btn btn-sm btn-outline-danger rounded-circle"
                                                title="Xóa"
                                                onclick="event.stopPropagation(); return confirm('Bạn có chắc chắn muốn xóa mã khuyến mại này?');">
+
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -190,3 +193,28 @@
         font-weight: 500;
     }
 </style>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-delete').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+                    Swal.fire({
+                        title: 'Bạn có chắc chắn muốn xóa?',
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
