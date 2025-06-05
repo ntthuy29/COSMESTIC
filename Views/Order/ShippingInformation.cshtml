@@ -1,121 +1,182 @@
 ﻿@model List<COSMESTIC.Models.Data.DeliveryIFMT>
-
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var selectedCartItems = ViewBag.SelectedCartItems as List<COSMESTIC.Models.Data.CartItem> ?? new List<COSMESTIC.Models.Data.CartItem>();
+    var totalOrderPrice = selectedCartItems.Sum(item => item.quantity * item.unitprice);
 }
 
-<h3>Thông tin giao hàng</h3>
-
-<form method="post" action="@Url.Action("ConfirmOrder", "Order")" id="orderForm">
-    <!-- Chọn địa chỉ giao hàng đã lưu -->
-    <div class="mb-3">
-        <label for="savedAddress" class="form-label">Chọn địa chỉ giao hàng đã lưu</label>
-        <select class="form-control" id="savedAddress" name="savedAddress" onchange="fillAddress(this)">
-            <option value="">Chọn địa chỉ</option>
-            @if (Model != null && Model.Any())
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header text-white" style="background-color: #B27474;">
+            <h4 class="mb-0">📍 Thông tin giao hàng</h4>
+        </div>
+        <div class="card-body">
+            <!-- Hiển thị thông báo lỗi -->
+            @if (TempData["ErrorMessage"] != null)
             {
-                @foreach (var address in Model)
-                {
-                    <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option>
-                }
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Danh sách sản phẩm đã chọn -->
+            @if (selectedCartItems.Any())
+            {
+                <h5 class="mb-3">Sản phẩm đã chọn</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Tổng giá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in selectedCartItems)
+                            {
+                                <tr>
+                                    <td><img src="@Url.Content("~/" + item.products.imagePath)" style="width: 50px; height: 50px; object-fit: cover;" alt="@item.products.productName" /></td>
+                                    <td>@item.products.productName</td>
+                                    <td class="text-center">@item.quantity</td>
+                                    <td class="text-end">@item.unitprice.ToString("N0") ₫</td>
+                                    <td class="text-end">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-end fw-bold fs-5"><strong>Tổng tiền:</strong> <span>@totalOrderPrice.ToString("N0") ₫</span></p>
             }
             else
             {
-                <option disabled>Không có địa chỉ giao hàng nào</option>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    Không có sản phẩm nào được chọn. Vui lòng quay lại giỏ hàng để chọn sản phẩm.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             }
-        </select>
-        <div id="savedAddressError" style="color: red; display: none;">Vui lòng chọn địa chỉ giao hàng.</div>
+
+            <!-- Form nhập thông tin giao hàng -->
+            <form method="post" action="@Url.Action("ConfirmOrder", "Order")" id="orderForm">
+                @Html.AntiForgeryToken()
+                @foreach (var item in selectedCartItems)
+                {
+                    <input type="hidden" name="selectedItems" value="@item.cartItemID" />
+                }
+
+                <h5 class="mt-4 mb-3">Chọn địa chỉ giao hàng</h5>
+                <div class="mb-4">
+                    <label for="savedAddress" class="form-label fw-bold">Địa chỉ đã lưu</label>
+                    <select class="form-select" id="savedAddress" name="savedAddress" onchange="fillAddress(this)">
+                        <option value="">-- Chọn địa chỉ --</option>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var address in Model)
+                            {
+                                <option value="@address.deliveryID" selected="@((address.deliveryID == ViewBag.savedAddress) ? "selected" : "")">
+                                    @address.deliveryName - @address.deliveryAddress (@address.deliveryPhone)
+                                </option>
+
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>Không có địa chỉ giao hàng nào</option>
+                        }
+                    </select>
+                    <div id="savedAddressError" class="invalid-feedback">Vui lòng chọn địa chỉ giao hàng hoặc nhập địa chỉ mới.</div>
+                </div>
+
+                <h5 class="mt-4 mb-3">Hoặc nhập địa chỉ mới</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="fullName" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Nhập họ và tên" />
+                        <div id="fullNameError" class="invalid-feedback">Họ và tên không được để trống.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="address" class="form-label">Địa chỉ giao hàng</label>
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ" />
+                        <div id="addressError" class="invalid-feedback">Địa chỉ không được để trống.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Nhập số điện thoại (10-11 số)" pattern="[0-9]{10,11}" />
+                        <div id="phoneNumberError" class="invalid-feedback">Số điện thoại phải có 10-11 chữ số.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4 gap-2">
+                    <a href="@Url.Action("Index", "ShoppingCart")" class="btn btn-outline-secondary">Quay lại giỏ hàng</a>
+                    <button type="submit" class="btn btn-lg" style="background-color: darkred; color: white;">
+                        <i class="bi bi-check-circle"></i> Xác nhận và đặt hàng
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label for="fullName" class="form-label">Họ và tên</label>
-        <input type="text" class="form-control" id="fullName" name="fullName" />
-        <div id="fullNameError" style="color: red; display: none;">Họ và tên không được để trống.</div>
-    </div>
+@section Scripts {
+    <script>
+        // Hàm tự động điền thông tin khi chọn địa chỉ
+        function fillAddress(selectElement) {
+            const selectedAddressId = selectElement.value;
+            const deliveryAddresses = @Html.Raw(Json.Serialize(Model ?? new List<COSMESTIC.Models.Data.DeliveryIFMT>()));
+            const fullNameInput = document.getElementById("fullName");
+            const addressInput = document.getElementById("address");
+            const phoneNumberInput = document.getElementById("phoneNumber");
 
-    <div class="mb-3">
-        <label for="address" class="form-label">Địa chỉ giao hàng</label>
-        <input type="text" class="form-control" id="address" name="address" />
-        <div id="addressError" style="color: red; display: none;">Địa chỉ giao hàng không được để trống.</div>
-    </div>
-
-    <div class="mb-3">
-        <label for="phoneNumber" class="form-label">Số điện thoại</label>
-        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" />
-        <div id="phoneNumberError" style="color: red; display: none;">Số điện thoại không được để trống.</div>
-    </div>
-    <button type="submit" class="btn btn-primary">Xác nhận và đặt hàng</button>
-</form>
-
-<script>
-    // Hàm để tự động điền các trường thông tin khi chọn địa chỉ
-    function fillAddress(selectElement) {
-        var selectedAddressId = selectElement.value;
-
-        if (selectedAddressId) {
-            var deliveryAddresses = @Html.Raw(Json.Serialize(Model));
-            var selectedAddress = deliveryAddresses.find(address => address.deliveryID == selectedAddressId);
-
-            if (selectedAddress) {
-                document.getElementById("fullName").value = selectedAddress.deliveryName;
-                document.getElementById("address").value = selectedAddress.deliveryAddress;
-                document.getElementById("phoneNumber").value = selectedAddress.deliveryPhone;
+            if (selectedAddressId) {
+                const selectedAddress = deliveryAddresses.find(address => address.deliveryID == selectedAddressId);
+                if (selectedAddress) {
+                    fullNameInput.value = selectedAddress.deliveryName || "";
+                    addressInput.value = selectedAddress.deliveryAddress || "";
+                    phoneNumberInput.value = selectedAddress.deliveryPhone || "";
+                }
+            } else {
+                fullNameInput.value = "";
+                addressInput.value = "";
+                phoneNumberInput.value = "";
             }
         }
-    }
 
-    // Hàm kiểm tra dữ liệu trước khi gửi form
-    document.getElementById("orderForm").addEventListener("submit", function(event) {
-        let isValid = true;
+        // Kiểm tra dữ liệu trước khi gửi form
+        document.getElementById("orderForm").addEventListener("submit", function() {
+            let isValid = true;
+            const savedAddress = document.getElementById("savedAddress").value.trim();
+            const fullName = document.getElementById("fullName").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
 
-    const savedAddress = document.getElementById("savedAddress").value.trim();
-    const fullName = document.getElementById("fullName").value.trim();
-    const address = document.getElementById("address").value.trim();
-    const phoneNumber = document.getElementById("phoneNumber").value.trim();
-
-    document.getElementById("savedAddressError").style.display = "none";
-    document.getElementById("savedAddress").classList.remove("is-invalid");
-
-    if (savedAddress === "") {
-        if (fullName === "") {
-            isValid = false;
-            document.getElementById("fullNameError").style.display = "block";
-            document.getElementById("fullName").classList.add("is-invalid");
-        } else {
-            document.getElementById("fullNameError").style.display = "none";
+            // Reset lỗi
+            document.getElementById("savedAddress").classList.remove("is-invalid");
             document.getElementById("fullName").classList.remove("is-invalid");
-        }
-
-        if (address === "") {
-            isValid = false;
-            document.getElementById("addressError").style.display = "block";
-            document.getElementById("address").classList.add("is-invalid");
-        } else {
-            document.getElementById("addressError").style.display = "none";
             document.getElementById("address").classList.remove("is-invalid");
-        }
-
-        if (phoneNumber === "") {
-            isValid = false;
-            document.getElementById("phoneNumberError").style.display = "block";
-            document.getElementById("phoneNumber").classList.add("is-invalid");
-        } else {
-            document.getElementById("phoneNumberError").style.display = "none";
             document.getElementById("phoneNumber").classList.remove("is-invalid");
-        }
-    } else {
-        // Nếu đã chọn địa chỉ đã lưu, thì các trường fullName, address, phoneNumber có thể để trống hoặc điền tự do, bạn có thể bỏ validate ở đây nếu muốn
-        document.getElementById("fullNameError").style.display = "none";
-        document.getElementById("addressError").style.display = "none";
-        document.getElementById("phoneNumberError").style.display = "none";
 
-        document.getElementById("fullName").classList.remove("is-invalid");
-        document.getElementById("address").classList.remove("is-invalid");
-        document.getElementById("phoneNumber").classList.remove("is-invalid");
-    }
+            if (!savedAddress) {
+                // Nếu không chọn địa chỉ đã lưu, yêu cầu nhập đầy đủ thông tin mới
+                if (!fullName) {
+                    isValid = false;
+                    document.getElementById("fullName").classList.add("is-invalid");
+                }
+                if (!address) {
+                    isValid = false;
+                    document.getElementById("address").classList.add("is-invalid");
+                }
+                if (!phoneNumber || !/^[0-9]{10,11}$/.test(phoneNumber)) {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                }
+            }
 
-    if (!isValid) {
-        event.preventDefault();
-    }
-    });
-</script>
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+}

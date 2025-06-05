@@ -2,6 +2,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     var cart = (COSMESTIC.Models.Data.ShoppingCart)ViewBag.Cart;
+    var selectedItems = ViewBag.SelectedItems as List<COSMESTIC.Models.Data.CartItem> ?? new List<COSMESTIC.Models.Data.CartItem>();
 }
 
 <div class="container my-5">
@@ -12,6 +13,11 @@
     <div class="card shadow rounded">
         <div class="card-body">
             <form method="post" action="@Url.Action("CreateOrder", "Order")">
+                @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                @foreach (var item in ViewBag.SelectedItems)
+                {
+                    <input type="hidden" name="selectedItems" value="@item.cartItemID" />
+                }
                 <!-- Thông tin người mua -->
                 <div class="mb-4">
                     <h5><strong>Thông tin người mua:</strong></h5>
@@ -114,7 +120,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in cart.cartItems)
+                        @foreach (var item in ViewBag.SelectedItems)
                         {
                             <tr>
                                 <td class="text-center">

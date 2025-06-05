@@ -156,5 +156,29 @@ namespace COSMESTIC.Controllers
             _context.SaveChanges();
             return RedirectToAction("Index", "ShoppingCart");
         }
+        [HttpPost]
+        public IActionResult RemoveSelectedFromCart(List<int> selectedItems)
+        {
+            var userID = HttpContext.Session.GetInt32("UserID");
+            foreach (var itemId in selectedItems)
+            {
+                var item = _context.CartItem.FirstOrDefault(c => c.cartItemID == itemId);
+                if (item != null)
+                {
+                    _context.CartItem.Remove(item);
+                }
+            }
+            var cart = _context.ShoppingCart.Include(c => c.cartItems)
+                                                .ThenInclude(ci => ci.products)
+                                                .FirstOrDefault(c => c.userID == userID);
+            if (cart != null)
+            {
+                cart.totalQuantity = cart.cartItems.Sum(ci => ci.quantity);
+                cart.totalPrice = cart.cartItems.Sum(ci => ci.quantity * ci.unitprice);
+            }
+            _context.SaveChanges();
+            return RedirectToAction("Index", "ShoppingCart");
+        }
+
     }
 }
