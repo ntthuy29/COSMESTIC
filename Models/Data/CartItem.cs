@@ -14,7 +14,6 @@ namespace COSMESTIC.Models.Data
         [ForeignKey("productID")]
         public int productID { get; set; }
         public int quantity { get; set; }
-        public bool Selected { get; set; }
         public decimal unitprice { get; set; }
         public virtual ShoppingCart cart { get; set; }
         public virtual Products products { get; set; }
