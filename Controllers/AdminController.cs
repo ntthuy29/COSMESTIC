@@ -67,7 +67,7 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public async Task<IActionResult> Revenue(DateTime? startDate, DateTime? endDate)
         {
-            // Mặc định khoảng thời gian nếu không có giá trị
+           
             startDate ??= DateTime.Now.AddMonths(-1);
             endDate ??= DateTime.Now;
 
@@ -84,6 +84,7 @@ namespace COSMESTIC.Controllers
                 CategoryStats = new List<RevenueItem>(),
                 StatusStats = new List<RevenueItem>(),
                 TotalStats = new List<RevenueItem>(),
+
                 CategoryLabels = new List<string>(),
                 CategoryRevenueData = new List<decimal>(),
                 CategoryOrderCountData = new List<int>(),
@@ -128,7 +129,7 @@ namespace COSMESTIC.Controllers
             model.StatusRevenueData = revenueByStatus.Select(r => r.TotalRevenue).ToList();
             model.StatusOrderCountData = revenueByStatus.Select(r => r.OrderCount).ToList();
 
-            // 3. Thống kê toàn hệ thống
+            // 3. Thống kê doanh thu tổng theo ngày đã chọn
             var totalRevenue = await ordersQuery.SumAsync(o => o.totalAmount);
             var orderCount = await ordersQuery.CountAsync();
 

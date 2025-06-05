@@ -1,0 +1,250 @@
+﻿@model COSMESTIC.Models.Discount.DetailViewModel
+
+@{
+    ViewData["Title"] = "Chi Tiết Mã Giảm Giá - " + Model.name;
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+@{
+    var statusClass = Model.status == "Đang hoạt động" ? "status-active" :
+                     Model.status == "Đã hết hạn" ? "status-expired" :
+                     Model.status == "Đã lên lịch" ? "status-scheduled" :
+                     "status-inactive";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Mã Giảm Giá - Tên Mã</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFF8F5; /* Màu nền hồng kem rất nhạt */
+        }
+
+        .playfair-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .brand-pink {
+            color: #E5A9A9;
+        }
+        /* Màu hồng đất nhẹ nhàng */
+        .brand-pink-bg {
+            background-color: #E5A9A9;
+        }
+
+        .brand-gold {
+            color: #B08D57;
+        }
+        /* Màu vàng đồng tinh tế */
+        .brand-gold-bg {
+            background-color: #B08D57;
+        }
+
+        .brand-text {
+            color: #4A4A4A;
+        }
+        /* Màu chữ chính, xám đậm */
+        .status-active {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        /* Xanh lá cho active */
+        .status-expired {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        /* Đỏ cho hết hạn */
+        .status-scheduled {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        /* Vàng cho đã lên lịch */
+        .status-inactive {
+            background-color: #E5E7EB;
+            color: #4B5563;
+        }
+        /* Xám cho không hoạt động (admin tắt) */
+
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+            .card:hover {
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            }
+
+        .btn-primary {
+            background-color: #E5A9A9; /* Màu hồng đất */
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: #D49090; /* Hồng đất đậm hơn */
+            }
+
+        .btn-secondary {
+            background-color: #F3F4F6; /* Xám nhạt */
+            color: #4A4A4A;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-secondary:hover {
+                background-color: #E5E7EB;
+            }
+
+        .icon-placeholder { /* Để thay thế cho SVG icons nếu cần */
+            display: inline-block;
+            width: 1.25rem; /* tương đương w-5 */
+            height: 1.25rem; /* tương đương h-5 */
+            margin-right: 0.5rem; /* tương đương mr-2 */
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Giả sử đây là LayoutAdmin.cshtml, nên sẽ có header và sidebar ở đây -->
+    <!-- Bắt đầu nội dung chính của trang chi tiết -->
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <!-- Breadcrumb hoặc nút quay lại -->
+        <div class="mb-6">
+            <a asp-action="Index" asp-controller="Discount" class="text-sm brand-pink hover:underline flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                </svg>
+                Quay lại Danh sách Mã giảm giá
+            </a>
+        </div>
+
+        <!-- Tiêu đề chính của mã giảm giá -->
+        <div class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-bold brand-text playfair-display">@Model.name</h1>
+            <p class="text-lg text-gray-500 mt-1">Chi tiết mã khuyến mãi và hiệu suất sử dụng.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Cột trái: Thông tin chính & Thống kê -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Card Thông tin chung -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-semibold brand-text mb-4 playfair-display">Thông tin chung</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Tên mã</p>
+                            <p class="text-md font-medium brand-text">@Model.name</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Trạng thái</p>
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full @statusClass">
+                                @Model.status
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Loại khuyến mãi</p>
+                            <p class="text-md font-medium brand-text">Giảm theo phần trăm</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Giá trị</p>
+                            <p class="text-md font-medium brand-pink">@Model.value%</p>
+                            <!-- Ví dụ cho loại số tiền cố định:
+                            <p class="text-md font-medium brand-pink">100.000 VNĐ</p>
+                            -->
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Ngày bắt đầu</p>
+                            <p class="text-md font-medium brand-text">@Model.startDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Ngày kết thúc</p>
+                            <p class="text-md font-medium brand-text">@Model.endDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Kích hoạt bởi Admin</p>
+                            <p class="text-md font-medium brand-text">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    @Model.isActive ? "Có" : "Không"
+                                </span>
+                                <!-- Hoặc:
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Không
+                                </span>
+                                -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Mô tả & Điều kiện -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-semibold brand-text mb-4 playfair-display">Mô tả & Điều kiện áp dụng</h2>
+                    <div>
+                        <h3 class="text-md font-semibold brand-text mb-1">Mô tả chi tiết:</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Ưu đãi đặc biệt chào hè rực rỡ! Nhận ngay @Model.value% giảm giá cho toàn bộ sản phẩm. Đừng bỏ lỡ cơ hội chăm sóc làn da toàn diện với giá cực kỳ hấp dẫn!
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-md font-semibold brand-text mb-1">Điều kiện:</h3>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                            <li>Áp dụng cho đơn hàng có giá trị tối thiểu @Model.discountAmount VNĐ.</li>
+                            <li>Không áp dụng đồng thời với các chương trình khuyến mãi khác.</li>
+                            <li>Mỗi khách hàng chỉ được sử dụng mã 01 lần.</li>
+                            <li>Áp dụng cho các sản phẩm trong danh mục "Chăm sóc da mùa hè".</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Thống kê & Hành động -->
+            <div class="md:col-span-1 space-y-6">
+                <!-- Card Thống kê sử dụng -->
+                <div class="card p-6 text-center">
+                    <h2 class="text-xl font-semibold brand-text mb-2 playfair-display">Lượt sử dụng</h2>
+                    <div class="my-4">
+                        <p class="text-6xl font-bold brand-pink">@Model.usageCount</p>
+                        <p class="text-sm text-gray-500">tổng lượt</p>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-2">
+                        <div class="brand-pink-bg h-2.5 rounded-full" style="width:@(Model.usageCount * 100.0 / 50)%;"></div> <!-- Giả sử có giới hạn 50 lượt -->
+                    </div>
+                    <p class="text-xs text-gray-500">Còn lại: @(50 - Model.usageCount) lượt (Giới hạn 50)</p>
+                   @* <button class="mt-4 w-full text-sm btn-secondary py-2 px-4 rounded-lg flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-2">
+                            <path d="M3 12.25A2.25 2.25 0 005.25 14.5h9.5A2.25 2.25 0 0017 12.25V8.5A2.25 2.25 0 0014.75 6.25h-9.5A2.25 2.25 0 003 8.5v3.75z" />
+                            <path d="M3.5 8.25a.75.75 0 01.75-.75h11.5a.75.75 0 010 1.5H4.25a.75.75 0 01-.75-.75zM5.25 11.5a.75.75 0 01.75-.75h8.5a.75.75 0 010 1.5H6a.75.75 0 01-.75-.75z" />
+                        </svg>
+                        Xem danh sách đơn hàng
+                    </button>*@
+                </div>
+
+                <!-- Card Hành động -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-semibold brand-text mb-4 playfair-display">Hành động</h2>
+                    <div class="space-y-3">
+                        <a asp-action="Edit" asp-controller="Discount" asp-route-id="@Model.discountID" class="w-full btn-primary py-2.5 px-4 rounded-lg font-medium flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-2">
+                                <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                            </svg>
+                            Chỉnh sửa mã
+                        </a>
+     
+                        <a asp-action="Delete" asp-controller="Discount" asp-route-id="@Model.discountID" class="w-full bg-red-500 hover:bg-red-600 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-2">
+                                <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.177-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193v-.443A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                            </svg>
+                            Xóa mã (Nguy hiểm)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

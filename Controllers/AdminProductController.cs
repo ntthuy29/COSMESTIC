@@ -19,7 +19,7 @@ namespace COSMESTIC.Controllers
             _environment = environment;
         }
 
-        public async Task<IActionResult> Index(string search, string danhmuc)
+        public async Task<IActionResult> Index(string search, string danhmuc, int page = 1)
         {
             var viewModel = new ProductViewModel
             {
@@ -52,8 +52,18 @@ namespace COSMESTIC.Controllers
                 query = query.Where(p => p.catalogID == catalogId);
             }
 
+            query = query.OrderByDescending(p => p.productID);
+
+            int pageSize = 5; 
+            int totalItems = await query.CountAsync();
+
+            //viewModel.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            //viewModel.CurrentPage = page;
+
             // Map to ListProductModel
             viewModel.SanPhams = await query
+                //.Skip((page - 1) * pageSize)
+                //.Take(pageSize)
                 .Select(p => new ListProductModel
                 {
                     productID = p.productID,
@@ -255,5 +265,6 @@ namespace COSMESTIC.Controllers
         {
             return dbContext.Products.Any(e => e.productID == id);
         }
+        //thêm action xem chi tiết sản phẩm(detail)
     }
 }

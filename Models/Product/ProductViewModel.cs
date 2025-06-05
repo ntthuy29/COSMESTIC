@@ -8,5 +8,9 @@ namespace COSMESTIC.Models.Product
         public string DanhMucDuocChon { get; set; }
         public List<ListProductModel> SanPhams { get; set; }
         public List<SelectListItem> DanhMucs { get; set; }
+
+        // --- Thêm 2 thuộc tính phân trang ---
+        //public int CurrentPage { get; set; }
+        //public int TotalPages { get; set; }
     }
 }

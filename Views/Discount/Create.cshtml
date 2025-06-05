@@ -1,4 +1,5 @@
-﻿@model COSMESTIC.Models.Discount.CreateModel
+﻿@*
+@model COSMESTIC.Models.Discount.CreateModel
 
 
 
@@ -41,7 +42,7 @@
                 <span asp-validation-for="endDate" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
+           <div class="form-group">
                 <label asp-for="isActive" class="control-label">Trạng thái</label>
                 <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai"></select>
                 <span asp-validation-for="isActive" class="text-danger"></span>
@@ -75,4 +76,242 @@
                 });
             });
         </script>
+}
+*@
+@*
+@model COSMESTIC.Models.Discount.CreateModel
+@{
+    ViewData["Title"] = "Thêm mã khuyến mãi mới";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml"; // Áp dụng layout admin
+}
+
+<h2>Thêm mã khuyến mãi mới</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+       
+        <form asp-action="Create" method="post" id="createDiscountForm">
+          
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+               
+                <label asp-for="name" class="control-label">Tên mã khuyến mãi</label>
+                <input asp-for="name" class="form-control" />
+                <span asp-validation-for="name" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="value" class="control-label">Giá trị (%)</label>
+                <input asp-for="value" type="number" class="form-control" min="0" max="100" step="0.01" />
+                <span asp-validation-for="value" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="startDate" class="control-label">Ngày bắt đầu</label>
+                        <input asp-for="startDate" type="datetime-local" class="form-control" id="startDate" name="startDate" /> 
+                        <span asp-validation-for="startDate" class="text-danger"></span>
+                    </div>
+                    
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="endDate" class="control-label">Ngày kết thúc</label>
+                        <input asp-for="endDate" type="datetime-local" class="form-control" id="endDate" name="endDate" /> 
+                        <span asp-validation-for="endDate" class="text-danger"></span>
+                      
+                        <span id="endDate-custom-error" class="text-danger field-validation-error"></span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group mb-3">
+                <label asp-for="isActive" class="control-label">Trạng thái ban đầu</label>
+                <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai">
+                </select>
+                <small class="form-text text-muted">Trạng thái này có thể được tự động cập nhật dựa vào ngày bắt đầu khi lưu.</small>
+                <span asp-validation-for="isActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4 d-flex justify-content-end">
+                @* Căn chỉnh nút sang phải và thêm khoảng cách trên 
+                <a asp-action="Index" class="btn btn-outline-secondary me-2">Quay lại danh sách</a>
+                <input type="submit" value="Thêm mới" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Thêm một quy tắc validation tùy chỉnh cho jQuery Validate
+            $.validator.addMethod("endDateAfterStartDate", function (value, element) {
+                var startDateString = $('#startDate').val();
+                var endDateString = $(element).val(); // value ở đây chính là endDateString
+
+                // Nếu một trong hai ngày chưa được nhập, coi như hợp lệ để các rule khác (như required) xử lý
+                if (!startDateString || !endDateString) {
+                    return true;
+                }
+
+                var startDate = new Date(startDateString);
+                var endDate = new Date(endDateString);
+
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    return true; // Để các rule khác xử lý nếu định dạng sai
+                }
+                return endDate > startDate;
+            }, "Ngày kết thúc phải sau ngày bắt đầu.");
+
+            // Áp dụng validation cho form
+            $("#createDiscountForm").validate({
+                rules: {
+                    name: {
+                        required: true
+                    },
+                    discountType: {
+                        required: true
+                    },
+                    value: {
+                        required: true,
+                        number: true,
+                        min: 0.01 // Hoặc giá trị min phù hợp
+                    },
+                    startDate: {
+                        required: true
+                    },
+                    endDate: {
+                        required: true,
+                        endDateAfterStartDate: true // Áp dụng quy tắc tùy chỉnh
+                    }
+                    // Không cần validate isActive ở client-side nếu nó được set tự động
+                },
+                messages: {
+                    name: {
+                        required: "Tên mã khuyến mãi không được để trống"
+                    },
+                    discountType: {
+                        required: "Vui lòng chọn loại khuyến mãi"
+                    },
+                    value: {
+                        required: "Giá trị không được để trống",
+                        number: "Giá trị phải là một số",
+                        min: "Giá trị phải lớn hơn 0"
+                    },
+                    startDate: {
+                        required: "Ngày bắt đầu không được để trống"
+                    },
+                    endDate: {
+                        required: "Ngày kết thúc không được để trống"
+                        // Thông báo cho endDateAfterStartDate đã được định nghĩa trong addMethod
+                    }
+                },
+                errorElement: "span",
+                errorPlacement: function (error, element) {
+                    error.addClass("text-danger field-validation-error"); // Thêm class cho lỗi
+                    // Nếu là lỗi của endDate và là lỗi tùy chỉnh, đặt vào span#endDate-custom-error
+                    // Tuy nhiên, jQuery validate sẽ tự đặt lỗi vào span asp-validation-for
+                    // nên span#endDate-custom-error có thể không cần thiết nữa nếu dùng cách này.
+                    // Chúng ta sẽ để jQuery validate tự xử lý vị trí lỗi.
+                    error.insertAfter(element);
+                },
+                // Bạn có thể xóa span#endDate-custom-error nếu dùng cách này
+                // Hoặc tùy chỉnh errorPlacement để đặt lỗi vào đó nếu muốn.
+            });
+
+            // Đoạn code submit cũ có thể được loại bỏ hoặc comment lại
+            // vì jQuery Validate sẽ xử lý việc ngăn submit form nếu không hợp lệ.
+
+            /*
+            $('form').submit(function (event) {
+                // ... code cũ ...
+            });
+            */
+
+            // Tùy chọn: Xóa thông báo lỗi khi người dùng thay đổi giá trị ngày
+            // jQuery Validate thường tự xử lý việc này khi người dùng sửa input
+            // $('#startDate, #endDate').on('change', function() {
+            //    // Có thể cần trigger lại validation cho endDate
+            //    $('#createDiscountForm').validate().element('#endDate');
+            // });
+        });
+    </script>
+}
+*@
+
+
+
+@model COSMESTIC.Models.Discount.CreateModel
+@{
+    ViewData["Title"] = "Thêm mã khuyến mãi mới";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+
+<h2>Thêm mã khuyến mãi mới</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <form asp-action="Create" method="post" id="createDiscountForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="name" class="control-label">Tên mã khuyến mãi</label>
+                <input asp-for="name" class="form-control" />
+                <span asp-validation-for="name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="value" class="control-label">Giá trị (%)</label>
+                <input asp-for="value" type="number" class="form-control" min="0" max="100" step="0.01" />
+                <span asp-validation-for="value" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="startDate" class="control-label">Ngày bắt đầu</label>
+                        <input asp-for="startDate" type="datetime-local" class="form-control" id="startDate" name="startDate" />
+                        <span asp-validation-for="startDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="endDate" class="control-label">Ngày kết thúc</label>
+                        <input asp-for="endDate" type="datetime-local" class="form-control" id="endDate" name="endDate" />
+                        <span asp-validation-for="endDate" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="isActive" class="control-label">Trạng thái ban đầu</label>
+                <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai"></select>
+                <small class="form-text text-muted">Trạng thái này có thể được tự động cập nhật dựa vào ngày bắt đầu khi lưu.</small>
+                <span asp-validation-for="isActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4 d-flex justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary me-2">Quay lại danh sách</a>
+                <input type="submit" value="Thêm mới" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -6,7 +6,19 @@
     ViewData["Title"] = "Quản lý mã khuyến mại";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml";
 }
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
@@ -78,8 +90,13 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
+                                
                                     <td class="ps-4 fw-bold">@item.discountID</td>
-                                    <td>@item.name</td>
+                                    <td>
+                                        <a asp-controller="Discount" asp-action="Details" asp-route-id="@item.discountID" class="text-blue-600 hover:underline">
+                                            @item.name
+                                        </a>
+                                    </td>
                                     <td>
                                         <span class="badge bg-success bg-opacity-10 text-success">
                                             @item.value%
@@ -107,13 +124,14 @@
                                         <div class="d-flex justify-content-end gap-2">
                                             <a asp-controller="Discount" asp-action="Edit" asp-route-id="@item.discountID"
                                                class="btn btn-sm btn-outline-primary rounded-circle"
-                                               title="Chỉnh sửa">
+                                               title="Chỉnh sửa"
+                                               onclick="event.stopPropagation();">
                                                 <i class="fas fa-pencil-alt"></i>
                                             </a>
                                             <a asp-controller="Discount" asp-action="Delete" asp-route-id="@item.discountID"
                                                class="btn btn-sm btn-outline-danger rounded-circle"
                                                title="Xóa"
-                                               onclick="return confirm('Bạn có chắc chắn muốn xóa mã khuyến mại này?');">
+                                               onclick="event.stopPropagation(); return confirm('Bạn có chắc chắn muốn xóa mã khuyến mại này?');">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </div>

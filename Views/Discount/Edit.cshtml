@@ -4,19 +4,13 @@
 @{
     ViewData["Title"] = "Chỉnh sửa mã giảm giá";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml"; // Áp dụng layout admin
+    var isDisabled = TempData["WarningMessage"] != null ? "disabled" : null;
 }
-@if (TempData["SuccessMessage"] != null)
-{
-
-    @TempData["SuccessMessage"]
-
-}
-
-
-<h2>Admin Product Index</h2>
+<h2>Chỉnh sửa mã giảm giá</h2>
+@*
 <!-- Nội dung của trang -->
 <form asp-action="Edit" asp-controller="Discount" method="post">
-    @Html.AntiForgeryToken() <!-- Bảo vệ chống CSRF -->
+
 
     <div class="form-group">
         <label asp-for="discountID" class="control-label"></label>
@@ -60,6 +54,88 @@
     <a asp-action="Index" class="btn btn-secondary">Hủy</a>
 </div>
 </form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+*@
+<hr />
+
+@if (!string.IsNullOrEmpty(TempData["WarningMessage"] as string))
+{
+    <div class="alert alert-warning" role="alert">
+        @TempData["WarningMessage"]
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <form asp-action="Edit" method="post">
+           @*  id="createDiscountForm" *@
+            @* <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div> *@
+            <div class="form-group mb-3">
+                <label asp-for="discountID" class="control-label"></label>
+                <input asp-for="discountID" class="form-control" readonly />
+                <input type="hidden" asp-for="discountID" /> <!-- Đảm bảo giá trị được gửi đi -->
+                <span asp-validation-for="discountID" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="name" class="control-label">Tên mã khuyến mãi</label>
+                <input asp-for="name" class="form-control" />
+                <span asp-validation-for="name" class="text-danger"></span>
+            </div>
+
+            @*<div class="form-group mb-3">
+                <label asp-for="value" class="control-label">Giá trị (%)</label>
+                <input asp-for="value" type="number" class="form-control" min="0" max="100" step="0.01" />
+                <span asp-validation-for="value" class="text-danger"></span>
+            </div>*@
+            <div class="form-group mb-3">
+             <label asp-for="value" class="control-label">Giá trị (%)</label>
+             <input asp-for="value" type="number" class="form-control" min="0" max="100" step="0.01" disabled="@isDisabled" />
+             <span asp-validation-for="value" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="startDate" class="control-label">Ngày bắt đầu</label>
+                        <input asp-for="startDate" type="datetime-local" class="form-control" id="startDate" name="startDate" />
+                        <span asp-validation-for="startDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="endDate" class="control-label">Ngày kết thúc</label>
+                        <input asp-for="endDate" type="datetime-local" class="form-control" id="endDate" name="endDate" />
+                        <span asp-validation-for="endDate" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="isActive" class="control-label">Trạng thái ban đầu</label>
+                <select asp-for="isActive" class="form-control" asp-items="ViewBag.Trangthai"></select>
+                <small class="form-text text-muted">Trạng thái này có thể được tự động cập nhật dựa vào ngày bắt đầu khi lưu.</small>
+                <span asp-validation-for="isActive" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4 d-flex justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary me-2">Quay lại danh sách</a>
+                <input type="submit" value="Cập nhật" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
