@@ -4,57 +4,100 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h3>Thông tin giao hàng</h3>
 
-<form method="post" action="@Url.Action("ConfirmOrder", "Order")" id="orderForm">
-    <!-- Chọn địa chỉ giao hàng đã lưu -->
-    <div class="mb-3">
-        <label for="savedAddress" class="form-label">Chọn địa chỉ giao hàng đã lưu</label>
-        <select class="form-control" id="savedAddress" name="savedAddress" onchange="fillAddress(this)">
-            <option value="">Chọn địa chỉ</option>
+@* <form method="post" action="@Url.Action("ConfirmOrder", "Order")" id="orderForm"> *@
+@*     <!-- Chọn địa chỉ giao hàng đã lưu --> *@
+@*     <div class="mb-3"> *@
+@*         <label for="savedAddress" class="form-label">Chọn địa chỉ giao hàng đã lưu</label> *@
+@*         <select class="form-control" id="savedAddress" name="savedAddress" onchange="fillAddress(this)"> *@
+@*             <option value="">Chọn địa chỉ</option> *@
+@*             @if (Model != null && Model.Any()) *@
+@*             { *@
+@*                 @foreach (var address in Model) *@
+@*                 { *@
+@*                     <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option> *@
+@*                 } *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 <option disabled>Không có địa chỉ giao hàng nào</option> *@
+@*             } *@
+@*         </select> *@
+@*         <div id="savedAddressError" style="color: red; display: none;">Vui lòng chọn địa chỉ giao hàng.</div> *@
+@*     </div> *@
+
+@*     <div class="mb-3"> *@
+@*         <label for="fullName" class="form-label">Họ và tên</label> *@
+@*         <input type="text" class="form-control" id="fullName" name="fullName" /> *@
+@*         <div id="fullNameError" style="color: red; display: none;">Họ và tên không được để trống.</div> *@
+@*     </div> *@
+
+@*     <div class="mb-3"> *@
+@*         <label for="address" class="form-label">Địa chỉ giao hàng</label> *@
+@*         <input type="text" class="form-control" id="address" name="address" /> *@
+@*         <div id="addressError" style="color: red; display: none;">Địa chỉ giao hàng không được để trống.</div> *@
+@*     </div> *@
+
+@*     <div class="mb-3"> *@
+@*         <label for="phoneNumber" class="form-label">Số điện thoại</label> *@
+@*         <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" /> *@
+@*         <div id="phoneNumberError" style="color: red; display: none;">Số điện thoại không được để trống.</div> *@
+@*     </div> *@
+
+@*     <button type="submit" class="btn btn-primary">Xác nhận và đặt hàng</button> *@
+@* </form> *@
+<div class="container-md" style="width: 600px;">
+    <form method="post" action="@Url.Action("ConfirmOrder", "Order")" id="orderForm">
+        <input type="hidden" name="deliveryName" id="FullName" />
+        <input type="hidden" name="deliveryAddress" id="Address" />
+        <input type="hidden" name="deliveryPhone" id="Phone" />
+
+        <ul class="list-group">
             @if (Model != null && Model.Any())
             {
-                @foreach (var address in Model)
+                foreach (var address in Model)
                 {
-                    <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option>
+                    <li class="list-group-item">
+                        <input class="form-check-input me-1"
+                               type="radio"
+                               name="deliveryID"
+                               value="@address.deliveryID"
+                               data-fullname="@address.deliveryName"
+                               data-address="@address.deliveryAddress"
+                               data-phone="@address.deliveryPhone"
+                               id="radio_@address.deliveryID"
+                        @(Model.First() == address ? "checked" : "") />
+
+                        <label class="form-check-label" for="radio_@address.deliveryID" style="cursor: pointer;">
+                            <span style="display: block; font-weight: bold;">
+                                @address.deliveryName
+                            </span>
+                            <span style="display: block;">@address.deliveryAddress</span>
+                            <span style="display: block;">@address.deliveryPhone</span>
+                        </label>
+                    </li>
                 }
             }
             else
             {
-                <option disabled>Không có địa chỉ giao hàng nào</option>
+                <li class="list-group-item text-muted">Không có địa chỉ giao hàng nào.</li>
             }
-        </select>
-        <div id="savedAddressError" style="color: red; display: none;">Vui lòng chọn địa chỉ giao hàng.</div>
-    </div>
+        </ul>
 
-    <div class="mb-3">
-        <label for="fullName" class="form-label">Họ và tên</label>
-        <input type="text" class="form-control" id="fullName" name="fullName" />
-        <div id="fullNameError" style="color: red; display: none;">Họ và tên không được để trống.</div>
-    </div>
+        <button type="submit" class="btn btn-danger mt-4" style="width: 100%;">Xác nhận</button>
+    </form>
 
-    <div class="mb-3">
-        <label for="address" class="form-label">Địa chỉ giao hàng</label>
-        <input type="text" class="form-control" id="address" name="address" />
-        <div id="addressError" style="color: red; display: none;">Địa chỉ giao hàng không được để trống.</div>
-    </div>
+</div>
 
-    <div class="mb-3">
-        <label for="phoneNumber" class="form-label">Số điện thoại</label>
-        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" />
-        <div id="phoneNumberError" style="color: red; display: none;">Số điện thoại không được để trống.</div>
-    </div>
 
-    <button type="submit" class="btn btn-primary">Xác nhận và đặt hàng</button>
-</form>
 
 <script>
-    // Hàm để tự động điền các trường thông tin khi chọn địa chỉ
+   
     function fillAddress(selectElement) {
         var selectedAddressId = selectElement.value;
 
         if (selectedAddressId) {
-            // Lấy thông tin địa chỉ từ ViewBag
+          
             var deliveryAddresses = @Html.Raw(Json.Serialize(Model));
             var selectedAddress = deliveryAddresses.find(address => address.deliveryID == selectedAddressId);
 
@@ -66,11 +109,11 @@
         }
     }
 
-    // Hàm kiểm tra dữ liệu trước khi gửi form
+   
     document.getElementById("orderForm").addEventListener("submit", function(event) {
         let isValid = true;
 
-        // Kiểm tra địa chỉ giao hàng đã lưu
+       
         if (document.getElementById("savedAddress").value === "") {
             isValid = false;
             document.getElementById("savedAddressError").style.display = "block";
@@ -78,7 +121,7 @@
             document.getElementById("savedAddressError").style.display = "none";
         }
 
-        // Kiểm tra họ và tên
+      
         if (document.getElementById("fullName").value.trim() === "") {
             isValid = false;
             document.getElementById("fullNameError").style.display = "block";
@@ -86,7 +129,7 @@
             document.getElementById("fullNameError").style.display = "none";
         }
 
-        // Kiểm tra địa chỉ
+      
         if (document.getElementById("address").value.trim() === "") {
             isValid = false;
             document.getElementById("addressError").style.display = "block";
@@ -94,7 +137,6 @@
             document.getElementById("addressError").style.display = "none";
         }
 
-        // Kiểm tra số điện thoại
         if (document.getElementById("phoneNumber").value.trim() === "") {
             isValid = false;
             document.getElementById("phoneNumberError").style.display = "block";
@@ -102,9 +144,27 @@
             document.getElementById("phoneNumberError").style.display = "none";
         }
 
-        // Nếu không hợp lệ, ngừng gửi form
+      
         if (!isValid) {
             event.preventDefault();
         }
     });
+        
+    document.querySelectorAll('input[name="deliveryID"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('FullName').value = this.getAttribute('data-fullname');
+            document.getElementById('Address').value = this.getAttribute('data-address');
+            document.getElementById('Phone').value = this.getAttribute('data-phone');
+        });
+    });
+
+    window.addEventListener('DOMContentLoaded', function() {
+        var checked = document.querySelector('input[name="deliveryID"]:checked');
+        if (checked) {
+            document.getElementById('FullName').value = checked.getAttribute('data-fullname');
+            document.getElementById('Address').value = checked.getAttribute('data-address');
+            document.getElementById('Phone').value = checked.getAttribute('data-phone');
+        }
+    });
+
 </script>

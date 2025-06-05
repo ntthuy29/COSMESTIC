@@ -49,14 +49,28 @@ namespace COSMESTIC.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
             }
+            if (ktrauser == null)
+            {
+                // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
+                TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
+                return RedirectToAction("Login");
+            }
             if (ktrauser.user.role == "Customer")
             {
-                var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
-                // Giả sử bạn có bảng Cart với userID
+                try
+                {
+                    var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
 
-                // Lưu số lượng sản phẩm vào session
-                HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
-
+                    if (cart != null && cart.totalQuantity != null)
+                    {
+                        HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message); // hoặc e.ToString() nếu cần đầy đủ
+                    return RedirectToAction("Product", "Product");
+                }
 
             }
             if (ktrauser == null)
@@ -68,10 +82,15 @@ namespace COSMESTIC.Controllers
             else if (ktrauser.username == "Ngan123@" && ktrauser.password == "Ngan123@")
             {
                 return RedirectToAction("Home", "Admin");
+            }else if (ktrauser.user.role == "sale")
+            {
+                Console.WriteLine("role = sale");
+                return RedirectToAction("Home", "Admin");
+
             }
             else
             {
-             
+
 
 
                 return RedirectToAction("Product", "Product");

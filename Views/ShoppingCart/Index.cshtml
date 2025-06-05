@@ -43,7 +43,7 @@
                                             <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-primary">+</button>
                                         </form>
                                     </td>
-                                    <td class="text-end" class="unitPrice">@item.unitprice.ToString("N0") ₫</td>
+                                    <td class="text-end unitPrice" >@item.unitprice.ToString("N0") ₫</td>
                                     <td class="text-end totalPrice">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
                                     <td class="text-center">
                                         <form method="post" action="@Url.Action("RemoveFromCart", "ShoppingCart")">

@@ -1,0 +1,52 @@
+﻿@{
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+@model COSMESTIC.Models.Data.Catalogs
+<div>      <a href="javascript:history.back()" class="btn btn-secondary">Quay lại</a></div>
+
+<div class="container mt-4">
+
+    <div class="container-md my-4">
+        <div class="card rounded" style="box-shadow: 0 4px 8px rgba(0,0,0,0.15);">
+            <div class="card-body">
+                <h5 class="card-title">Danh mục: <span style="color: darkred">@Model.catalogName</span></h5>
+                <p class="card-text">Mô tả: @Model.catalogDescription</p>
+            </div>
+        </div>
+    </div>
+
+
+    <table class="table table-bordered table-hover align-middle text-center">
+        <thead class="table-primary">
+            <tr>
+                <th scope="col">STT</th>
+                <th scope="col">Ảnh</th>
+                <th scope="col">Tên sản phẩm</th>
+                <th scope="col">Mô tả</th>
+                <th scope="col">Giá</th>
+            
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int stt = 1;
+            }
+            @foreach (var p in Model.products)
+            {
+                <tr>
+                    <td>@stt</td>
+                    <td>
+                        <img src="@Url.Content("~/" + p.imagePath)" alt="@p.productName" width="80" height="80" style="object-fit: cover; border-radius: 8px;" />
+                    </td>
+                    <td>@p.productName</td>
+                    <td style="max-width: 300px; text-align: left;">@p.productDescription</td>
+                    <td class="text-danger fw-bold">
+                        @p.price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))
+                    </td>
+                  
+                </tr>
+                stt++;
+            }
+        </tbody>
+    </table>
+</div>

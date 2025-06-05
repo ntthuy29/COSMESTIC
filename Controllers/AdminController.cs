@@ -13,7 +13,7 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public IActionResult Home()
         {
             return View();
@@ -33,7 +33,7 @@ namespace COSMESTIC.Controllers
         {
             return RedirectToAction("Index", "Account");
         }
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public IActionResult Order()
         {
             return RedirectToAction("IndexAdminOrder", "Order");

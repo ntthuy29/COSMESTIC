@@ -149,15 +149,30 @@ namespace COSMESTIC.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var art = await dbContext.Products.FindAsync(id);
-            if (art != null)
+
+            if (art == null)
             {
-                dbContext.Products.Remove(art);
-                await dbContext.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Sản phẩm đã được xóa thành công";
+                TempData["ErrorMessageDeleteProduct"] = "Sản phẩm không tồn tại.";
                 return RedirectToAction("Index");
             }
+
+            var isProductPending = await dbContext.Orders
+                .Where(o => o.status == "Chờ xử lý")
+                .AnyAsync(o => o.orderDetails.Any(od => od.productID == id));
+
+            if (isProductPending)
+            {
+                TempData["ErrorMessageDeleteProduct"] = "Không thể xóa sản phẩm vì đang có trong đơn hàng chờ xử lý.";
+                return RedirectToAction("Index");
+            }
+
+            dbContext.Products.Remove(art);
+            await dbContext.SaveChangesAsync();
+
+            TempData["SuccessMessageDeleteProduct"] = "Sản phẩm đã được xóa thành công.";
             return RedirectToAction("Index");
         }
+
         // còn thiếu 2 controller edit, detail
         [HttpGet]
         [Authorize(Roles = "admin")]

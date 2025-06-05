@@ -126,20 +126,19 @@
             let itemsToShow = 4; 
 
             loadMoreBtn.addEventListener('click', function() {
-                // Lấy các sản phẩm đang ẩn và hiển thị `itemsToShow` sản phẩm tiếp theo
+             
                 const hiddenItems = Array.from(productItems).filter(item => item.classList.contains('d-none'));
 
                 hiddenItems.slice(0, itemsToShow).forEach(item => {
                     item.classList.remove('d-none');
                 });
 
-                // Ẩn nút "Load More" nếu không còn sản phẩm nào ẩn
+             
                 if (hiddenItems.length <= itemsToShow) {
                     loadMoreBtn.style.display = 'none';
                 }
             });
 
-            // Ẩn nút "Load More" ngay từ đầu nếu không có sản phẩm ẩn
             if (productItems.length === 0) {
                 loadMoreBtn.style.display = 'none';
             }
@@ -149,7 +148,6 @@
                 const min = document.getElementById('mins').value;
                 const max = document.getElementById('maxs').value;
 
-                // Xử lý giá trị nhập vào (bỏ "000" nếu cần)
                 const minPrice = min ? parseInt(min) * 1000 : 0;
                 const maxPrice = max ? parseInt(max) * 1000 : Infinity;
 
@@ -163,7 +161,7 @@
                 const isInRange = (isNaN(minPrice) || price >= minPrice) &&
                                  (isNaN(maxPrice) || price <= maxPrice);
 
-                // Chỉ sử dụng một cách ẩn (nên dùng .d-none để đồng bộ với load more)
+               
                 if (!isInRange) {
                     item.classList.add('d-none');
                 } else {
@@ -171,7 +169,7 @@
                 }
             });
 
-            // Ẩn nút "Load More" nếu tất cả sản phẩm đã được lọc
+           
             updateLoadMoreButton();
         }
 

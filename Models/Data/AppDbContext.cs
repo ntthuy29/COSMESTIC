@@ -69,10 +69,14 @@ namespace COSMESTIC.Models.Data
                 entity.Property(p => p.productName).IsRequired();
                 entity.Property(p => p.price).IsRequired();
                 entity.Property(p => p.imagePath).IsRequired();
+
                 entity.HasOne(p => p.catalog)
                     .WithMany(c => c.products)
-                    .HasForeignKey(p => p.catalogID).IsRequired();
+                    .HasForeignKey(p => p.catalogID)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Restrict); // <-- Dòng này ngăn xóa dây chuyền
             });
+
             modelBuilder.Entity<Catalogs>(entity =>
             {
                 entity.Property(c => c.catalogID)

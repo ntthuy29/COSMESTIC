@@ -25,8 +25,10 @@ namespace COSMESTIC.Controllers
             var orders = _context.Orders
                 .Include(o => o.orderDetails)
                 .ThenInclude(oi => oi.products)
+
                 .Where(o => o.userID == userId)
                 .ToList();
+            
             return View(orders);
         }
         public async Task<IActionResult> ShippingInformation()
@@ -40,6 +42,13 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public IActionResult ConfirmOrder(string fullName, string address, string phoneNumber, string discountCode)
         {
+            Console.WriteLine("HUHU");
+
+            Console.WriteLine(fullName);
+            Console.WriteLine(address);
+            Console.WriteLine(phoneNumber);
+            Console.WriteLine(discountCode);
+            Console.WriteLine("haha");
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
             {
@@ -399,7 +408,7 @@ namespace COSMESTIC.Controllers
                 orderDate = DateTime.Now,
 
                 status = "Chờ xử lý",
-                totalAmount = totalAmount - totalDiscountAmount, // Áp dụng giảm giá ngay tại đây
+                totalAmount = totalAmount - totalDiscountAmount, 
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
                                                     .OrderBy(d => d.deliveryID)
@@ -410,7 +419,7 @@ namespace COSMESTIC.Controllers
             _context.Orders.Add(newOrder);
             _context.SaveChanges();
 
-            // Tạo chi tiết đơn hàng
+          
             var orderDetail = new orderDetail
             {
                 orderID = newOrder.orderID,
@@ -420,7 +429,7 @@ namespace COSMESTIC.Controllers
             };
             _context.orderDetails.Add(orderDetail);
 
-            // Trừ sản phẩm khỏi kho
+          
             if (product != null)
             {
                 product.quantity -= quantity;
@@ -446,9 +455,13 @@ namespace COSMESTIC.Controllers
 
 
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> IndexAdminOrder(string status, string searchCustomer)
         {
+            if (string.IsNullOrEmpty(status))
+            {
+                status = "Chờ xử lý";
+            }
 
             var query = _context.Orders
                 .Include(o => o.users)
@@ -482,7 +495,7 @@ namespace COSMESTIC.Controllers
             return View(orders);
         }
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> Approve(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -497,7 +510,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> Reject(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -513,7 +526,7 @@ namespace COSMESTIC.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> Delete(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -534,7 +547,7 @@ namespace COSMESTIC.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> BulkApprove(int[] selectedOrders)
         {
             if (selectedOrders == null || !selectedOrders.Any())

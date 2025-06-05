@@ -54,11 +54,11 @@
                                     </div>
                                     <div>
                                         <label for="phone" class="form-label">Số điện thoại</label>
-                                        <input type="text" id="phone" class="form-control" value="@Model.phoneNumber" readonly>
+                                        <input type="number" id="phone" class="form-control" value="@Model.phoneNumber" readonly>
                                     </div>
                                     <div>
                                         <label for="birth" class="form-label">Ngày sinh</label>
-                                        <input type="text" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" readonly>
+                                        <input type="date" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" readonly>
                                     </div>
                                 </form>
                             </div>
@@ -129,11 +129,11 @@
                                     </div>
                                     <div>
                                         <label for="phone" class="form-label">Số điện thoại</label>
-                                        <input type="text" id="phone" class="form-control" value="@Model.phoneNumber" name="phoneNumber" required>
+                                        <input type="number" id="phone" class="form-control" value="@Model.phoneNumber" name="phoneNumber" required>
                                     </div>
                                     <div>
                                         <label for="birth" class="form-label">Ngày sinh</label>
-                                        <input type="text" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" name="dateOfBirth" required>
+                                        <input type="date" id="birth" class="form-control" value="@Model.dateOfBirth.ToString("dd/MM/yyyy")" name="dateOfBirth" required>
                                     </div>
                                     <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
                                 </form>
