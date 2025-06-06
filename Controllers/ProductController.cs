@@ -44,11 +44,11 @@ namespace COSMESTIC.Controllers
             if (userId != null)
             {
                 var userOrders = _context.Orders
-                    .Where(o => o.userID == userId && o.status == "Shipped")
-                    .Include(o => o.orderDetails)
+                    .Where(o => o.userID == userId && o.status == "Đã hoàn thành")
+                    .Include(o => o.orderDetails)   
                     .ToList();
                 hasPurchased = _context.Orders
-                                       .Where(o => o.userID == userId && o.status == "Shipped")
+                                       .Where(o => o.userID == userId && o.status == "Đã hoàn thành")
                                        .Any(o => o.orderDetails.Any(od => od.productID == id));
                 // Nếu có bất kỳ đơn hàng nào chưa được đánh giá thì hasReviewed sẽ là true
                 hasReviewed = userOrders.Any(o => o.orderDetails != null && o.orderDetails.Any(od => od.productID == id) &&
@@ -69,7 +69,7 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("Login", "Login");
             }
             var hasPurchased = _context.Orders
-                .Where(o => o.userID == userId && o.status == "Shipped")
+                .Where(o => o.userID == userId && o.status == "Đã hoàn thành")
                 .Any(o => o.orderDetails.Any(od => od.productID == productID));
             if (!hasPurchased)
             {
@@ -77,7 +77,7 @@ namespace COSMESTIC.Controllers
                 return RedirectToAction("ProductDetail", new { productID = productID });
             }
             var lastOrder = _context.Orders
-                .Where(o => o.userID == userId && o.status == "Shipped")
+                .Where(o => o.userID == userId && o.status == "Đã hoàn thành")
                 .OrderByDescending(o => o.orderDate)
                 .FirstOrDefault();
             if (lastOrder == null)

@@ -342,7 +342,7 @@ namespace COSMESTIC.Controllers
 
             if (!string.IsNullOrEmpty(duocsudung))
             {
-                bool isActive = duocsudung.ToLower() == "duocsudung";
+                bool isActive = duocsudung.ToLower() == "True";
                 query = query.Where(d => (d.isActive && isActive) || (d.isActive && !isActive));
             }
 

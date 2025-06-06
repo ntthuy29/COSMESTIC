@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250605092325_setNullContrainst")]
-    partial class setNullContrainst
+    [Migration("20250602013527_AddNoteCanNull")]
+    partial class AddNoteCanNull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,10 +200,17 @@ namespace COSMESTIC.Migrations
                     b.Property<DateTime?>("endDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("orderDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("payMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("status")
                         .IsRequired()
@@ -276,8 +283,7 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("productID"), 30000L);
 
-                    b.Property<int?>("catalogID")
-                        .IsRequired()
+                    b.Property<int>("catalogID")
                         .HasColumnType("int");
 
                     b.Property<string>("imagePath")
@@ -540,7 +546,7 @@ namespace COSMESTIC.Migrations
                     b.HasOne("COSMESTIC.Models.Data.Catalogs", "catalog")
                         .WithMany("products")
                         .HasForeignKey("catalogID")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("catalog");

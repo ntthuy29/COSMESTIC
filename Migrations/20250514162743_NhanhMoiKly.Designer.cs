@@ -4,6 +4,7 @@ using COSMESTIC.Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace COSMESTIC.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250514162743_NhanhMoiKly")]
+    partial class NhanhMoiKly
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,16 +33,16 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("accountID"), 20000L);
 
-                    b.Property<string>("email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("userID")
                         .HasColumnType("int");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("accountID");
 
@@ -197,17 +200,10 @@ namespace COSMESTIC.Migrations
                     b.Property<DateTime?>("endDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("note")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("orderDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("payMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("status")
                         .IsRequired()
@@ -280,8 +276,7 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("productID"), 30000L);
 
-                    b.Property<int?>("catalogID")
-                        .IsRequired()
+                    b.Property<int>("catalogID")
                         .HasColumnType("int");
 
                     b.Property<string>("imagePath")
@@ -544,7 +539,7 @@ namespace COSMESTIC.Migrations
                     b.HasOne("COSMESTIC.Models.Data.Catalogs", "catalog")
                         .WithMany("products")
                         .HasForeignKey("catalogID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("catalog");

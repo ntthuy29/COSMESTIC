@@ -2,190 +2,534 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     var cart = (COSMESTIC.Models.Data.ShoppingCart)ViewBag.Cart;
+    var selectedItems = ViewBag.SelectedItems as List<COSMESTIC.Models.Data.CartItem> ?? new List<COSMESTIC.Models.Data.CartItem>();
 }
 
 <div class="container my-5">
-    <div class="text-center mb-4">
-        <h3 class="text-success fw-bold">🎉 Xác nhận đơn hàng 🎉</h3>
+    <!-- Header với tiến trình thanh toán -->
+    <div class="checkout-header mb-5 text-center">
+        <h2 class="fw-bold text-pink">Xác nhận đơn hàng của bạn</h2>
+        <p class="text-muted">Vui lòng kiểm tra lại thông tin trước khi đặt hàng</p>
+        <div class="checkout-progress mt-4">
+            <div class="progress-steps">
+                <div class="step completed">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Giỏ hàng</span>
+                </div>
+                <div class="step completed">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Thông tin giao hàng</span>
+                </div>
+                <div class="step active">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Xác nhận đơn hàng</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow rounded">
-        <div class="card-body">
-            <form method="post" action="@Url.Action("CreateOrder", "Order")">
-                <!-- Thông tin người mua -->
-                <div class="mb-4">
-                    <h5><strong>Thông tin người mua:</strong></h5>
-                    <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(ViewBag.FullName))</p>
-                    <p><strong>Số điện thoại:</strong> @ViewBag.PhoneNumber</p>
-                    <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(ViewBag.Address))</p>
+    <form method="post" action="@Url.Action("CreateOrder", "Order")" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
 
-                    <!-- Hidden input để truyền sang Create -->
-                    <input type="hidden" name="fullName" value="@ViewBag.FullName" />
-                    <input type="hidden" name="phoneNumber" value="@ViewBag.PhoneNumber" />
-                    <input type="hidden" name="address" value="@ViewBag.Address" />
-                </div>
+        <!-- Hidden fields cho selected items -->
+        @foreach (var item in selectedItems)
+        {
+            <input type="hidden" name="selectedItems" value="@item.cartItemID" />
+        }
+        <input type="hidden" name="fullName" value="@ViewBag.FullName" />
+        <input type="hidden" name="phoneNumber" value="@ViewBag.PhoneNumber" />
+        <input type="hidden" name="address" value="@ViewBag.Address" />
+        <input type="hidden" name="savedAddress" value="@ViewBag.savedAddress" />
 
-                <!-- Mã giảm giá -->
-                <div class="mb-3">
-                    <label for="discountCode" class="form-label">Mã giảm giá</label>
-                    <div class="input-group">
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="discountCode" name="discountCode" value="@ViewBag.DiscountCode" placeholder="Chọn mã giảm giá" readonly />
-                            <a href="@Url.Action("ChooseDiscount", "Discount", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber, returnUrl = Url.Action("ConfirmOrder", "Order") })" class="btn btn-primary">Chọn mã</a>
-                        </div>
+        <div class="row g-4">
+            <!-- Cột thông tin khách hàng -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm rounded-3 border-0 h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="m-0 fw-bold text-pink"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h5>
                     </div>
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="text-danger">@TempData["ErrorMessage"]</div>
-                    }
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="text-success">@TempData["SuccessMessage"]</div>
-                    }
-                </div>
-                <!-- Phương thức thanh toán -->
-                <div class="mb-3">
-                    <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
-                    <select class="form-control" id="paymentMethod" name="paymentMethod" onchange="showQRCode(this)">
-                        <option value="cash">Thanh toán bằng tiền mặt</option>
-                        <option value="bankAccount">Thanh toán bằng tài khoản ngân hàng</option>
-                        <option value="momo">Thanh toán qua Momo</option>
-                    </select>
-                </div>
-
-                <!-- QR Code Modal -->
-                <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="qrCodeModalLabel">Quét mã QR để thanh toán</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;" />
-                                <div class="mt-3">
-                                    <!-- Phần mô tả nội dung chuyển khoản -->
-                                    <div id="bankTransferInfo" style="display: none;">
-                                        <h6 class="fw-bold">Thông tin chuyển khoản ngân hàng</h6>
-                                        <p class="mb-1"><strong>Tên tài khoản:</strong> COSMESTIC COMPANY</p>
-                                        <p class="mb-1"><strong>Số tài khoản:</strong> 1055457267</p>
-                                        <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank - Chi nhánh Tam Kỳ</p>
-                                        <p class="mb-1"><strong>Nội dung chuyển khoản:</strong></p>
-                                        <p class="bg-light p-2 rounded">
-                                            <code>DH@(DateTime.Now.ToString("ddMMyyyy"))_[SỐ_ĐIỆN_THOẠI_CỦA_BẠN]</code>
-                                        </p>
-                                        <p class="text-danger small">Lưu ý: Vui lòng ghi đúng nội dung để hệ thống tự động xác nhận thanh toán</p>
-                                    </div>
-
-                                    <div id="momoTransferInfo" style="display: none;">
-                                        <h6 class="fw-bold">Hướng dẫn thanh toán Momo</h6>
-                                        <p class="mb-1">1. Mở ứng dụng Momo và chọn "Quét mã"</p>
-                                        <p class="mb-1">2. Quét mã QR bên trên</p>
-                                        <p class="mb-1">3. Kiểm tra thông tin đơn hàng</p>
-                                        <p class="mb-1">4. Nhập nội dung: <code>DH@(DateTime.Now.ToString("ddMMyyyy"))</code></p>
-                                        <p class="mb-1">5. Xác nhận thanh toán</p>
+                    <div class="card-body">
+                        <div class="customer-info mb-4">
+                            <div class="info-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user text-pink me-2"></i>
+                                    <div>
+                                        <p class="mb-0"><strong>Họ và tên:</strong></p>
+                                        <p class="text-dark">@Html.Raw(HttpUtility.HtmlDecode(ViewBag.FullName))</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Xong</button>
+
+                            <div class="info-item mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-phone text-pink me-2"></i>
+                                    <div>
+                                        <p class="mb-0"><strong>Số điện thoại:</strong></p>
+                                        <p class="text-dark">@ViewBag.PhoneNumber</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-map-marker-alt text-pink me-2"></i>
+                                    <div>
+                                        <p class="mb-0"><strong>Địa chỉ giao hàng:</strong></p>
+                                        <p class="text-dark">@Html.Raw(HttpUtility.HtmlDecode(ViewBag.Address))</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mã giảm giá -->
+                        <div class="discount-section mb-4">
+                            <h6 class="fw-bold text-pink mb-3"><i class="fas fa-tag me-2"></i>Mã giảm giá</h6>
+                            <div class="input-group">
+                                <input type="text" class="form-control border-pink" id="discountCode" name="discountCode" value="@ViewBag.DiscountCode" placeholder="Nhập mã giảm giá" readonly />
+                                <a href="@Url.Action("ChooseDiscount", "Discount", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber, returnUrl = Url.Action("ConfirmOrder", "Order") })" class="btn btn-pink">
+                                    <i class="fas fa-ticket-alt me-1"></i> Chọn mã
+                                </a>
+                            </div>
+                            @if (TempData["ErrorMessage"] != null)
+                            {
+                                <div class="alert alert-danger mt-2 small">@TempData["ErrorMessage"]</div>
+                            }
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <div class="alert alert-success mt-2 small">@TempData["SuccessMessage"]</div>
+                            }
+                        </div>
+
+                        <!-- Phương thức thanh toán -->
+                        <div class="payment-method mb-4">
+                            <h6 class="fw-bold text-pink mb-3"><i class="fas fa-credit-card me-2"></i>Phương thức thanh toán</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cashPayment" value="cash" checked>
+                                <label class="form-check-label" for="cashPayment">
+                                    <i class="fas fa-money-bill-wave me-1"></i> Thanh toán tiền mặt khi nhận hàng
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="bankPayment" value="bankAccount">
+                                <label class="form-check-label" for="bankPayment">
+                                    <i class="fas fa-university me-1"></i> Chuyển khoản ngân hàng
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="momoPayment" value="momo">
+                                <label class="form-check-label" for="momoPayment">
+                                    <i class="fas fa-mobile-alt me-1"></i> Thanh toán qua Momo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú -->
+                        <div class="notes-section">
+                            <h6 class="fw-bold text-pink mb-3"><i class="fas fa-edit me-2"></i>Ghi chú đơn hàng</h6>
+                            <textarea class="form-control border-pink" id="note" name="note" rows="3" placeholder="Vui lòng nhập ghi chú nếu cần (thời gian giao hàng, yêu cầu đặc biệt,...)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột thông tin đơn hàng -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm rounded-3 border-0 h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="m-0 fw-bold text-pink"><i class="fas fa-shopping-bag me-2"></i>Chi tiết đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="order-items">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr class="bg-light-pink">
+                                            <th class="text-center" style="width: 80px;">Ảnh</th>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-center">SL</th>
+                                            <th class="text-end">Đơn giá</th>
+                                            <th class="text-end">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in selectedItems)
+                                        {
+                                            <tr>
+                                                <td class="text-center">
+                                                    <img src="@Url.Content("~/" + item.products.imagePath)" class="product-img rounded-2" alt="@item.products.productName" />
+                                                </td>
+                                                <td>
+                                                    <div class="product-name">@item.products.productName</div>
+                                                   
+                                                </td>
+                                                <td class="text-center align-middle">@item.quantity</td>
+                                                <td class="text-end align-middle">@item.unitprice.ToString("N0") ₫</td>
+                                                <td class="text-end align-middle fw-bold">@((item.unitprice * item.quantity).ToString("N0")) ₫</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tổng thanh toán -->
+                            <div class="order-summary mt-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Tạm tính:</span>
+                                    <span class="fw-bold">@ViewBag.TotalAmount.ToString("N0") ₫</span>
+                                </div>
+
+                                @if (ViewBag.DiscountAmount > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-2 text-success">
+                                        <span>Giảm giá:</span>
+                                        <span class="fw-bold">-@ViewBag.DiscountAmount.ToString("N0") ₫</span>
+                                    </div>
+                                }
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Phí vận chuyển:</span>
+                                    <span class="fw-bold">0 ₫</span>
+                                </div>
+
+                                <hr class="my-2">
+
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h5 class="m-0">Tổng cộng:</h5>
+                                    <h4 class="m-0 text-pink fw-bold">
+                                        @(ViewBag.DiscountAmount > 0 ? ViewBag.finalTotal.ToString("N0") : ViewBag.TotalAmount.ToString("N0")) ₫
+                                    </h4>
+                                </div>
+
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-pink btn-lg fw-bold py-3">
+                                        <i class="fas fa-check-circle me-2"></i> XÁC NHẬN ĐƠN HÀNG
+                                    </button>
+                                    <a href="@Url.Action("ShippingInformation", "Order")" class="btn btn-outline-secondary py-3">
+                                        <i class="fas fa-arrow-left me-2"></i> QUAY LẠI CHỈNH SỬA
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </form>
+</div>
 
-                <!-- Chi tiết đơn hàng -->
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-primary">
-                        <tr>
-                            <th class="text-center">Ảnh</th>
-                            <th>Sản phẩm</th>
-                            <th class="text-center">Số lượng</th>
-                            <th class="text-end">Đơn giá</th>
-                            <th class="text-end">Tổng tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in cart.cartItems)
-                        {
-                            <tr>
-                                <td class="text-center">
-                                    <img src="@Url.Content("~/" + item.products.imagePath)" style="width: 60px; height: 60px; object-fit: cover;" class="rounded" />
-                                </td>
-                                <td>@item.products.productName</td>
-                                <td class="text-center">@item.quantity</td>
-                                <td class="text-end">@item.unitprice.ToString("N0") ₫</td>
-                                <td class="text-end">@((item.unitprice * item.quantity).ToString("N0")) ₫</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <!-- Tổng cộng -->
-                <div class="d-flex justify-content-end mt-3">
-                    <div class="text-end">
-                        <h4 class="text-muted">
-                            Tổng tiền trước giảm: @ViewBag.TotalAmount.ToString("N0") ₫
-                        </h4>
-                        @if (ViewBag.DiscountAmount > 0)
-                        {
-                            <h4 class="text-muted">
-                                Giảm giá: -@ViewBag.DiscountAmount.ToString("N0") ₫
-                            </h4>
-                            <h4 class="text-danger fw-bold">
-                                Tổng cộng: @ViewBag.finalTotal.ToString("N0") ₫
-                            </h4>
-                        }
-                        else
-                        {
-                            <h4 class="text-danger fw-bold">
-                                Tổng cộng: @ViewBag.TotalAmount.ToString("N0") ₫
-                            </h4>
-                        }
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-pink text-white">
+                <h5 class="modal-title" id="qrCodeModalLabel">Hướng dẫn thanh toán</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;" />
+
+                <div id="bankTransferInfo" style="display: none;">
+                    <div class="payment-guide">
+                        <h6 class="fw-bold text-pink mb-3">THANH TOÁN QUA NGÂN HÀNG</h6>
+                        <div class="guide-item mb-2">
+                            <i class="fas fa-university me-2 text-pink"></i>
+                            <span>Ngân hàng: Vietcombank - Chi nhánh Tam Kỳ</span>
+                        </div>
+                        <div class="guide-item mb-2">
+                            <i class="fas fa-user me-2 text-pink"></i>
+                            <span>Tên tài khoản: COSMESTIC COMPANY</span>
+                        </div>
+                        <div class="guide-item mb-2">
+                            <i class="fas fa-wallet me-2 text-pink"></i>
+                            <span>Số tài khoản: <strong>1055457267</strong></span>
+                        </div>
+                        <div class="guide-item mb-3">
+                            <i class="fas fa-comment me-2 text-pink"></i>
+                            <span>Nội dung chuyển khoản:</span>
+                        </div>
+                        <div class="bg-light-pink p-2 rounded-2 mb-3">
+                            <code class="text-dark">DH@(DateTime.Now.ToString("ddMMyyyy"))_[SỐ_ĐIỆN_THOẠI_CỦA_BẠN]</code>
+                        </div>
+                        <div class="alert alert-warning small">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Vui lòng ghi đúng nội dung để hệ thống tự động xác nhận thanh toán
+                        </div>
                     </div>
                 </div>
 
-                <!-- Nút xác nhận -->
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-success me-2">
-                        ✅ Xác nhận & Đặt hàng
-                    </button>
-                    <a href="@Url.Action("ShippingInformation", "Order")" class="btn btn-outline-secondary">
-                        🔄 Quay lại chỉnh sửa
-                    </a>
+                <div id="momoTransferInfo" style="display: none;">
+                    <div class="payment-guide">
+                        <h6 class="fw-bold text-pink mb-3">THANH TOÁN QUA MOMO</h6>
+                        <div class="guide-steps">
+                            <div class="step mb-3">
+                                <div class="step-number bg-pink text-white rounded-circle d-inline-flex align-items-center justify-content-center">1</div>
+                                <span class="ms-2">Mở ứng dụng Momo và chọn "Quét mã"</span>
+                            </div>
+                            <div class="step mb-3">
+                                <div class="step-number bg-pink text-white rounded-circle d-inline-flex align-items-center justify-content-center">2</div>
+                                <span class="ms-2">Quét mã QR bên trên</span>
+                            </div>
+                            <div class="step mb-3">
+                                <div class="step-number bg-pink text-white rounded-circle d-inline-flex align-items-center justify-content-center">3</div>
+                                <span class="ms-2">Kiểm tra thông tin đơn hàng</span>
+                            </div>
+                            <div class="step mb-3">
+                                <div class="step-number bg-pink text-white rounded-circle d-inline-flex align-items-center justify-content-center">4</div>
+                                <span class="ms-2">Nhập nội dung: <code>DH@(DateTime.Now.ToString("ddMMyyyy"))</code></span>
+                            </div>
+                            <div class="step">
+                                <div class="step-number bg-pink text-white rounded-circle d-inline-flex align-items-center justify-content-center">5</div>
+                                <span class="ms-2">Xác nhận thanh toán</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-pink" data-bs-dismiss="modal">Đã hiểu</button>
+            </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Hàm hiển thị QR Code
-        function showQRCode(selectElement) {
-            const paymentMethod = selectElement.value;
-            const qrCodeImage = document.getElementById("qrCodeImage");
-            const bankInfo = document.getElementById("bankTransferInfo");
-            const momoInfo = document.getElementById("momoTransferInfo");
-            const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+@section Styles {
+    <style>
+        /* Màu sắc chủ đạo */
+        :root {
+            --pink-color: #ff6b9d;
+            --light-pink: #fff0f5;
+            --dark-pink: #e84393;
+        }
 
-            // Ẩn tất cả thông tin trước khi hiển thị
-            bankInfo.style.display = "none";
-            momoInfo.style.display = "none";
+        .text-pink {
+            color: var(--pink-color) !important;
+        }
 
-            if (paymentMethod === "bankAccount") {
-                qrCodeImage.src = "/Img/QR-NganHangPay.jpg";
-                bankInfo.style.display = "block";
-                modal.show();
-            } else if (paymentMethod === "momo") {
-                qrCodeImage.src = "/Img/QR-MomoPay.jpg";
-                momoInfo.style.display = "block";
-                modal.show();
+        .bg-pink {
+            background-color: var(--pink-color) !important;
+        }
+
+        .bg-light-pink {
+            background-color: var(--light-pink) !important;
+        }
+
+        .btn-pink {
+            background-color: var(--pink-color);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+            .btn-pink:hover {
+                background-color: var(--dark-pink);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             }
 
-            qrCodeImage.onerror = function() {
-                console.error("Không thể tải ảnh QR Code");
-                qrCodeImage.src = "https://via.placeholder.com/300x300?text=QR+Code+Not+Found";
-            };
+        .border-pink {
+            border-color: var(--pink-color) !important;
         }
+
+        /* Header */
+        .checkout-header {
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Thanh tiến trình */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+            .progress-steps::before {
+                content: "";
+                position: absolute;
+                top: 15px;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: #e0e0e0;
+                z-index: 1;
+            }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .step-text {
+            font-size: 0.85rem;
+            color: #9e9e9e;
+        }
+
+        .step.completed .step-number {
+            background-color: var(--pink-color);
+        }
+
+        .step.completed .step-text {
+            color: var(--pink-color);
+        }
+
+        .step.active .step-number {
+            background-color: var(--pink-color);
+            box-shadow: 0 0 0 3px rgba(255,107,157,0.3);
+        }
+
+        .step.active .step-text {
+            color: var(--pink-color);
+            font-weight: bold;
+        }
+
+        /* Card */
+        .card {
+            border: none;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Sản phẩm */
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.3s ease;
+        }
+
+            .product-img:hover {
+                transform: scale(1.1);
+            }
+
+        .product-name {
+            font-weight: 500;
+        }
+
+        .product-brand {
+            font-size: 0.85rem;
+        }
+
+        /* Payment guide */
+        .payment-guide {
+            text-align: left;
+        }
+
+        .guide-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .guide-steps .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+       
+
+        .step-text {
+            font-size: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Hiển thị QR code khi chọn phương thức thanh toán
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
+
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === "bankAccount") {
+                        showQRCode('bankAccount');
+                    } else if (this.value === "momo") {
+                        showQRCode('momo');
+                    }
+                });
+            });
+
+            function showQRCode(paymentMethod) {
+                const qrCodeImage = document.getElementById("qrCodeImage");
+                const bankInfo = document.getElementById("bankTransferInfo");
+                const momoInfo = document.getElementById("momoTransferInfo");
+                const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+
+                // Ẩn tất cả thông tin trước khi hiển thị
+                bankInfo.style.display = "none";
+                momoInfo.style.display = "none";
+
+                if (paymentMethod === "bankAccount") {
+                    qrCodeImage.src = "/Img/QR-NganHangPay.jpg";
+                    bankInfo.style.display = "block";
+                    document.getElementById('qrCodeModalLabel').textContent = "Thanh toán qua ngân hàng";
+                    modal.show();
+                } else if (paymentMethod === "momo") {
+                    qrCodeImage.src = "/Img/QR-MomoPay.jpg";
+                    momoInfo.style.display = "block";
+                    document.getElementById('qrCodeModalLabel').textContent = "Thanh toán qua Momo";
+                    modal.show();
+                }
+
+                qrCodeImage.onerror = function() {
+                    console.error("Không thể tải ảnh QR Code");
+                    qrCodeImage.src = "https://via.placeholder.com/300x300?text=QR+Code+Not+Found";
+                };
+            }
+
+            // Thêm validation cho form
+            const form = document.querySelector('.needs-validation');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
     </script>
 }

@@ -147,7 +147,7 @@ namespace COSMESTIC.Controllers
                 .Include(o => o.orderDetails)
                 .ThenInclude(od => od.products)
                 .ThenInclude(p => p.catalog)
-                .Where(o => o.orderDate >= startDate && o.orderDate <= endDate);
+                .Where(o => o.orderDate.Date >= startDate.Value.Date && o.orderDate.Date <= endDate.Value.Date);
 
             var model = new RevenueReportViewModel
             {

@@ -4,57 +4,152 @@
     ViewData["Title"] = "Ưu đãi";
 }
 
-<div class="container my-5">
-    <h3 class="text-center mb-4">🎉 Ưu đãi</h3>
+<div class="container my-4 my-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header section -->
+            <div class="text-center mb-3">
+                <h2 class="fw-bold" style="color: #FF6B6B; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">KHO ƯU ĐÃI</h2>
+                <p class="text-muted fs-5">Chọn mã giảm giá phù hợp và tiết kiệm ngay!</p>
+                <div class="d-flex justify-content-center">
+                    <div style="width: 80px; height: 4px; background: linear-gradient(90deg, #FF6B6B, #FFD166); border-radius: 2px;"></div>
+                </div>
+            </div>
 
-    <div class="card p-4">
-        <div class="mb-3">
-            <input type="text" class="form-control mb-2" placeholder="Nhập mã khuyến mãi" id="manualDiscountCode" />
-            <button type="button" class="btn btn-link" onclick="applyManualDiscount()">Kiểm tra</button>
-        </div>
-
-        @if (Model != null && Model.Any())
-        {
-            foreach (var discount in Model)
-            {
-                <div class="discount-item mb-3 p-3 border rounded">
-                    <div class="d-flex align-items-center">
-                        <div>
-                            <h6 class="mb-1">@discount.name</h6>
-                            <p class="text-muted mb-0">Giảm @discount.value%</p>
-                            <p class="text-muted mb-0">Hiệu lực: @discount.startDate - @discount.endDate</p>
-                            <button class="btn btn-sm btn-outline-primary mt-2" onclick="selectDiscount('@discount.name')">Chọn</button>
+            <!-- Discount card -->
+            <div class="card border-0" style="background: linear-gradient(135deg, #f8f9fa, #ffffff); box-shadow: 0 10px 30px rgba(255, 107, 107, 0.1); border-radius: 15px;">
+                <div class="card-body p-4 p-lg-5">
+                    <!-- Manual discount input -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold mb-3" style="color: #4ECDC4;">
+                            <i class="fas fa-tag me-2"></i>Bạn có mã giảm giá?
+                        </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg border-2 border-primary"
+                                   placeholder="Nhập mã khuyến mãi"
+                                   id="manualDiscountCode"
+                                   style="border-color: #4ECDC4 !important;">
+                            <button class="btn px-4 fw-bold"
+                                    type="button"
+                                    onclick="applyManualDiscount()"
+                                    style="background: #4ECDC4; color: white;">
+                                <i class="fas fa-paper-plane me-2"></i>ÁP DỤNG
+                            </button>
                         </div>
                     </div>
+
+                    <div class="position-relative my-4">
+                        <hr style="border-color: #FFD166;">
+                        <div class="position-absolute top-50 start-50 translate-middle px-3" style="background-color: #f8f9fa;">
+                            <span class="fw-semibold" style="color: #FF6B6B;">HOẶC</span>
+                        </div>
+                    </div>
+
+                    <!-- Discount list -->
+                    @if (Model != null && Model.Any())
+                    {
+                        <h5 class="mb-4 fw-bold" style="color: #FF6B6B;">
+                            <i class="fas fa-gift me-2"></i>MÃ GIẢM GIÁ CỦA BẠN
+                        </h5>
+
+                        <div class="row g-3">
+                            @foreach (var discount in Model)
+                            {
+                                <div class="col-12">
+                                    <div class="p-4 border-0 rounded-4 shadow-sm"
+                                         style="background: linear-gradient(135deg, #ffffff, #f0f9ff); border-left: 4px solid #4ECDC4 !important;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <span class="badge me-2" style="background: #FFD166; color: #333;">HOT</span>
+                                                    <h6 class="mb-0 fw-bold" style="color: #06AED5;">@discount.name</h6>
+                                                </div>
+                                                <p class="mb-2 fw-semibold" style="color: #4ECDC4;">
+                                                    <i class="fas fa-percentage me-1"></i> Giảm @discount.value%
+                                             
+                                                </p>
+                                                <small class="d-flex align-items-center" style="color: #888;">
+                                                    <i class="far fa-calendar-alt me-2"></i>
+                                                    @discount.startDate → @discount.endDate
+                                                </small>
+                                            </div>
+                                            <button class="btn rounded-pill px-4 py-2 fw-bold"
+                                                    onclick="selectDiscount('@discount.name')"
+                                                    style="background: #FF6B6B; color: white;">
+                                                DÙNG NGAY
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-4" style="font-size: 5rem; color: #FFD166;">
+                                <i class="fas fa-gift"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3" style="color: #06AED5;">Chưa có ưu đãi nào</h5>
+                            <p class="text-muted">Chúng tôi sẽ cập nhật ưu đãi mới sớm nhất!</p>
+                        </div>
+                    }
+
+                    <!-- Warning message -->
+                    @if (TempData["MinAmountMessage"] != null)
+                    {
+                        <div class="alert mt-4 d-flex align-items-center border-0 shadow-sm"
+                             style="background: linear-gradient(135deg, #fff8f8, #ffffff); border-left: 4px solid #FF6B6B !important;">
+                            <i class="fas fa-exclamation-circle me-3" style="color: #FF6B6B; font-size: 1.5rem;"></i>
+                            <div class="fw-semibold" style="color: #555;">@TempData["MinAmountMessage"]</div>
+                        </div>
+                    }
                 </div>
-            }
-        }
-        else
-        {
-            <p class="text-muted text-center">Không có mã giảm giá nào đang hoạt động.</p>
-        }
-
-        @if (TempData["MinAmountMessage"] != null)
-        {
-            <div class="alert alert-warning d-flex align-items-center mt-3">
-                <span class="me-2">! </span>
-                <p class="mb-0">@TempData["MinAmountMessage"]</p>
             </div>
-        }
-    </div>
 
-    <div class="text-center mt-4">
-        @if (ViewBag.ReturnUrl == "ShippingInformationBuyNow")
-        {
-            <a href="@Url.Action("ShippingInformationBuyNow","Order"), new {productId = ViewBag.ProductId, quantity = ViewBag.Quantity} class="btn btn-primary">Quay lại</a>
-        }
-        else
-        {
-            <a href="@Url.Action("ConfirmOrder", "Order", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber })" class="btn btn-primary">Quay lại</a>
-        }
+            <!-- Back button -->
+            <div class="text-center mt-5">
+                @if (ViewBag.ReturnUrl == "ShippingInformationBuyNow")
+                {
+                    <a href="@Url.Action("ShippingInformationBuyNow","Order", new {productId = ViewBag.ProductId, quantity = ViewBag.Quantity})"
+                       class="btn btn-lg px-4 fw-bold"
+                       style="background: #06AED5; color: white;">
+                        <i class="fas fa-arrow-left me-2"></i>QUAY LẠI
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("ConfirmOrder", "Order", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber })"
+                       class="btn btn-lg px-4 fw-bold"
+                       style="background: #06AED5; color: white;">
+                        <i class="fas fa-arrow-left me-2"></i>QUAY LẠI
+                    </a>
+                }
+            </div>
+        </div>
     </div>
-
 </div>
+
+@section Styles {
+    <style>
+        .discount-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2) !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(78, 205, 196, 0.25) !important;
+            border-color: #4ECDC4 !important;
+        }
+    </style>
+}
 
 @section Scripts {
     <script>
@@ -82,29 +177,23 @@
 
         // Hàm áp dụng mã giảm giá nhập tay
         function applyManualDiscount() {
-            const manualCode = document.getElementById('manualDiscountCode').value;
+            const manualCode = document.getElementById('manualDiscountCode').value.trim();
             if (manualCode) {
-                let returnUrl = '@ViewBag.ReturnUrl';
-                const actionType = '@ViewBag.ActionType';
-                if (!returnUrl) {
-                    returnUrl = '@Url.Action("ConfirmOrder", "Order")';
-                }
-
-                let url = returnUrl + (returnUrl.includes('?') ? '&' : '?') +
-                    'discountCode=' + encodeURIComponent(manualCode) +
-                    '&address=' + encodeURIComponent('@ViewBag.Address') +
-                    '&fullName=' + encodeURIComponent('@ViewBag.FullName') +
-                    '&phoneNumber=' + encodeURIComponent('@ViewBag.PhoneNumber');
-
-                if (actionType === 'ShippingInformationBuyNow') {
-                    url += '&productId=@ViewBag.ProductId' +
-                           '&quantity=@ViewBag.Quantity';
-                }
-
-                window.location.href = url;
+                selectDiscount(manualCode);
             } else {
-                alert("Vui lòng nhập mã khuyến mãi!");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops...',
+                    text: 'Bạn chưa nhập mã giảm giá!',
+                    confirmButtonColor: '#FF6B6B',
+                    confirmButtonText: 'Đã hiểu'
+                });
             }
         }
+
+        // Focus vào ô nhập mã khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('manualDiscountCode').focus();
+        });
     </script>
 }

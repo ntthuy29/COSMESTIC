@@ -26,12 +26,12 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel models)
         {
-            Console.WriteLine("Username: " + models.username);
+            Console.WriteLine("Email: " + models.email);
             Console.WriteLine("Password: " + models.password);
 
 
 
-            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.username == models.username && u.password == models.password);
+            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.email == models.email && u.password == models.password);
             if (ktrauser != null)
             {
                 var claims = new List<Claim>
@@ -44,7 +44,7 @@ namespace COSMESTIC.Controllers
                 HttpContext.Session.SetInt32("UserID", ktrauser.userID);
 
                 HttpContext.Session.SetString("role", ktrauser.user.role);
-                HttpContext.Session.SetString("Username", ktrauser.username);
+                HttpContext.Session.SetString("Username", ktrauser.email);
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
@@ -57,9 +57,25 @@ namespace COSMESTIC.Controllers
             }
             if (ktrauser.user.role == "Customer")
             {
+
                 try
                 {
                     var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
+
+     
+                // Giả sử bạn có bảng Cart với userID
+
+                if (cart != null)
+                {
+                    HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                }
+                else
+                {
+                    // Handle the case where cart is null, e.g., set count to 0 or skip
+                    HttpContext.Session.SetInt32("CartItemCount", 0);
+                }
+
+
 
                     if (cart != null && cart.totalQuantity != null)
                     {
@@ -79,7 +95,7 @@ namespace COSMESTIC.Controllers
                 TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
                 return RedirectToAction("Login");
             }
-            else if (ktrauser.username == "Ngan123@" && ktrauser.password == "Ngan123@")
+            else if (ktrauser.email == "ngan@gmail.com" && ktrauser.password == "Ngan123@")
             {
                 return RedirectToAction("Home", "Admin");
             }else if (ktrauser.user.role == "sale")
@@ -90,8 +106,6 @@ namespace COSMESTIC.Controllers
             }
             else
             {
-
-
 
                 return RedirectToAction("Product", "Product");
 

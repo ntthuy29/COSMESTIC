@@ -2,7 +2,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-    
+
 <div class="container my-5">
     <div class="card shadow-sm">
         <div class="card-header text-white" style="background-color: #B27474;">
@@ -17,66 +17,154 @@
             }
             else
             {
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Ảnh</th>
-                                <th>Sản phẩm</th>
-                                <th class="text-center">Số lượng</th>
-                                <th class="text-end">Đơn giá</th>
-                                <th class="text-end">Tổng giá</th>
-                                <th class="text-center">Xóa</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.cartItems)
-                            {
+                <form method="post" action="@Url.Action("RemoveSelectedFromCart", "ShoppingCart")">
+                    @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <td><img src="@Url.Content("~/" + item.products.imagePath)" style="width: 50px;height: 50px;" /></td>
-                                    <td>@item.products.productName</td>
-                                    <td class="text-center">
-                                        <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" style="display: inline;" class="updateQuantityForm">
-                                            <input type="hidden" name="cartItemID" value="@item.cartItemID" />
-                                            <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary">-</button>
-                                            <input type="text" name="quantity" value="@item.quantity" class="quantityInput" style="width: 40px; text-align: center;" readonly />
-                                            <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-primary">+</button>
-                                        </form>
-                                    </td>
-                                    <td class="text-end unitPrice" >@item.unitprice.ToString("N0") ₫</td>
-                                    <td class="text-end totalPrice">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
-                                    <td class="text-center">
-                                        <form method="post" action="@Url.Action("RemoveFromCart", "ShoppingCart")">
-                                            <input type="hidden" name="cartItemID" value="@item.cartItemID" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                <i class="bi bi-trash"></i> Xóa
-                                            </button>
-                                        </form>
-                                    </td>
+                                    <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()" /></th>
+                                    <th>Ảnh</th>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Tổng giá</th>
+                                    <th class="text-center">Xóa</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-8">
-                        <div class="p-3 bg-light rounded shadow-sm">
-                            <p><strong style="font-size: 20px; color: red">Tổng tiền:</strong> <span id="totalPrice">@Model.totalPrice.ToString("N0") ₫</span></p>
-                        </div>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.cartItems)
+                                {
+                                    <tr>
+                                        <td><input type="checkbox" name="selectedItems" value="@item.cartItemID" class="cart-checkbox" onchange="updateSelectedItems()" /></td>
+                                        <td><img src="@Url.Content("~/" + item.products.imagePath)" style="width: 50px; height: 50px; object-fit: cover;" alt="@item.products.productName" /></td>
+                                        <td>@item.products.productName</td>
+                                        <td class="text-center">
+                                            <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" class="updateQuantityForm d-inline">
+                                                @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                                                <input type="hidden" name="cartItemID" value="@item.cartItemID" />
+                                                <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary" @(item.quantity <= 1 ? "disabled" : "")>-</button>
+                                                <input type="number" name="quantity" value="@item.quantity" min="1" class="quantityInput" style="width: 50px; text-align: center;" onchange="updateTotalPrice(this, @item.unitprice, @item.cartItemID)" />
+                                                <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-primary">+</button>
+                                            </form>
+                                        </td>
+                                        <td class="text-end unitPrice">@item.unitprice.ToString("N0") ₫</td>
+                                        <td class="text-end totalPrice" data-cartitemid="@item.cartItemID">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
+                                        <td class="text-center">
+                                            <form method="post" action="@Url.Action("RemoveFromCart", "ShoppingCart")" class="d-inline">
+                                                @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                                                <input type="hidden" name="cartItemID" value="@item.cartItemID" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i> Xóa
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i> Xóa các sản phẩm đã chọn
+                        </button>
+                    </div>
+                </form>
 
-                    <div class="col-md-4 d-flex align-items-center justify-content-end">
-                        <form method="post" action="@Url.Action("ShippingInformation", "Order")">
-                            <button type="submit" class="btn btn-lg" style="background-color: darkred;color: white;">
+                <!-- Form đặt hàng -->
+                <form method="post" action="@Url.Action("ShippingInformation", "Order")" id="orderForm">
+                    @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                    <input type="hidden" name="selectedItems" id="selectedItems" />
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="p-3 bg-light rounded shadow-sm">
+                                <p><strong style="font-size: 20px; color: red">Tổng tiền:</strong> <span id="totalPrice">@Model.totalPrice.ToString("N0") ₫</span></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center justify-content-end">
+                            <button type="submit" class="btn btn-lg" style="background-color: darkred; color: white;">
                                 <i class="bi bi-credit-card"></i> Đặt hàng
                             </button>
-                        </form>
-
+                        </div>
                     </div>
-                </div>
+                </form>
             }
         </div>
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        // Cập nhật danh sách selectedItems
+        function updateSelectedItems() {
+            let selectedItems = [];
+            document.querySelectorAll('input[name="selectedItems"]:checked').forEach(function (checkbox) {
+                selectedItems.push(checkbox.value);
+            });
+            document.getElementById('selectedItems').value = selectedItems.join(',');
+            updateTotalPriceAll();
+        }
+
+        // Toggle select all checkboxes
+        function toggleSelectAll() {
+            const isChecked = document.getElementById('selectAll').checked;
+            document.querySelectorAll('input[name="selectedItems"]').forEach(function (checkbox) {
+                checkbox.checked = isChecked;
+            });
+            updateSelectedItems();
+        }
+
+        // Cập nhật tổng giá của một hàng
+        function updateTotalPrice(input, unitPrice, cartItemID) {
+            const quantity = parseInt(input.value) || 1; // Đảm bảo quantity là số nguyên
+            input.value = quantity; // Cập nhật giá trị input
+            const totalPriceElement = document.querySelector(`.totalPrice[data-cartitemid="${cartItemID}"]`);
+            const total = quantity * unitPrice;
+            totalPriceElement.textContent = total.toLocaleString('vi-VN') + ' ₫';
+            updateTotalPriceAll();
+        }
+
+        // Cập nhật tổng giá của toàn bộ giỏ hàng (chỉ tính các sản phẩm được chọn)
+        function updateTotalPriceAll() {
+            let total = 0;
+            document.querySelectorAll('input[name="selectedItems"]:checked').forEach(function (checkbox) {
+                const row = checkbox.closest('tr');
+                const totalPriceText = row.querySelector('.totalPrice').textContent.replace(/[^0-9]/g, '');
+                total += parseInt(totalPriceText) || 0;
+            });
+            document.getElementById('totalPrice').textContent = total.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        // Xử lý form đặt hàng
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+            const selectedItems = document.getElementById('selectedItems').value;
+            if (!selectedItems) {
+                e.preventDefault();
+                alert('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
+            }
+        });
+
+        // Đảm bảo cập nhật tổng giá khi tải trang
+        document.addEventListener('DOMContentLoaded', function () {
+            updateSelectedItems();
+        });
+        document.querySelectorAll('.updateQuantityForm').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          // Cập nhật giao diện nếu cần
+                          updateTotalPriceAll();
+                      } else {
+                          alert('Cập nhật số lượng thất bại!');
+                      }
+                  });
+            });
+        });
+    </script>
+}
