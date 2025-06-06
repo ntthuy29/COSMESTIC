@@ -1,8 +1,242 @@
-﻿<!-- Views/AdminHome/Index.cshtml -->
+﻿@model COSMESTIC.Models.OverView
+@using System.Text.Json
+
 @{
-    ViewBag.Title = "Admin Dashboard";
+    ViewBag.Title = "Dashboard";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml";
 }
 
-<h2>Welcome to Admin Dashboard</h2>
-<!-- Nội dung trang admin home -->
+<h1 class="dashboard-title">Tổng Quan</h1>
+
+<div class="row text-white mb-5">
+    <div class="col-md-3 mb-4">
+        <div class="card card-custom bg-blue shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-users card-icon"></i>
+                <h6 class="card-subtitle">Tổng Người Dùng</h6>
+                <h3 class="card-value">@Model.TotalUsers</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-custom bg-purple shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-shopping-cart card-icon"></i>
+                <h6 class="card-subtitle">Tổng Đơn Hàng</h6>
+                <h3 class="card-value">@Model.TotalOrders</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-custom bg-teal shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-box card-icon"></i>
+                <h6 class="card-subtitle">Tổng Sản Phẩm</h6>
+                <h3 class="card-value">@Model.TotalProducts</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-custom bg-orange shadow-sm">
+            <div class="card-body">
+                <i class="fas fa-dollar-sign card-icon"></i>
+                <h6 class="card-subtitle">Doanh Thu</h6>
+                <h3 class="card-value">@Model.TotalRevenue.ToString("N0") VNĐ</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card chart-card shadow-sm">
+            <div class="card-body">
+                <h5 class="chart-title" style="color: darkred;">Doanh Thu Theo Danh Mục</h5>
+                <canvas id="revenuePieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card top-product-card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Sản Phẩm Hàng Đầu</h5>
+                <p class="product-name">@Model.topProduct.ProductName</p>
+                <p class="product-revenue">Doanh Thu: <strong>@Model.topProduct.TotalRevenue.ToString("N0") VNĐ</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script>
+        const ctx = document.getElementById('revenuePieChart').getContext('2d');
+        const labels = @Html.Raw(JsonSerializer.Serialize(Model.RevenueByCatalogList.Select(r => r.CatalogName)));
+        const data = @Html.Raw(JsonSerializer.Serialize(Model.RevenueByCatalogList.Select(r => r.Revenue)));
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu theo danh mục',
+                    data: data,
+                    backgroundColor: [
+                              '#FF6B6B',  
+        '#00CED1',  
+        '#E91E63',  
+        '#2196F3',  
+        '#FFD700', 
+        '#E53935',  
+        '#9C27B0'   
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: "'Inter', sans-serif",
+                                size: 14
+                            },
+                            color: '#2C3E50'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { family: "'Inter', sans-serif" },
+                        bodyFont: { family: "'Inter', sans-serif" },
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.formattedValue + ' VNĐ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        body {
+            background-color: #E6F4EA;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dashboard-title {
+            color: #2C3E50;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .bg-blue {
+            background: linear-gradient(135deg, #4C78DD 0%, #3498DB 100%);
+        }
+
+        .bg-purple {
+            background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+        }
+
+        .bg-teal {
+            background: linear-gradient(135deg, #1ABC9C 0%, #16A085 100%);
+        }
+
+        .bg-orange {
+            background: linear-gradient(135deg, #E67E22 0%, #D35400 100%);
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .card-subtitle {
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .chart-card, .top-product-card {
+            border: none;
+            border-radius: 12px;
+            background: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+            .chart-card .card-body {
+                padding: 2rem;
+            }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 1.5rem;
+        }
+
+        #revenuePieChart {
+            max-height: 350px;
+        }
+
+        .top-product-card .card-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .top-product-card .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 1rem;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1ABC9C;
+            margin: 0.5rem 0;
+        }
+
+        .product-revenue {
+            font-size: 1.1rem;
+            color: #2C3E50;
+        }
+    </style>
+}
