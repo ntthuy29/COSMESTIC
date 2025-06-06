@@ -10,7 +10,7 @@ namespace COSMESTIC.Controllers
 {
     public class AdminProductController : Controller
     {
-        
+
         private readonly AppDbContext dbContext;
         private readonly IWebHostEnvironment _environment;
 
@@ -20,28 +20,30 @@ namespace COSMESTIC.Controllers
             _environment = environment;
         }
 
+        [HttpGet]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Index(string search, string danhmuc)
+        public async Task<IActionResult> Index(int? page, string search, string danhmuc)
         {
-            var viewModel = new ProductViewModel
+            var model = new ProductViewModel
             {
-                TuKhoaTimKiem = search,
-                DanhMucDuocChon = danhmuc,
-                DanhMucs = await dbContext.Catalogs
+                TuKhoaTimKiem = search ?? "",
+                DanhMucDuocChon = danhmuc 
+            };
+
+            // Lấy danh sách danh mục
+            model.DanhMucs = await dbContext.Catalogs
                 .Select(c => new SelectListItem
                 {
                     Value = c.catalogID.ToString(),
                     Text = c.catalogName
-                })
-                .ToListAsync()
-            };
+                }).ToListAsync();
 
-            // Build query for products
+            // Xây dựng truy vấn sản phẩm
             var query = dbContext.Products
                 .Include(p => p.catalog)
                 .AsQueryable();
 
-            // Apply search filter
+            // Lọc theo từ khóa tìm kiếm
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(p => p.productName.Contains(search) ||
@@ -53,19 +55,18 @@ namespace COSMESTIC.Controllers
             {
                 query = query.Where(p => p.catalogID == catalogId);
             }
-
             query = query.OrderByDescending(p => p.productID);
 
-            int pageSize = 5; 
-            int totalItems = await query.CountAsync();
+            // Tính tổng số sản phẩm
+            model.TotalItems = await query.CountAsync();
 
-            //viewModel.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
-            //viewModel.CurrentPage = page;
+            
+            model.CurrentPage = page ?? 1;
 
-            // Map to ListProductModel
-            viewModel.SanPhams = await query
-                //.Skip((page - 1) * pageSize)
-                //.Take(pageSize)
+          
+            model.SanPhams = await query
+                .Skip((model.CurrentPage - 1) * model.PageSize)
+                .Take(model.PageSize)
                 .Select(p => new ListProductModel
                 {
                     productID = p.productID,
@@ -77,7 +78,7 @@ namespace COSMESTIC.Controllers
                 })
                 .ToListAsync();
 
-            return View(viewModel);
+            return View(model);
         }
 
         [HttpGet]
@@ -104,7 +105,7 @@ namespace COSMESTIC.Controllers
         {
             if (!ModelState.IsValid)
             {
-               
+
                 model.DanhMucs = await dbContext.Catalogs
                     .Select(c => new SelectListItem
                     {
@@ -115,61 +116,72 @@ namespace COSMESTIC.Controllers
                 return View(model);
             }
 
-            
+
             string imagePath = null;
             if (model.imageFile != null && model.imageFile.Length > 0)
             {
-               
+
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "Img");
                 if (!Directory.Exists(uploadsFolder))
                 {
-                    Directory.CreateDirectory(uploadsFolder); 
+                    Directory.CreateDirectory(uploadsFolder);
                 }
 
-                
+
                 var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.imageFile.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                // Lưu file ảnh vào thư mục Uploads
+               
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.imageFile.CopyToAsync(fileStream);
                 }
 
-               
+
                 imagePath = "Img/" + uniqueFileName;
             }
 
-            // Ánh xạ view model sang entity
             var product = new Products
             {
                 productName = model.productName,
                 productDescription = model.productDescription ?? "",
                 price = model.price,
-                imagePath = imagePath, // Lưu đường dẫn vào CSDL
+                imagePath = imagePath, 
                 catalogID = model.DanhMucDuocChon
             };
 
-            // Lưu vào cơ sở dữ liệu
+           
             dbContext.Products.Add(product);
             await dbContext.SaveChangesAsync();
 
-            return RedirectToAction("Index"); // Điều chỉnh theo trang bạn muốn chuyển hướng
+            return RedirectToAction("Index"); 
         }
+
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var art = await dbContext.Products.FindAsync(id);
-            if (art != null)
+            var product = await dbContext.Products.FindAsync(id);
+            if (product == null)
             {
-                dbContext.Products.Remove(art);
-                await dbContext.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Sản phẩm đã được xóa thành công";
+                TempData["ErrorMessage"] = "Không tìm thấy sản phẩm.";
                 return RedirectToAction("Index");
             }
+
+            // Kiểm tra xem sản phẩm có trong đơn hàng nào không
+            bool isInOrder = await dbContext.orderDetails.AnyAsync(od => od.productID == id);
+            if (isInOrder)
+            {
+                TempData["ErrorMessage"] = "Sản phẩm đang có trong đơn hàng, không thể xóa.";
+                return RedirectToAction("Index");
+            }
+
+            // Nếu không có trong đơn hàng, tiến hành xóa
+            dbContext.Products.Remove(product);
+            await dbContext.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Sản phẩm đã được xóa thành công.";
             return RedirectToAction("Index");
         }
-        // còn thiếu 2 controller edit, detail
+     
         [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -185,13 +197,17 @@ namespace COSMESTIC.Controllers
                 return NotFound();
             }
 
-            var model = new CreateProduct
+           
+            bool isInOrder = await dbContext.orderDetails.AnyAsync(od => od.productID == id);
+            ViewBag.IsInOrder = isInOrder;
+            ViewBag.ImagePath = product.imagePath;
+
+            var model = new EditProduct
             {
-                DanhMucDuocChon = product.catalogID, // Giả định có CategoryId trong Product
+                DanhMucDuocChon = product.catalogID,
                 productName = product.productName,
                 productDescription = product.productDescription,
                 price = product.price,
-                // imageFile không cần gán vì không gửi file trong GET
                 DanhMucs = await dbContext.Catalogs
                     .Select(c => new SelectListItem
                     {
@@ -199,17 +215,18 @@ namespace COSMESTIC.Controllers
                         Text = c.catalogName
                     }).ToListAsync()
             };
-            // Truyền ImagePath qua ViewBag
-            ViewBag.ImagePath = product.imagePath;
 
             return View(model);
         }
-        [HttpPost]
-        [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Edit(int id, CreateProduct model)
-        {
-           
 
+        [HttpPost]
+         [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int id, EditProduct model)
+        {
+            
+            bool isInOrder = await dbContext.orderDetails.AnyAsync(od => od.productID == id);
+            ViewBag.IsInOrder = isInOrder;
+           
             if (ModelState.IsValid)
             {
                 try
@@ -220,12 +237,17 @@ namespace COSMESTIC.Controllers
                         return NotFound();
                     }
 
-                    product.catalogID = model.DanhMucDuocChon;
-                    product.productName = model.productName;
-                    product.productDescription = model.productDescription;
-                    product.price = model.price;
 
-                    // Xử lý hình ảnh nếu có
+                    product.catalogID = model.DanhMucDuocChon;
+                    product.productDescription = model.productDescription;
+
+                    if (!isInOrder)
+                    {
+                        product.productName = model.productName;
+                        product.price = model.price;
+                    }
+
+                  
                     if (model.imageFile != null && model.imageFile.Length > 0)
                     {
                         var fileName = Path.GetFileName(model.imageFile.FileName);
@@ -239,11 +261,11 @@ namespace COSMESTIC.Controllers
 
                     dbContext.Update(product);
                     await dbContext.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction("Index");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(id))
+                    if (!await ProductExists(id))
                     {
                         return NotFound();
                     }
@@ -252,23 +274,66 @@ namespace COSMESTIC.Controllers
                         throw;
                     }
                 }
+                
             }
-
-            // Nếu ModelState không hợp lệ, tải lại danh sách danh mục
+            
             model.DanhMucs = await dbContext.Catalogs
                 .Select(c => new SelectListItem
                 {
                     Value = c.catalogID.ToString(),
                     Text = c.catalogName
                 }).ToListAsync();
+            ViewBag.ImagePath = (await dbContext.Products.FindAsync(id))?.imagePath;
+            return View(model);
+        }
+        private async Task<bool> ProductExists(int id)
+        {
+            return await dbContext.Products.AnyAsync(e => e.productID == id);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Detail(int id)
+        {
+            var product = await dbContext.Products
+                .Include(p => p.catalog)
+                .Include(p => p.orderDetails)
+                .FirstOrDefaultAsync(p => p.productID == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Tính toán số lượng đã bán từ OrderDetails
+            int soldQuantity = product.orderDetails?.Sum(od => od.quantity) ?? 0;
+
+            // Giả sử TotalQuantity là quantity từ Products (hoặc bạn có thể lấy từ nguồn khác)
+            int totalQuantity = product.quantity;
+
+            // Tính số lượng còn lại
+            int remainingQuantity = totalQuantity - soldQuantity;
+
+            decimal revenue = soldQuantity * product.price;
+
+            // Tạo model DetailProduct và gán thông tin
+            var model = new DetailProduct
+            {
+                ProductID = product.productID,
+                ProductName = product.productName,
+                ProductDescription = product.productDescription,
+                Price = product.price,
+                ImagePath = product.imagePath,
+                CatalogName = product.catalog?.catalogName,
+                TotalQuantity = totalQuantity,
+                SoldQuantity = soldQuantity,
+                RemainingQuantity = remainingQuantity,
+                Revenue = revenue
+            };
 
             return View(model);
         }
-        [Authorize(Roles = "admin")]
-        private bool ProductExists(int id)
-        {
-            return dbContext.Products.Any(e => e.productID == id);
-        }
-        //thêm action xem chi tiết sản phẩm(detail)
+
+
     }
 }

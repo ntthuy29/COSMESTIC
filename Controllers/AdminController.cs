@@ -18,7 +18,7 @@ namespace COSMESTIC.Controllers
         {
             return View();
         }
-        [Authorize(Roles = "admin")]
+       [Authorize(Roles = "admin")]
         public IActionResult Product()
         {
             return RedirectToAction("Index", "AdminProduct");
