@@ -11,7 +11,7 @@ namespace COSMESTIC.Models.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int accountID { get; set; }
      [Required]
-     public string username { get; set; }
+     public string email { get; set; }
         [Required]
        public string password { get; set; }
         [ForeignKey("userID")]

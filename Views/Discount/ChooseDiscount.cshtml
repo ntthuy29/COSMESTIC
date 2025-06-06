@@ -79,7 +79,10 @@
 
             window.location.href = url;
         }
-
+        // Hàm encode chuỗi 2 lần
+        function doubleEncode(str) {
+            return encodeURIComponent(encodeURIComponent(str));
+        }
         // Hàm áp dụng mã giảm giá nhập tay
         function applyManualDiscount() {
             const manualCode = document.getElementById('manualDiscountCode').value;
@@ -92,9 +95,9 @@
 
                 let url = returnUrl + (returnUrl.includes('?') ? '&' : '?') +
                     'discountCode=' + encodeURIComponent(manualCode) +
-                    '&address=' + encodeURIComponent('@ViewBag.Address') +
-                    '&fullName=' + encodeURIComponent('@ViewBag.FullName') +
-                    '&phoneNumber=' + encodeURIComponent('@ViewBag.PhoneNumber');
+                        '&address=' + doubleEncode('@ViewBag.Address') +
+                        '&fullName=' + doubleEncode('@ViewBag.FullName') +
+                        '&phoneNumber=' + doubleEncode('@ViewBag.PhoneNumber');
 
                 if (actionType === 'ShippingInformationBuyNow') {
                     url += '&productId=@ViewBag.ProductId' +

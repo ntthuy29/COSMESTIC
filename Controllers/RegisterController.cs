@@ -37,7 +37,7 @@ namespace COSMESTIC.Controllers
                 };
                 var newAccount = new Account
                 {
-                    username = models.username,
+                    email = models.email,
                     password = models.password
                 };
                 newUser.account = newAccount;

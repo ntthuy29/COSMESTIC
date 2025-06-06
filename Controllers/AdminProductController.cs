@@ -272,3 +272,5 @@ namespace COSMESTIC.Controllers
         //thêm action xem chi tiết sản phẩm(detail)
     }
 }
+
+
