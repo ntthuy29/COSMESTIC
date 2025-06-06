@@ -1,65 +1,74 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@model COSMESTIC.Models.RegisterModel
+﻿@model COSMESTIC.Models.RegisterModel
 @{
     Layout = null;
+    ViewData["Title"] = "Đăng ký - COSMESTIC";
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng ký - COSMESTIC</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/Login.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/re" asp-append-version="true" />
-
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
-<body>
+<body style="background: linear-gradient(to right, #a18cd1, #fbc2eb); height: 100vh; display: flex; align-items: center; justify-content: center;">
     <div class="container">
-        <div class="row pb-5">
-            
-
+        <div class="row">
             <div class="col">
-                <div class="login-box mx-auto mb-8">
+                <div class="mx-auto p-4 bg-white shadow rounded" style="max-width: 400px;">
                     <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
-                    <form asp-action="Register" method="post">
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    <form asp-action="Register" method="post" novalidate>
                         <div class="mb-3">
-                            
-                            <input type="text" class="form-control" name="fullName" placeholder="Họ và tên" required>
+                            <input asp-for="fullName" class="form-control" placeholder="Họ và tên" />
+                            <span asp-validation-for="fullName" class="text-danger"></span>
                         </div>
+
                         <div class="mb-3">
-                            @* <label class="form-label">Email</label> *@
-                            <input type="email" class="form-control" name="email" placeholder="Email" required>
-                           
+                            <input asp-for="email" class="form-control" placeholder="Email" />
+                            <span asp-validation-for="email" class="text-danger"></span>
                         </div>
-                        <div class="mb-3"> 
-                            @* <label class="form-label">Số điện thoại</label> *@
-                            <input type="text" class="form-control " name="phoneNumber" placeholder="Số điện thoại" required>
-                         </div> 
+
                         <div class="mb-3">
-                            @* <label class="form-label">Ngày sinh</label> *@
-                            <input type="date" class="form-control " name="dateOfBirth" placeholder="Ngày sinh" required>
+                            <input asp-for="phoneNumber" class="form-control" placeholder="Số điện thoại" />
+                            <span asp-validation-for="phoneNumber" class="text-danger"></span>
                         </div>
-                        <div class="mb-2">
-                            @* <label class="form-label">Tên đăng nhập</label> *@
-                            <input type="text" class="form-control" name="username" placeholder="Tên đăng nhập" required>
+
+                        <div class="mb-3">
+                            <input asp-for="dateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="dateOfBirth" class="text-danger"></span>
                         </div>
-                        <div class="mb-2">
-                            @* <label class="form-label">Mật khẩu</label> *@
-                            <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+
+                        <div class="mb-3">
+                            <input asp-for="username" class="form-control" placeholder="Tên đăng nhập" />
+                            <span asp-validation-for="username" class="text-danger"></span>
                         </div>
+
+                        <div class="mb-3">
+                            <input asp-for="password" class="form-control" placeholder="Mật khẩu" />
+                            <span asp-validation-for="password" class="text-danger"></span>
+                        </div>
+
                         <button type="submit" class="btn btn-outline-primary w-100">Đăng ký</button>
-                        <div class="text-center mt-3">Bạn đã có tài khoản? <a href="/Login/Login">Đăng nhập</a></div>
+                        <div class="text-center mt-3">
+                            Đã có tài khoản? <a href="/Login/Login">Đăng nhập</a>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-    <script src="~/js/Login.js"></script>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>

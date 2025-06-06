@@ -6,14 +6,37 @@
 }
 
 <div class="container my-5">
-    <h3 class="text-success text-center fw-bold mb-4">🧾 Chi tiết đơn hàng #@Model.orderID</h3>
+    <h3 class="text-success text-center fw-bold mb-4">🧾 Chi tiết đơn hàng</h3>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
+            @if (Model.payMethod == "momo" || Model.payMethod == "bankAccount")
+            {
+                <div style="position: absolute; top: 20px; right: 20px;">
+                    <a href="@Url.Action("InvoiceDetails", "Order", new { orderId = Model.orderID })" class="btn btn-info btn-sm" title="Xem hóa đơn">
+                        <i class="fas fa-file-alt me-2"></i>Xem hóa đơn
+                    </a>
+                </div>
+            }
+
             <h5 class="fw-bold mb-3">📌 Thông tin người nhận</h5>
             <p><strong>Họ và tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
             <p><strong>Số điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
             <p><strong>Địa chỉ giao hàng:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
+            <p><strong>Phương thức thanh toán:</strong> 
+                @if (@Model.payMethod == "cash")
+                {
+                    <span><i class="fas fa-money-bill-wave me-2"></i>Thanh toán bằng tiền mặt</span>
+                }
+                else if (@Model.payMethod == "momo")
+                {
+                    <span><img src="~/images/momo-icon.png" alt="Momo" style="width:20px; height:20px; margin-right: 8px;" />Thanh toán qua Momo</span>
+                }
+                else
+                {
+                    <span><i class="fas fa-credit-card me-2"></i>Thanh toán bằng tài khoản ngân hàng</span>
+                }
+            </p>
             <p><strong>Ngày đặt:</strong> @Model.orderDate.ToString("dd/MM/yyyy HH:mm")</p>
             <p>
                 <strong>Trạng thái:</strong>
@@ -24,10 +47,19 @@
                         ;
                         break;
                     case "Đang giao":
+                        <span class="badge bg-primary">Đang giao hàng</span>
+                        ;
+                        break;
+                    case "Đã hoàn thành":
                         <span class="badge bg-info text-dark">Đã giao</span>
+                        <p><strong>Ngày giao:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
                         break;
                     case "Bị từ chối":
+                        <span class="badge bg-danger">Bị từ chối</span>
+                        ;
+                        break;
+                    case "Đã hủy":
                         <span class="badge bg-danger">Đã hủy</span>
                         <p><strong>Ngày hủy:</strong> @Model.endDate?.ToString("dd/MM/yyyy HH:mm")</p>
                         ;
@@ -54,6 +86,16 @@
                     <input type="hidden" name="id" id="cancelOrderId" />
                 </form>
 
+            }
+            @if (Model.status == "Đã hoàn thành")
+            {
+                <a href="javascript:void(0);" onclick="confirmDelivered(@Model.orderID)" class="btn btn-success btn-sm rounded-circle" title="Đã nhận hàng thành công">
+                    <i class="fas fa-check"></i>
+                    <span>Đã giao hàng</span>
+                </a>
+                <form id="deliveredForm" method="post" style="display:none;">
+                    <input type="hidden" name="id" id="deliveredOrderId" />
+                </form>
             }
         </div>
     </div>
@@ -112,6 +154,24 @@
                     document.getElementById('cancelOrderId').value = orderId;
                     document.getElementById('cancelForm').action = '/Order/CancelOrder'; // đúng controller/action
                     document.getElementById('cancelForm').submit();
+                }
+            });
+        }
+            function confirmDelivered(orderId) {
+            Swal.fire({
+                title: 'Xác nhận đã giao hàng',
+                text: "Bạn có chắc chắn đơn hàng này đã được giao thành công?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Đã giao',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deliveredOrderId').value = orderId;
+                    document.getElementById('deliveredForm').action = '/Order/MarkAsDelivered'; // Controller/Action xử lý
+                    document.getElementById('deliveredForm').submit();
                 }
             });
         }

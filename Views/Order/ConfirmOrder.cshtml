@@ -2,6 +2,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     var cart = (COSMESTIC.Models.Data.ShoppingCart)ViewBag.Cart;
+    var selectedItems = ViewBag.SelectedItems as List<COSMESTIC.Models.Data.CartItem> ?? new List<COSMESTIC.Models.Data.CartItem>();
 }
 
 <div class="container my-5">
@@ -12,6 +13,11 @@
     <div class="card shadow rounded">
         <div class="card-body">
             <form method="post" action="@Url.Action("CreateOrder", "Order")">
+                @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
+                @foreach (var item in ViewBag.SelectedItems)
+                {
+                    <input type="hidden" name="selectedItems" value="@item.cartItemID" />
+                }
                 <!-- Thông tin người mua -->
                 <div class="mb-4">
                     <h5><strong>Thông tin người mua:</strong></h5>
@@ -23,6 +29,7 @@
                     <input type="hidden" name="fullName" value="@ViewBag.FullName" />
                     <input type="hidden" name="phoneNumber" value="@ViewBag.PhoneNumber" />
                     <input type="hidden" name="address" value="@ViewBag.Address" />
+                    <input type="hidden" name="savedAddress" value="@ViewBag.savedAddress" />
                 </div>
 
                 <!-- Mã giảm giá -->
@@ -43,6 +50,7 @@
                         <div class="text-success">@TempData["SuccessMessage"]</div>
                     }
                 </div>
+
                 <!-- Phương thức thanh toán -->
                 <div class="mb-3">
                     <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
@@ -51,6 +59,12 @@
                         <option value="bankAccount">Thanh toán bằng tài khoản ngân hàng</option>
                         <option value="momo">Thanh toán qua Momo</option>
                     </select>
+                </div>
+
+                <!-- Thêm ô nhập ghi chú -->
+                <div class="mb-3">
+                    <label for="note" class="form-label">Ghi chú (nếu có)</label>
+                    <textarea class="form-control" id="note" name="note" rows="3" placeholder="Nhập ghi chú nếu cần"></textarea>
                 </div>
 
                 <!-- QR Code Modal -->
@@ -106,7 +120,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in cart.cartItems)
+                        @foreach (var item in ViewBag.SelectedItems)
                         {
                             <tr>
                                 <td class="text-center">
