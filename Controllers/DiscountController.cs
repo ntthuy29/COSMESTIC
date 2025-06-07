@@ -21,7 +21,7 @@ namespace COSMESTIC.Controllers
             _logger = logger;
         }
 
-        [HttpGet]//đây là controller để hiển thị ra danh sách sản phẩm
+        [HttpGet]//đây là action để hiển thị ra danh sách mã khuyến mãi
         public async Task<IActionResult> Index(string search, string duocsudung, string value)
         {
            
@@ -49,7 +49,6 @@ namespace COSMESTIC.Controllers
                 {
                     query = query.Where(d => d.value > 20);
                 }
-                
             }
             var model = await query
                 .Select(d => new ListDiscountModel
@@ -67,13 +66,12 @@ namespace COSMESTIC.Controllers
             ViewData["ValueFilter"] = value;
 
             return View(model);
-  
         }
         
         [HttpGet]
         public IActionResult Create()
         {
-
+            
             ViewBag.Trangthai = new List<SelectListItem>
             {
                 new SelectListItem { Value = "true", Text = "Kích hoạt" },
@@ -82,8 +80,47 @@ namespace COSMESTIC.Controllers
             };
             return View();
         }
-        
+       
+
         [HttpPost]
+        public async Task<IActionResult> Create(CreateModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Trangthai = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "true", Text = "Kích hoạt" },
+            new SelectListItem { Value = "false", Text = "Không kích hoạt" }
+        };
+                return View(model); // Trả về view với lỗi validation
+            }
+
+            // Kiểm tra thời gian không hợp lệ
+            if (model.endDate <= model.startDate)
+            {
+                ModelState.AddModelError("endDate", "Ngày kết thúc phải sau ngày bắt đầu.");
+                ViewBag.Trangthai = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "true", Text = "Kích hoạt" },
+            new SelectListItem { Value = "false", Text = "Không kích hoạt" }
+        };
+                return View(model);
+            }
+
+            var discount = new Discount
+            {
+                discountType = model.name, // Lưu ý: discountType nên là một enum hoặc giá trị cố định, không dùng name trực tiếp
+                value = model.value,
+                startDate = model.startDate,
+                endDate = model.endDate,
+                isActive = model.isActive
+            };
+
+            await dbContext.Discount.AddAsync(discount);
+            await dbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        /*[HttpPost]
         public async Task<IActionResult> Create(CreateModel model)
         {
             var discount = new Discount
@@ -98,17 +135,27 @@ namespace COSMESTIC.Controllers
             await dbContext.Discount.AddAsync(discount);
             await dbContext.SaveChangesAsync();
             return RedirectToAction("Index");
-        }
+        }*/
+
         //làm 2 action là edit và delete là xog @@
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            var discount = await dbContext.Discount.FindAsync(id);
+            //var discount = await dbContext.Discount.FindAsync(id);
+            var discount = await dbContext.Discount
+        .Include(d => d.Orders) // Tải danh sách Orders
+        .FirstOrDefaultAsync(d => d.discountID == id);
             if (discount == null)
             {
                 return NotFound();
             }
+
+            if (discount.Orders.Any())
+            {
+                TempData["WarningMessage"] = "Mã khuyến mãi này đang được áp dụng cho đơn hàng. Bạn chỉ có thể chỉnh sửa ngày và trạng thái.";
+            }
+
 
             var model = new CreateModel
             {
@@ -125,10 +172,10 @@ namespace COSMESTIC.Controllers
                 new SelectListItem { Value = "true", Text = "Kích hoạt" },
                 new SelectListItem { Value = "false", Text = "Không kích hoạt" }
             };
-
             return View(model);
         }
 
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CreateModel model)
@@ -182,19 +229,81 @@ namespace COSMESTIC.Controllers
             };
             return View(model);
 
+        }*/
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, CreateModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Trangthai = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "true", Text = "Kích hoạt" },
+            new SelectListItem { Value = "false", Text = "Không kích hoạt" }
+        };
+                return View(model);
+            }
+
+            var discount = await dbContext.Discount
+                .Include(d => d.Orders)
+                .FirstOrDefaultAsync(d => d.discountID == id);
+
+            if (discount == null)
+            {
+                return NotFound();
+            }
+
+            if (discount.Orders.Any())
+            {
+                TempData["WarningMessage"] = "Mã khuyến mãi này đang được áp dụng cho đơn hàng. Bạn chỉ có thể chỉnh sửa ngày và trạng thái.";
+                // Giữ nguyên các trường quan trọng
+                model.name = discount.discountType; // Không cho phép thay đổi
+                model.value = discount.value; // Không cho phép thay đổi
+            }
+
+            if (model.endDate <= model.startDate)
+            {
+                ModelState.AddModelError("endDate", "Ngày kết thúc phải sau ngày bắt đầu.");
+                ViewBag.Trangthai = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "true", Text = "Kích hoạt" },
+            new SelectListItem { Value = "false", Text = "Không kích hoạt" }
+        };
+                return View(model);
+            }
+
+            discount.discountType = model.name;
+            discount.value = model.value;
+            discount.startDate = model.startDate;
+            discount.endDate = model.endDate;
+            discount.isActive = model.isActive;
+
+            await dbContext.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Mã khuyến mãi đã được cập nhật thành công.";
+            return RedirectToAction("Index");
         }
 
-        //Controller delete này chưa hoạt động được vì còn phải chờ bảng đơn hàng seed dữ liệu để kiểm tra 
+        
         public async Task<IActionResult> Delete(int id)
         {
-            var art = await dbContext.Discount.FindAsync(id);
-            if (art != null)
+            var discount = await dbContext.Discount
+        .Include(d => d.Orders)
+        .FirstOrDefaultAsync(d => d.discountID == id);
+
+            if (discount == null)
             {
-                dbContext.Discount.Remove(art);
-                await dbContext.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Mã giảm giá đã được xóa thành công";
+                return NotFound();
+            }
+
+            if (discount.Orders.Any())
+            {
+                TempData["ErrorMessage"] = "Mã khuyến mãi này đang được áp dụng cho đơn hàng. Không thể xóa.";
                 return RedirectToAction("Index");
             }
+
+            dbContext.Discount.Remove(discount);
+            await dbContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Mã khuyến mãi đã được xóa thành công.";
             return RedirectToAction("Index");
         }
         [HttpGet]
@@ -233,7 +342,7 @@ namespace COSMESTIC.Controllers
 
             if (!string.IsNullOrEmpty(duocsudung))
             {
-                bool isActive = duocsudung.ToLower() == "duocsudung";
+                bool isActive = duocsudung.ToLower() == "True";
                 query = query.Where(d => (d.isActive && isActive) || (d.isActive && !isActive));
             }
 
@@ -272,6 +381,58 @@ namespace COSMESTIC.Controllers
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.ActionType = actionType; // Lưu action type để sử dụng trong view
 
+
+            return View(model);
+        }
+
+
+        //còn thiếu controller detail
+        [HttpGet]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var discount = await dbContext.Discount
+                .Include(d => d.Orders)
+                .FirstOrDefaultAsync(d => d.discountID == id);
+
+            if (discount == null)
+            {
+                return NotFound();
+            }
+
+            var model = new DetailViewModel
+            {
+                discountID = discount.discountID,
+                name = discount.discountType,//tên
+                value = discount.value,
+                startDate = discount.startDate,
+                endDate = discount.endDate,
+                isActive = discount.isActive,
+                discountAmount = discount.discountAmount,
+                usageCount = discount.Orders.Count, // Số lượt sử dụng thực tế
+            };
+
+            // Tính trạng thái
+            if (!discount.isActive)
+            {
+                model.status = "Tạm dừng (Admin)";
+            }
+            else if (DateTime.Now < discount.startDate)
+            {
+                model.status = "Đã lên lịch";
+            }
+            else if (DateTime.Now > discount.endDate)
+            {
+                model.status = "Đã hết hạn";
+            }
+            else
+            {
+                model.status = "Đang hoạt động";
+            }
 
             return View(model);
         }

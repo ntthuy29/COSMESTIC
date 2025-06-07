@@ -2,146 +2,325 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Xác nhận đơn hàng";
 }
 
 <div class="container my-5">
-    <h3 class="text-success fw-bold text-center mb-4">🎉 Xác nhận đơn hàng 🎉</h3>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3">📦 Sản phẩm đã chọn</h5>
-            <p><strong>Sản phẩm:</strong> @ViewBag.Product.productName</p>
-            <p><strong>Giá:</strong> @ViewBag.Product.price.ToString("N0") ₫</p>
-            <p><strong>Số lượng:</strong> @ViewBag.Quantity</p>
-            <p><strong>Tổng tiền trước giảm:</strong> @ViewBag.TotalAmount.ToString("N0") ₫</p>
-            @if (ViewBag.DiscountAmount > 0)
-            {
-                <p><strong>Giảm giá:</strong> -@ViewBag.DiscountAmount.ToString("N0") ₫</p>
-                <p><strong>Tổng tiền sau giảm:</strong> @ViewBag.FinalTotal.ToString("N0") ₫</p>
-            }
-            else
-            {
-                <p><strong>Tổng tiền:</strong> @ViewBag.TotalAmount.ToString("N0") ₫</p>
-            }
-
-            <h5 class="fw-bold mb-3">📌 Thông tin giao hàng</h5>
-            <form method="post" action="@Url.Action("CreateOrderBuyNow", "Order")" id="orderForm">
-                <!-- Chọn địa chỉ giao hàng đã lưu -->
-                <div class="mb-3">
-                    <label for="savedAddress" class="form-label">Chọn địa chỉ giao hàng đã lưu</label>
-                    <select class="form-control" id="savedAddress" name="savedAddress" onchange="fillAddress(this)">
-                        <option value="">Chọn địa chỉ</option>
-                        @if (Model != null && Model.Any())
-                        {
-                            @foreach (var address in Model)
-                            {
-                                <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option>
-                            }
-                        }
-                        else
-                        {
-                            <option disabled>Không có địa chỉ giao hàng nào</option>
-                        }
-                    </select>
-                    <div id="savedAddressError" style="color: red; display: none;">Vui lòng chọn địa chỉ giao hàng.</div>
-                </div>
-
-                <!-- Các trường thông tin giao hàng -->
-                <div class="mb-3">
-                    <label for="fullName" class="form-label">Họ và tên</label>
-                    <input type="text" class="form-control" id="fullName" name="fullName" required />
-                    <div id="fullNameError" style="color: red; display: none;">Họ và tên không được để trống.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Địa chỉ giao hàng</label>
-                    <input type="text" class="form-control" id="address" name="address" required />
-                    <div id="addressError" style="color: red; display: none;">Địa chỉ giao hàng không được để trống.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="phoneNumber" class="form-label">Số điện thoại</label>
-                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required />
-                    <div id="phoneNumberError" style="color: red; display: none;">Số điện thoại không được để trống.</div>
-                </div>
-
-                <!-- Thông tin ẩn -->
-                <input type="hidden" name="productId" value="@ViewBag.Product.productID" />
-                <input type="hidden" name="quantity" value="@ViewBag.Quantity" />
-                <input type="hidden" name="discountCode" value="@ViewBag.DiscountCode" />
-                <input type="hidden" name="applyDiscount" value="@(ViewBag.DiscountAmount > 0)" />
-
-                <!-- Mã giảm giá -->
-                <div class="mb-3">
-                    <label for="discountCode" class="form-label">Mã giảm giá</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="discountCode" name="discountCode" value="@ViewBag.DiscountCode" placeholder="Chọn mã giảm giá" readonly />
-                        <a href="#" class="btn btn-primary" id="chooseDiscountLink">Chọn mã</a>
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <!-- Progress Steps -->
+            <div class="mb-2">
+                <div class="d-flex justify-content-between gap-3">
+                    <div class="w-50 text-center py-2 px-3" style="background-color: #f5f5dc; border-radius: 0.375rem;">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                        <span class="text-black fw-bold ">Đơn hàng</span>
                     </div>
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="text-danger">@TempData["ErrorMessage"]</div>
-                    }
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="text-success">@TempData["SuccessMessage"]</div>
-                    }
+                    <div class="w-50 text-center py-2 px-3" style="background-color: #f5f5dc; border-radius: 0.375rem;">
+                        <i class="fas fa-truck me-2"></i>
+                        <span class="text-black fw-bold">Giao hàng</span>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Phương thức thanh toán -->
-                <div class="mb-3">
-                    <label for="paymentMethod" class="form-label">Phương thức thanh toán</label>
-                    <select class="form-control" id="paymentMethod" name="paymentMethod" onchange="showQRCode(this)">
-                        <option value="cash">Thanh toán bằng tiền mặt</option>
-                        <option value="bankAccount">Thanh toán bằng tài khoản ngân hàng</option>
-                        <option value="momo">Thanh toán qua Momo</option>
-                    </select>
-                </div>
 
-                <!-- QR Code Modal -->
-                <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="qrCodeModalLabel">Quét mã QR để thanh toán</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid" style="max-width: 300px;" />
-                                <div class="mt-3">
-                                    <!-- Phần mô tả nội dung chuyển khoản -->
-                                    <div id="bankTransferInfo" style="display: none;">
-                                        <h6 class="fw-bold">Thông tin chuyển khoản ngân hàng</h6>
-                                        <p class="mb-1"><strong>Tên tài khoản:</strong> COSMESTIC COMPANY</p>
-                                        <p class="mb-1"><strong>Số tài khoản:</strong> 1055457267</p>
-                                        <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank - Chi nhánh Tam Kỳ</p>
-                                        <p class="mb-1"><strong>Nội dung chuyển khoản:</strong></p>
-                                        <p class="bg-light p-2 rounded">
-                                            <code>DH@(DateTime.Now.ToString("ddMMyyyy"))_[SỐ_ĐIỆN_THOẠI_CỦA_BẠN]</code>
-                                        </p>
-                                        <p class="text-danger small">Lưu ý: Vui lòng ghi đúng nội dung để hệ thống tự động xác nhận thanh toán</p>
-                                    </div>
-
-                                    <div id="momoTransferInfo" style="display: none;">
-                                        <h6 class="fw-bold">Hướng dẫn thanh toán Momo</h6>
-                                        <p class="mb-1">1. Mở ứng dụng Momo và chọn "Quét mã"</p>
-                                        <p class="mb-1">2. Quét mã QR bên trên</p>
-                                        <p class="mb-1">3. Kiểm tra thông tin đơn hàng</p>
-                                        <p class="mb-1">4. Nhập nội dung: <code>DH@(DateTime.Now.ToString("ddMMyyyy"))</code></p>
-                                        <p class="mb-1">5. Xác nhận thanh toán</p>
+            <div class="row g-4">
+                <!-- Left Column - Order Summary -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                       
+                        <div class="card-body">
+                            <!-- Product Info -->
+                            <div class="d-flex align-items-center mb-3">
+                                <div>
+                                    <img src="@Url.Content("~/" + ViewBag.productImg)" class="card-img-top img-fluid" style="height: 80px; width: 80px;" />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">@ViewBag.Product.productName</h6>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">@ViewBag.Quantity × @ViewBag.Product.price.ToString("N0") ₫</span>
+                                        <span class="fw-bold" style="color: red !important;">@ViewBag.TotalAmount.ToString("N0") ₫</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Xong</button>
+
+                            <hr class="my-3">
+
+                            <!-- Order Summary -->
+                            <div class="bg-light p-3 rounded mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tạm tính:</span>
+                                    <span style="color: red !important;">@ViewBag.TotalAmount.ToString("N0") ₫</span>
+                                </div>
+                                @if (ViewBag.DiscountAmount > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-2 text-danger">
+                                        <span>Giảm giá:</span>
+                                        <span style="color: red !important;">-@ViewBag.DiscountAmount.ToString("N0") ₫</span>
+                                    </div>
+                                }
+                                <div class="d-flex justify-content-between fw-bold fs-5">
+                                    <span>Tổng cộng:</span>
+                                    <span class="text-success">@ViewBag.FinalTotal.ToString("N0") ₫</span>
+                                </div>
+                            </div>
+
+                            <!-- Discount Code -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Mã giảm giá</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="discountCode" name="discountCode" value="@ViewBag.DiscountCode" placeholder="Nhập mã giảm giá" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" id="chooseDiscountLink">
+                                        <i class="fas fa-tag me-1"></i> Chọn mã
+                                    </button>
+                                </div>
+                                @if (TempData["ErrorMessage"] != null)
+                                {
+                                    <div class="text-danger mt-2"><i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]</div>
+                                }
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="text-success mt-2"><i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]</div>
+                                }
+                            </div>
+
+                            <!-- Order Note -->
+                            <div>
+                                <label for="note" class="form-label fw-bold">Ghi chú đơn hàng</label>
+                                <textarea class="form-control" id="note" name="note" rows="3" placeholder="Ghi chú cho người bán (nếu có)"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-success">Xác nhận đơn hàng</button>
-            </form>
+
+                <!-- Right Column - Shipping & Payment -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm">
+                       
+                        <div class="card-body">
+                            <form method="post" action="@Url.Action("CreateOrderBuyNow", "Order")" id="orderForm">
+                                <!-- Saved Address -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Địa chỉ đã lưu</label>
+                                    <select class="form-select" id="savedAddress" name="savedAddress" onchange="fillAddress(this)">
+                                        <option value="">Chọn địa chỉ giao hàng đã lưu</option>
+                                        @if (Model != null && Model.Any())
+                                        {
+                                            @foreach (var address in Model)
+                                            {
+                                                <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <option disabled>Bạn chưa có địa chỉ giao hàng nào</option>
+                                        }
+                                    </select>
+                                    <div id="savedAddressError" class="invalid-feedback">Vui lòng chọn địa chỉ giao hàng.</div>
+                                </div>
+
+                                <!-- Shipping Form -->
+                                <div class="border-top border-bottom py-4 mb-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="fullName" class="form-label">Họ và tên người nhận</label>
+                                            <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Nhập họ tên">
+                                            <div id="fullNameError" class="invalid-feedback">Họ và tên không được để trống.</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                                            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Nhập số điện thoại">
+                                            <div id="phoneNumberError" class="invalid-feedback">Số điện thoại không được để trống.</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="address" class="form-label">Địa chỉ giao hàng</label>
+                                            <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ chi tiết">
+                                            <div id="addressError" class="invalid-feedback">Địa chỉ giao hàng không được để trống.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Phương thức thanh toán</label>
+                                    <div class="list-group">
+                                        <label class="list-group-item">
+                                            <input class="form-check-input me-2" type="radio" name="paymentMethod" value="cash" checked>
+                                            <i class="fas fa-money-bill-wave me-2"></i> Thanh toán khi nhận hàng (COD)
+                                        </label>
+                                        <label class="list-group-item">
+                                            <input class="form-check-input me-2" type="radio" name="paymentMethod" value="bankAccount">
+                                            <i class="fas fa-university me-2"></i> Chuyển khoản ngân hàng
+                                        </label>
+                                        <label class="list-group-item">
+                                            <input class="form-check-input me-2" type="radio" name="paymentMethod" value="momo">
+                                            <i class="fas fa-mobile-alt me-2"></i> Ví điện tử Momo
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Hidden Fields -->
+                                <input type="hidden" name="productId" value="@ViewBag.Product.productID">
+                                <input type="hidden" name="quantity" value="@ViewBag.Quantity">
+                                <input type="hidden" name="discountCode" value="@ViewBag.DiscountCode">
+                                <input type="hidden" name="applyDiscount" value="@(ViewBag.DiscountAmount > 0)">
+                                <input type="hidden" name="savedAddress" value="@ViewBag.savedAddress">
+
+                                <!-- Submit Button -->
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg py-3 fw-bold">
+                                        <i class="fas fa-shopping-bag me-2"></i> ĐẶT HÀNG NGAY
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="qrCodeModalLabel">
+                    <i class="fas fa-qrcode me-2"></i> Thanh toán qua QR Code
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 200px;">
+
+                <!-- Bank Transfer Info -->
+                <div id="bankTransferInfo" class="text-start" style="display: none;">
+                    <div class="alert alert-info p-2 small">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-university me-2"></i> Thông tin chuyển khoản</h6>
+                        <ul class="list-unstyled mb-2">
+                            <li class="mb-1"><strong>Tài khoản:</strong> COSMESTIC COMPANY</li>
+                            <li class="mb-1"><strong>Số TK:</strong> 1055457267</li>
+                            <li class="mb-1"><strong>Ngân hàng:</strong> Vietcombank</li>
+                            <li class="mb-1"><strong>Số tiền:</strong> @ViewBag.FinalTotal.ToString("N0") ₫</li>
+                            <li class="mt-2">
+                                <strong>Nội dung:</strong>
+                                <div class="bg-white p-1 mt-1 rounded border">
+                                    <code class="small">DH@(DateTime.Now.ToString("ddMMyyyy"))_[SĐT]</code>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="alert alert-warning mt-2 p-1 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Ghi đúng nội dung để tự động xác nhận
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Momo Transfer Info -->
+                <div id="momoTransferInfo" class="text-start" style="display: none;">
+                    <div class="alert alert-purple p-2 small">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-mobile-alt me-2"></i> Hướng dẫn Momo</h6>
+                        <ol class="ps-3 mb-0">
+                            <li class="mb-1">Mở Momo chọn "Quét mã"</li>
+                            <li class="mb-1">Quét mã QR bên trên</li>
+                            <li class="mb-1">Kiểm tra thông tin</li>
+                            <li class="mb-1">Nhập nội dung: <code class="small">DH@(DateTime.Now.ToString("ddMMyyyy"))</code></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-1"></i> Đã thanh toán
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Các style cũ giữ nguyên */
+        .alert-purple {
+            background-color: #f0e6ff;
+            border-color: #d9c2ff;
+            color: #6f42c1;
+        }
+
+        .list-group-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem !important;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-check-input {
+            margin-top: 0;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 0;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+
+        .invalid-feedback {
+            display: none;
+            font-size: 0.8rem;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+            .is-invalid ~ .invalid-feedback {
+                display: block;
+            }
+
+        /* Cập nhật style cho card */
+        .card {
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9); /* Màu nền trắng trong suốt */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Đổ bóng mạnh hơn */
+            border: none;
+        }
+
+            .card:hover {
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Đổ bóng khi hover */
+                transform: translateY(-2px);
+            }
+
+        .card-header {
+            background-color: rgba(248, 249, 250, 0.8); /* Màu header nhạt */
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Background cho container */
+        .container.my-5 {
+            background-color: #f8f9fa; /* Màu nền nhạt cho toàn bộ container */
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        /* Style cho phần order summary */
+        .bg-light {
+            background-color: rgba(248, 249, 250, 0.7) !important;
+            border-radius: 8px;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 992px) {
+            .col-lg-6 {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+}
 @section Scripts {
     <script>
         // Hàm điền thông tin địa chỉ
@@ -159,9 +338,17 @@
             }
         }
 
-         // Hàm hiển thị QR Code
-        function showQRCode(selectElement) {
-            const paymentMethod = selectElement.value;
+        // Hiển thị QR Code khi chọn phương thức thanh toán
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === "bankAccount" || this.value === "momo") {
+                    showQRCode(this);
+                }
+            });
+        });
+
+        function showQRCode(element) {
+            const paymentMethod = element.value;
             const qrCodeImage = document.getElementById("qrCodeImage");
             const bankInfo = document.getElementById("bankTransferInfo");
             const momoInfo = document.getElementById("momoTransferInfo");
@@ -183,39 +370,58 @@
 
             qrCodeImage.onerror = function() {
                 console.error("Không thể tải ảnh QR Code");
-                qrCodeImage.src = "https://via.placeholder.com/300x300?text=QR+Code+Not+Found";
+                qrCodeImage.src = "https://via.placeholder.com/200x200?text=QR+Code+Not+Found";
             };
         }
 
         // Validate form
         document.getElementById("orderForm").addEventListener("submit", function(e) {
             let isValid = true;
-            const fields = [
-                { id: "savedAddress", errorId: "savedAddressError" },
-                { id: "fullName", errorId: "fullNameError" },
-                { id: "address", errorId: "addressError" },
-                { id: "phoneNumber", errorId: "phoneNumberError" }
-            ];
+            const savedAddress = document.getElementById("savedAddress").value.trim();
+            const fullName = document.getElementById("fullName").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
 
-            fields.forEach(field => {
-                const element = document.getElementById(field.id);
-                const errorElement = document.getElementById(field.errorId);
+            // Reset validation
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
 
-                if (!element.value.trim()) {
+            // Nếu không chọn địa chỉ đã lưu thì validate các trường thông tin
+            if (savedAddress === "") {
+                // Validate full name
+                if (fullName === "") {
                     isValid = false;
-                    errorElement.style.display = "block";
-                    element.classList.add("is-invalid");
-                } else {
-                    errorElement.style.display = "none";
-                    element.classList.remove("is-invalid");
+                    document.getElementById("fullName").classList.add("is-invalid");
+                    document.getElementById("fullNameError").style.display = "block";
                 }
-            });
+
+                // Validate address
+                if (address === "") {
+                    isValid = false;
+                    document.getElementById("address").classList.add("is-invalid");
+                    document.getElementById("addressError").style.display = "block";
+                }
+
+                // Validate phone number
+                if (phoneNumber === "") {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").style.display = "block";
+                } else if (!/^(0|\+84)[1-9][0-9]{8}$/.test(phoneNumber)) {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").innerText = "Số điện thoại không hợp lệ";
+                    document.getElementById("phoneNumberError").style.display = "block";
+                }
+            }
 
             if (!isValid) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
+
+        // Xử lý chọn mã giảm giá
         document.getElementById('chooseDiscountLink').addEventListener('click', function(e) {
             e.preventDefault();
             const fullName = document.getElementById('fullName').value;

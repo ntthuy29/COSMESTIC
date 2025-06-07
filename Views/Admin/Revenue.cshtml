@@ -3,218 +3,321 @@
 @{
     ViewData["Title"] = "Thống kê doanh thu";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+
+    var startDate = Model.StartDate?.ToString("yyyy-MM-dd") ?? "";
+    var endDate = Model.EndDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd");
 }
 
 <div class="container-fluid">
-    
-      
-        <!-- Main content -->
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Thống kê doanh thu</h1>
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <!-- Form chọn ngày -->
+        <form asp-action="Revenue" method="post" class="mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="startDate" class="form-label">Từ ngày</label>
+                    <input type="date" name="startDate" value="@startDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label for="endDate" class="form-label">Đến ngày</label>
+                    <input type="date" name="endDate" value="@endDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary form-control">📅 Thống kê</button>
+                </div>
             </div>
+        </form>
 
-            <!-- Form lựa chọn thời gian -->
-            <form asp-action="Revenue" method="post" class="mb-4">
-                <div class="row">
-                    <div class="col-md-3">
-                        <label>Từ ngày</label>
-                        <input type="date" name="startDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+        <!-- Bộ chọn chế độ -->
+        <div class="btn-group mb-4" role="group">
+            <button type="button" class="btn btn-outline-primary active" onclick="showSection('total')">Toàn bộ hệ thống</button>
+            <button type="button" class="btn btn-outline-primary" onclick="showSection('category')">Theo danh mục</button>
+            <button type="button" class="btn btn-outline-primary" onclick="showSection('status')">Theo trạng thái</button>
+        </div>
+
+        <!-- Tổng quan -->
+        <div id="section-total" class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">📈 Thống kê toàn hệ thống</h5>
+                @if (Model.TotalStats.Any())
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-bordered table-striped mt-3">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Loại</th>
+                                        <th>Doanh thu</th>
+                                        <th>Số đơn hàng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.TotalStats)
+                                    {
+                                        <tr>
+                                            <td>@item.Key</td>
+                                            <td>@item.TotalRevenue.ToString("N0") đ</td>
+                                            <td>@item.OrderCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="totalChart" class="chart"></canvas>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label>Đến ngày</label>
-                        <input type="date" name="endDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                }
+                else
+                {
+                    <p>Không có dữ liệu để hiển thị.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Theo danh mục -->
+        <div id="section-category" class="card mb-4 shadow-sm" style="visibility: hidden; position: absolute;">
+            <div class="card-body">
+                <h5 class="card-title">📂 Thống kê theo danh mục</h5>
+                @if (Model.CategoryStats.Any())
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-bordered table-striped mt-3">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Danh mục</th>
+                                        <th>Doanh thu</th>
+                                        <th>Số đơn hàng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.CategoryStats)
+                                    {
+                                        <tr>
+                                            <td>@item.Key</td>
+                                            <td>@item.TotalRevenue.ToString("N0") đ</td>
+                                            <td>@item.OrderCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="categoryChart" class="chart"></canvas>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label> </label>
-                        <button type="submit" class="btn btn-primary form-control">Thống kê</button>
+                }
+                else
+                {
+                    <p>Không có dữ liệu để hiển thị.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Theo trạng thái -->
+        <div id="section-status" class="card mb-4 shadow-sm" style="visibility: hidden; position: absolute;">
+            <div class="card-body">
+                <h5 class="card-title">📦 Thống kê theo trạng thái đơn hàng</h5>
+                @if (Model.StatusStats.Any())
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-bordered table-striped mt-3">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Trạng thái</th>
+                                        <th>Doanh thu</th>
+                                        <th>Số đơn hàng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.StatusStats)
+                                    {
+                                        <tr>
+                                            <td>@item.Key</td>
+                                            <td>@item.TotalRevenue.ToString("N0") đ</td>
+                                            <td>@item.OrderCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="statusChart" class="chart"></canvas>
+                        </div>
                     </div>
-                </div>
-            </form>
-
-            <!-- Thống kê theo danh mục -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Thống kê theo danh mục</h5>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Danh mục</th>
-                                <th>Doanh thu</th>
-                                <th>Số lượng đơn hàng</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.CategoryStats)
-                            {
-                                <tr>
-                                    <td>@item.Key</td>
-                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
-                                    <td>@item.OrderCount</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <canvas id="categoryChart" height="100"></canvas>
-                </div>
+                }
+                else
+                {
+                    <p>Không có dữ liệu để hiển thị.</p>
+                }
             </div>
-
-            <!-- Thống kê theo trạng thái -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Thống kê theo trạng thái đơn hàng</h5>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Trạng thái</th>
-                                <th>Doanh thu</th>
-                                <th>Số lượng đơn hàng</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.StatusStats)
-                            {
-                                <tr>
-                                    <td>@item.Key</td>
-                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
-                                    <td>@item.OrderCount</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <canvas id="statusChart" height="100"></canvas>
-                </div>
-            </div>
-
-            <!-- Thống kê toàn hệ thống -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Thống kê toàn hệ thống</h5>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Tổng</th>
-                                <th>Doanh thu</th>
-                                <th>Số lượng đơn hàng</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.TotalStats)
-                            {
-                                <tr>
-                                    <td>@item.Key</td>
-                                    <td>@item.TotalRevenue.ToString("N0")đ</td>
-                                    <td>@item.OrderCount</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <canvas id="totalChart" height="100"></canvas>
-                </div>
-            </div>
-        </main>
-    
+        </div>
+    </main>
 </div>
 
-<!-- Bootstrap CSS and JS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Biểu đồ theo danh mục
-    var categoryCtx = document.getElementById('categoryChart').getContext('2d');
-    var categoryChart = new Chart(categoryCtx, {
-        type: 'bar',
-        data: {
-            labels: @Html.Raw(Json.Serialize(Model.CategoryLabels)),
-            datasets: [
-                {
-                    label: 'Doanh thu (đ)',
-                    data: @Html.Raw(Json.Serialize(Model.CategoryRevenueData)),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Số lượng đơn hàng',
-                    data: @Html.Raw(Json.Serialize(Model.CategoryOrderCountData)),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        function showSection(section) {
+            const sections = ['total', 'category', 'status'];
 
-    // Biểu đồ theo trạng thái
-    var statusCtx = document.getElementById('statusChart').getContext('2d');
-    var statusChart = new Chart(statusCtx, {
-        type: 'bar',
-        data: {
-            labels: @Html.Raw(Json.Serialize(Model.StatusLabels)),
-            datasets: [
-                {
-                    label: 'Doanh thu (đ)',
-                    data: @Html.Raw(Json.Serialize(Model.StatusRevenueData)),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Số lượng đơn hàng',
-                    data: @Html.Raw(Json.Serialize(Model.StatusOrderCountData)),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+            sections.forEach(s => {
+                const el = document.getElementById('section-' + s);
+                if (s === section) {
+                    el.style.visibility = 'visible';
+                    el.style.position = 'relative';
+                } else {
+                    el.style.visibility = 'hidden';
+                    el.style.position = 'absolute';
                 }
-            ]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+            });
 
-    // Biểu đồ toàn hệ thống
-    var totalCtx = document.getElementById('totalChart').getContext('2d');
-    var totalChart = new Chart(totalCtx, {
-        type: 'bar',
-        data: {
-            labels: @Html.Raw(Json.Serialize(Model.TotalLabels)),
-            datasets: [
-                {
-                    label: 'Doanh thu (đ)',
-                    data: @Html.Raw(Json.Serialize(Model.TotalRevenueData)),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Số lượng đơn hàng',
-                    data: @Html.Raw(Json.Serialize(Model.TotalOrderCountData)),
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.btn-group .btn')[sections.indexOf(section)].classList.add('active');
         }
-    });
-</script>
+
+        function renderChart(chartId, labels, data, colors, chartType = 'bar') {
+            console.log('Chart ID:', chartId);
+            console.log('Labels:', labels);
+            console.log('Data:', data);
+            if (!labels || !data || data.length === 0) {
+                console.warn('No data to render chart for', chartId);
+                return;
+            }
+            const ctx = document.getElementById(chartId).getContext('2d');
+            return new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 14
+                                },
+                                color: '#2C3E50'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.formattedValue + ' đ';
+                                }
+                            }
+                        }
+                    },
+                    ...(chartType === 'bar' ? {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    } : {})
+                }
+            });
+        }
+
+        // Render charts only if data exists
+        @if (Model.TotalStats.Any())
+        {
+            <text>
+                window.totalChartInstance = renderChart('totalChart', @Html.Raw(Json.Serialize(Model.TotalLabels)), @Html.Raw(Json.Serialize(Model.TotalRevenueData)), [
+                    '#FF6B6B', // Pink
+                    '#E63946', // Red
+                    '#FFD700' , // Yellow
+                        '#C71585' // Purple
+                ], 'bar');
+            </text>
+        }
+
+        @if (Model.CategoryStats.Any())
+        {
+            <text>
+                window.categoryChartInstance = renderChart('categoryChart', @Html.Raw(Json.Serialize(Model.CategoryLabels)), @Html.Raw(Json.Serialize(Model.CategoryRevenueData)), [
+                    '#C71585', // Purple
+                    '#A3E4D7', // Light Cyan
+                    '#DDA0DD', // Light Purple
+                    '#FF6B6B', // Pink
+                    '#E63946'  // Red
+                ], 'bar');
+            </text>
+        }
+
+        @if (Model.StatusStats.Any())
+        {
+            <text>
+                window.statusChartInstance = renderChart('statusChart', @Html.Raw(Json.Serialize(Model.StatusLabels)), @Html.Raw(Json.Serialize(Model.StatusRevenueData)), [
+                    '#FFD700', // Yellow
+                    '#FF6B6B', // Pink
+                    '#A3E4D7'  // Light Cyan
+                ], 'pie');
+            </text>
+        }
+
+        // Default to total section
+        showSection('total');
+    </script>
+}
+
+@section Styles {
+    <style>
+        body {
+            background-color: #E6F4EA; /* Very light green background */
+        }
+
+        .chart {
+            max-width: 100%;
+            height: 350px; /* Larger height for bigger charts */
+            margin: 0;
+            margin-left: 20px; /* Shift charts to the right */
+            padding: 10px 0;
+            display: block !important;
+        }
+
+        .btn-group .btn.active {
+            background-color: #FF6B6B; /* Pink for active button */
+            color: white;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        .table-dark {
+            background-color: #C71585; /* Purple for table header */
+        }
+
+        .card {
+            position: relative;
+            min-height: 400px; /* Increased to accommodate larger chart */
+        }
+
+        .table {
+            margin-bottom: 0; /* Remove extra margin below table */
+        }
+
+        .row {
+            align-items: stretch; /* Ensure table and chart align vertically */
+        }
+
+        .col-md-6 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+        }
+    </style>
+}

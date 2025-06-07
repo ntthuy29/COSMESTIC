@@ -1,34 +1,70 @@
-﻿@model List<COSMESTIC.Models.Data.Orders>
-
-<h3>Danh sách đơn hàng</h3>
-
-@if (Model == null || !Model.Any())
-{
-    <p>Không có đơn hàng nào.</p>
+﻿
+@model COSMESTIC.Models.Data.Orders
+@{
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
 }
-else
-{
-    <table class="table">
-        <thead>
+
+<h2 class="mb-4 text-primary">Chi tiết đơn hàng</h2>
+
+<div class="mb-3">
+    <p><strong>Khách hàng:</strong> <span class="text-info">@Model.Delivery.deliveryName</span></p>
+    <p><strong>Ngày đặt:</strong> <span class="text-info">@Model.orderDate.ToString("dd/MM/yyyy")</span></p>
+    <p>
+        <strong>Trạng thái:</strong>
+        @if (Model.status == "Chờ xử lý")
+        {
+            <span class="badge bg-warning text-dark">@Model.status</span>
+        }
+        else if (Model.status == "Đã hoàn thành")
+        {
+            <span class="badge bg-success">@Model.status</span>
+        }
+        else if (Model.status == "Đã hủy")
+        {
+            <span class="badge bg-danger">@Model.status</span>
+        }
+        else if (Model.status == "Đang giao")
+        {
+            <span class="badge bg-primary">@Model.status</span>
+        }
+        else if (Model.status == "Bị từ chối")
+        {
+            <span class="badge bg-danger">@Model.status</span>
+        }
+        else
+        {
+            <span>@Model.status</span>
+        }
+    </p>
+    <p><strong>Tổng tiền:</strong> <span class="fw-bold text-danger">@Model.totalAmount.ToString("N0") VNĐ</span></p>
+</div>
+
+<h3 class="mb-3">Sản phẩm trong đơn hàng</h3>
+
+<table class="table table-striped table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Tên sản phẩm</th>
+            <th class="text-center">Số lượng</th>
+            <th class="text-end">Giá (VNĐ)</th>
+            <th class="text-end">Thành tiền (VNĐ)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.orderDetails)
+        {
             <tr>
-                <th>Mã đơn hàng</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Chi tiết</th>
+                <td>@item.products.productName</td>
+                <td class="text-center">@item.quantity</td>
+                <td class="text-end">@item.unitPrice.ToString("N0")</td>
+                <td class="text-end">@((item.quantity * item.unitPrice).ToString("N0"))</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in Model)
-            {
-                <tr>
-                    <td>@order.orderID</td>
-                    <td>@order.orderDate.ToString("dd/MM/yyyy")</td>
-                    <td>@order.totalAmount.ToString("N0") ₫</td>
-                    <td>@order.status</td>
-                    <td><a href="@Url.Action("OrderDetails", new { orderId = order.orderID })">Xem chi tiết</a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>
+
+<div class="mt-4">
+    <a asp-action="IndexAdminOrder" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Quay lại danh sách đơn hàng
+    </a>
+</div>

@@ -30,16 +30,16 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("accountID"), 20000L);
 
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("userID")
                         .HasColumnType("int");
-
-                    b.Property<string>("username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("accountID");
 
@@ -197,10 +197,17 @@ namespace COSMESTIC.Migrations
                     b.Property<DateTime?>("endDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("orderDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("payMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("status")
                         .IsRequired()
@@ -273,7 +280,8 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("productID"), 30000L);
 
-                    b.Property<int>("catalogID")
+                    b.Property<int?>("catalogID")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("imagePath")
@@ -368,13 +376,11 @@ namespace COSMESTIC.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userID"), 1000L);
 
-
                     b.Property<decimal>("TotalSpent")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("createdDate")
                         .HasColumnType("datetime2");
-
 
                     b.Property<DateTime>("dateOfBirth")
                         .HasColumnType("datetime2");
@@ -538,7 +544,7 @@ namespace COSMESTIC.Migrations
                     b.HasOne("COSMESTIC.Models.Data.Catalogs", "catalog")
                         .WithMany("products")
                         .HasForeignKey("catalogID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("catalog");

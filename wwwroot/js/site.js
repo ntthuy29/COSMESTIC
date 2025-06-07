@@ -4,25 +4,29 @@
 // Write your JavaScript code.
 function addToCart() {
     var countDiv = document.getElementById("countItemCart");
-    var currentCount = parseInt(countDiv.innerText) || 0;  // Lấy số hiện tại, nếu rỗng hoặc NaN thì mặc định 0
+    var currentCount = parseInt(countDiv.innerText) || 0; 
     var newCount = currentCount + 1;
     countDiv.innerText = newCount;
 }
-// Sử dụng Event Delegation để xử lý dynamic content
+
 document.addEventListener('click', function (e) {
-    if (e.target.id === 'btnPrice') {
+    if (e.target.id === 'apply') {
+        console.log("hihi");
         const min = document.getElementById('min').value;
         const max = document.getElementById('max').value;
-        filterByPrice(min ? parseInt(min+"000") : 0, max ? parseInt(max+"000") : Infinity);
+        filterByApply(min ? parseInt(min+"000") : 0, max ? parseInt(max+"000") : Infinity);
     }
 });
 
-function filterByPrice(minPrice, maxPrice) {
-    const items = document.querySelectorAll('.item');
-    items.forEach(item => {
+function filterByApply(minPrice, maxPrice) {
+    const item = document.querySelectorAll('.item');
+    console.log("ddang tim gia");
+    console.log(item);
+    item.forEach(item => {
         const price = parseInt(item.id);
         const isInRange = (minPrice === '' || price >= minPrice) &&
             (maxPrice === '' || price <= maxPrice);
+            console.log("ddax ap ding")
         item.style.display = isInRange ? 'block' : 'none';
     });
 }

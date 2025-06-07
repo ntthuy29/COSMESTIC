@@ -1,0 +1,107 @@
+﻿@model CatalogWithProductsViewModel
+
+@{
+    ViewData["Title"] = "Thêm danh mục sản phẩm";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+<div>                <a href="javascript:history.back()" class="btn btn-secondary">Quay lại</a></div>
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Thêm Danh Mục Sản Phẩm</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Tên danh mục</label>
+                    <input asp-for="catalogName" class="form-control" required />
+                    <span asp-validation-for="catalogName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mô tả danh mục</label>
+                    <textarea asp-for="catalogDescription" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="catalogDescription" class="text-danger"></span>
+                </div>
+
+                <hr />
+                <h5 class="mt-2 mb-2">Thêm danh sách sản phẩm</h5>
+                <div id="productContainer">
+                    <div class="product-item row g-2 mb-3 border p-3 rounded">
+                        <div class="col-md-6 mb-2">
+                            <label>Tên sản phẩm</label>
+                            <input type="text" name="Products[0].productName" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label>Mô tả</label>
+                            <input type="text" name="Products[0].productDescription" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label>Giá</label>
+                            <input type="number" name="Products[0].price" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label>Số lượng</label>
+                            <input type="number" name="Products[0].quantity" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label>Hình ảnh</label>
+                            <input type="file" name="Products[0].imageFile" class="form-control" required />
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger w-100 remove-product">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="button" class="btn btn-secondary" id="addProduct">+ Thêm sản phẩm</button>
+                </div>
+
+                <button type="submit" class="btn btn-success">Lưu danh mục</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let productIndex = 1;
+
+        document.getElementById('addProduct').addEventListener('click', function () {
+            const container = document.getElementById('productContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'product-item row g-2 mb-3 border p-3 rounded';
+            newItem.innerHTML = `
+                <div class="col-md-6 mb-2">
+                    <label>Tên sản phẩm</label>
+                    <input type="text" name="Products[${productIndex}].productName" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label>Mô tả</label>
+                    <input type="text" name="Products[${productIndex}].productDescription" class="form-control" required />
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label>Giá</label>
+                    <input type="number" name="Products[${productIndex}].price" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label>Hình ảnh</label>
+                    <input type="file" name="Products[${productIndex}].imageFile" class="form-control" required />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger w-100 remove-product">Xóa</button>
+                </div>
+            `;
+            container.appendChild(newItem);
+            productIndex++;
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-product')) {
+                e.target.closest('.product-item').remove();
+            }
+        });
+    </script>
+}

@@ -26,12 +26,12 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel models)
         {
-            Console.WriteLine("Username: " + models.username);
+            Console.WriteLine("Email: " + models.email);
             Console.WriteLine("Password: " + models.password);
 
 
 
-            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.username == models.username && u.password == models.password);
+            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.email == models.email && u.password == models.password);
             if (ktrauser != null)
             {
                 var claims = new List<Claim>
@@ -44,19 +44,49 @@ namespace COSMESTIC.Controllers
                 HttpContext.Session.SetInt32("UserID", ktrauser.userID);
 
                 HttpContext.Session.SetString("role", ktrauser.user.role);
-                HttpContext.Session.SetString("Username", ktrauser.username);
+                HttpContext.Session.SetString("Username", ktrauser.email);
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
             }
+            if (ktrauser == null)
+            {
+                // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
+                TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
+                return RedirectToAction("Login");
+            }
             if (ktrauser.user.role == "Customer")
             {
-                var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
+
+                try
+                {
+                    var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
+
+     
                 // Giả sử bạn có bảng Cart với userID
 
-                // Lưu số lượng sản phẩm vào session
-                HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                if (cart != null)
+                {
+                    HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                }
+                else
+                {
+                    // Handle the case where cart is null, e.g., set count to 0 or skip
+                    HttpContext.Session.SetInt32("CartItemCount", 0);
+                }
 
+
+
+                    if (cart != null && cart.totalQuantity != null)
+                    {
+                        HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message); // hoặc e.ToString() nếu cần đầy đủ
+                    return RedirectToAction("Product", "Product");
+                }
 
             }
             if (ktrauser == null)
@@ -65,14 +95,17 @@ namespace COSMESTIC.Controllers
                 TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
                 return RedirectToAction("Login");
             }
-            else if (ktrauser.username == "Ngan123@" && ktrauser.password == "Ngan123@")
+            else if (ktrauser.email == "ngan@gmail.com" && ktrauser.password == "Ngan123@")
             {
                 return RedirectToAction("Home", "Admin");
+            }else if (ktrauser.user.role == "sale")
+            {
+                Console.WriteLine("role = sale");
+                return RedirectToAction("Home", "Admin");
+
             }
             else
             {
-             
-
 
                 return RedirectToAction("Product", "Product");
 

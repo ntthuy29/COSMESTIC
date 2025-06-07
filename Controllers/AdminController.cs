@@ -3,6 +3,7 @@ using COSMESTIC.Models.Revenue;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using COSMESTIC.Models;
 namespace COSMESTIC.Controllers
 {
     public class AdminController : Controller
@@ -13,12 +14,75 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
-        [Authorize(Roles = "admin")]
-        public IActionResult Home()
+        [Authorize(Roles = "admin,sale")]
+
+        public async Task<IActionResult> Home()
         {
-            return View();
+            var totalUsers = await _context.Users.CountAsync();
+            var totalOrders = await _context.Orders.CountAsync();
+            var totalProducts = await _context.Products.CountAsync();
+            var totalRevenue = await _context.Orders
+                .SumAsync(o => o.totalAmount);
+
+            var revenueByCatalog = await _context.Orders
+            .Where(o => o.totalAmount > 0)
+            .SelectMany(o => o.orderDetails.Select(od => new
+            {
+                CatalogName = od.products.catalog.catalogName,
+                ProductTotal = od.quantity * od.unitPrice,
+                OrderTotalOriginal = o.orderDetails.Sum(d => d.quantity * d.unitPrice),
+                OrderTotalAfterDiscount = o.totalAmount,
+                OrderId = o.orderID
+            }))
+            .Where(x => x.OrderTotalOriginal > 0)
+            .Select(x => new
+            {
+                x.CatalogName,
+                RealRevenue = (x.ProductTotal / x.OrderTotalOriginal) * x.OrderTotalAfterDiscount,
+                x.OrderId
+            })
+            .GroupBy(x => x.CatalogName)
+            .Select(g => new RevenueItem
+            {
+                Key = g.Key,
+                TotalRevenue = g.Sum(x => x.RealRevenue),
+                OrderCount = g.Select(x => x.OrderId).Distinct().Count()
+            })
+             .ToListAsync();
+
+            var revenueList = revenueByCatalog.Select(r => new RevenueByCatalog
+            {
+                CatalogName = r.Key,
+                Revenue = r.TotalRevenue
+            }).ToList();
+            var topProducts = await _context.orderDetails
+            .GroupBy(od => new { od.productID, od.products.productName })
+            .Select(g => new TopProduct
+            {
+                ProductID = g.Key.productID,
+                ProductName = g.Key.productName,
+                TotalRevenue = g.Sum(od => od.quantity * od.unitPrice)
+            })
+            .OrderByDescending(x => x.TotalRevenue)
+            .FirstOrDefaultAsync();
+
+
+            var overview = new OverView
+            {
+                TotalUsers = totalUsers,
+                TotalOrders = totalOrders,
+                TotalProducts = totalProducts,
+                TotalRevenue = totalRevenue,
+                RevenueByCatalogList = revenueList,
+                topProduct = topProducts
+            };
+
+            return View(overview);
         }
+
+
         [Authorize(Roles = "admin")]
+
         public IActionResult Product()
         {
             return RedirectToAction("Index", "AdminProduct");
@@ -33,7 +97,7 @@ namespace COSMESTIC.Controllers
         {
             return RedirectToAction("Index", "Account");
         }
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin,sale")]
         public IActionResult Order()
         {
             return RedirectToAction("IndexAdminOrder", "Order");
@@ -75,7 +139,7 @@ namespace COSMESTIC.Controllers
         [HttpPost]
         public async Task<IActionResult> Revenue(DateTime? startDate, DateTime? endDate)
         {
-            // Mặc định khoảng thời gian nếu không có giá trị
+
             startDate ??= DateTime.Now.AddMonths(-1);
             endDate ??= DateTime.Now;
 
@@ -83,7 +147,7 @@ namespace COSMESTIC.Controllers
                 .Include(o => o.orderDetails)
                 .ThenInclude(od => od.products)
                 .ThenInclude(p => p.catalog)
-                .Where(o => o.orderDate >= startDate && o.orderDate <= endDate);
+                .Where(o => o.orderDate.Date >= startDate.Value.Date && o.orderDate.Date <= endDate.Value.Date);
 
             var model = new RevenueReportViewModel
             {
@@ -92,6 +156,7 @@ namespace COSMESTIC.Controllers
                 CategoryStats = new List<RevenueItem>(),
                 StatusStats = new List<RevenueItem>(),
                 TotalStats = new List<RevenueItem>(),
+
                 CategoryLabels = new List<string>(),
                 CategoryRevenueData = new List<decimal>(),
                 CategoryOrderCountData = new List<int>(),
@@ -136,7 +201,7 @@ namespace COSMESTIC.Controllers
             model.StatusRevenueData = revenueByStatus.Select(r => r.TotalRevenue).ToList();
             model.StatusOrderCountData = revenueByStatus.Select(r => r.OrderCount).ToList();
 
-            // 3. Thống kê toàn hệ thống
+            // 3. Thống kê doanh thu tổng theo ngày đã chọn
             var totalRevenue = await ordersQuery.SumAsync(o => o.totalAmount);
             var orderCount = await ordersQuery.CountAsync();
 

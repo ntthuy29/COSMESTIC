@@ -41,7 +41,7 @@ namespace COSMESTIC.Models.Data
                 {
                     entity.Property(a => a.accountID)
                         .UseIdentityColumn(20000, 1);
-                    entity.Property(a => a.username).IsRequired();
+                    entity.Property(a => a.email).IsRequired();
                     entity.Property(a => a.password).IsRequired();
                     entity.HasOne(a => a.user)
                         .WithOne(u => u.account)
@@ -69,10 +69,14 @@ namespace COSMESTIC.Models.Data
                 entity.Property(p => p.productName).IsRequired();
                 entity.Property(p => p.price).IsRequired();
                 entity.Property(p => p.imagePath).IsRequired();
+
                 entity.HasOne(p => p.catalog)
                     .WithMany(c => c.products)
-                    .HasForeignKey(p => p.catalogID).IsRequired();
+                    .HasForeignKey(p => p.catalogID)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Restrict); // <-- Dòng này ngăn xóa dây chuyền
             });
+
             modelBuilder.Entity<Catalogs>(entity =>
             {
                 entity.Property(c => c.catalogID)

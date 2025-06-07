@@ -1,0 +1,143 @@
+﻿@model IEnumerable<COSMESTIC.Models.Data.Catalogs>
+
+@{
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+@if (TempData["ErrorMessageDeleteCatalog"] != null)
+{
+    <div id="deleteModal" class="modal-custom">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white rounded-top">
+                <h5 class="modal-title">Thông báo lỗi</h5>
+                <button type="button" id="close" class="btn-close-custom" aria-label="Đóng">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger mb-0 text-center">
+                    @TempData["ErrorMessageDeleteCatalog"]
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<h2 class="text-center">Quản lý danh mục sản phẩm</h2>
+
+<p>
+    <a class="btn btn-success" href="@Url.Action("Create", "Catalog")">➕ Thêm danh mục</a>
+</p>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>STT</th>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int stt = 1;
+        }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@stt</td>
+                <td>@item.catalogName</td>
+                <td>@item.catalogDescription</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" href="@Url.Action("Edit", "Catalog", new { id = item.catalogID })">Sửa</a>
+                    <a class="btn btn-info btn-sm" href="@Url.Action("Details", "Catalog", new { id = item.catalogID })">Chi tiết</a>
+                    <a class="btn btn-danger btn-sm btn-delete"
+                       data-url="@Url.Action("Delete", "Catalog", new { id = item.catalogID })"
+                       href="javascript:void(0);">Xóa</a>
+
+                </td>
+            </tr>
+            stt++;
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý nút xóa
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const url = this.getAttribute('data-url');
+
+                    Swal.fire({
+                        title: 'Xác nhận xóa?',
+                        text: "Hành động này không thể hoàn tác!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+
+            // Xử lý nút đóng modal
+             const modal = document.getElementById("deleteModal");
+            const closeBtn = document.getElementById("close");
+
+            if (modal && closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    modal.style.display = "none";
+                    document.body.style.overflow = "auto";
+                });
+            }
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        /* Sửa lại phần CSS cho modal */
+        .modal-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal-custom .modal-content {
+                background-color: white;
+                padding: 10px;
+                width: 300px;
+                position: relative;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                border-radius: 8px;
+            }
+
+        .btn-close-custom {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            background: none;
+            border: none;
+        }
+
+        .table-dark {
+            background-color: #6f42c1 !important; /* ví dụ màu tím */
+            color: white !important;
+        }
+
+    </style>
+}
