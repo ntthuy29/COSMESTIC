@@ -2,191 +2,328 @@
 
 @{
     var role = Context.Session.GetString("role");
+    ViewData["Title"] = Model.productName;
 }
 
 <div class="container product-detail">
+    <!-- Phần thông tin sản phẩm -->
     <div class="row mt-5">
         <div class="col-md-5 product-image">
             <img src="~/@Model.imagePath" alt="@Model.productName" class="img-fluid rounded shadow" />
         </div>
         <div class="col-md-7 product-info">
-            <h2 class="product-name text-danger">@Model.productName</h2>
-            <h3 class="product-price text-warning">
-                Giá: @Model.price.ToString("N0") ₫
+            <h1 class="product-name text-danger mb-3">@Model.productName</h1>
+            <div class="d-flex align-items-center mb-3">
+                <div class="product-rating me-3">
+                    @{
+                        var avgRating = Model.ProductReviews?.Any() == true ? Model.ProductReviews.Average(r => r.rating) : 0;
+                        var reviewCount = Model.ProductReviews?.Count ?? 0;
+                    }
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="@(i <= avgRating ? "fas" : "far") fa-star text-warning"></i>
+                    }
+                    <span class="ms-2">(@reviewCount đánh giá)</span>
+                </div>
+            </div>
+
+            <h3 class="product-price text-warning mb-4">
+                @Model.price.ToString("N0") ₫
             </h3>
-            <p><strong>Số lượng :</strong> @Model.quantity</p>
 
-            <div class="quantity-selector d-flex align-items-center mb-3">
-                <button class="btn btn-light btn-quantity" id="decrease-btn">
-                    -
-                </button>
-                <span id="quantity-display">1</span> <!-- Mặc định là 1 -->
-                <button class="btn btn-light btn-quantity" id="increase-btn">
-                    +
-                </button>
-            </div>
-
-            <div class="product-description mb-4">
-                <strong>Mô tả:</strong> @Model.productDescription
-            </div>
-
-            <div class="action-buttons d-flex gap-5">
-
-                
-
-
-                @if (role == "Customer")
+            <div class="availability mb-4">
+                @if (Model.quantity > 0)
                 {
-                    <div class="">
-                        <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")">
-                            <input type="hidden" name="productId" value="@Model.productID" />
-                            <input type="hidden" name="quantity" id="productQuantityBuyNow" value="1" /> <!-- Số lượng cho "Mua ngay" -->
-                            <button type="submit" class="btn btn-success me-2">Mua ngay</button>
-                        </form>
-
-                    </div>
-                    <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")">
-                        <input type="hidden" name="productId" value="@Model.productID" />
-
-                        <input type="hidden" name="quantity" id="productQuantityAddToCart" value="1" />
-                        <button class="btn btn-danger">Thêm vào giỏ hàng</button>
-
-                       
-
-                    </form>
+                    <span class="text-success"><i class="fas fa-check-circle me-2"></i>Còn hàng</span>
                 }
                 else
                 {
-                    <div class="" onclick="alertLogin()"> <button class="btn btn-success me-2">Mua ngay</button></div>
-                    <div class="" onclick="alertLogin()">
-                        <input type="hidden" name="productId" value="@Model.productID" />
-                        <button class="btn btn-danger">Thêm vào giỏ hàng</button>
+                    <span class="text-danger"><i class="fas fa-times-circle me-2"></i>Tạm hết hàng</span>
+                }
+                <span class="text-muted ms-3">@Model.quantity sản phẩm có sẵn</span>
+            </div>
+
+            <div class="product-description mb-4">
+                <h5 class="border-bottom pb-2">Mô tả sản phẩm</h5>
+                <p>@Model.productDescription</p>
+            </div>
+
+            @if (Model.quantity > 0)
+            {
+                <div class="quantity-selector d-flex align-items-center mb-4">
+                    <span class="me-3"><strong>Số lượng:</strong></span>
+                    <button class="btn btn-outline-secondary btn-quantity" id="decrease-btn">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span id="quantity-display" class="mx-3">1</span>
+                    <button class="btn btn-outline-secondary btn-quantity" id="increase-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="action-buttons d-flex gap-3 mb-5">
+                    @if (role == "Customer")
+                    {
+                        <form method="post" action="@Url.Action("ShippingInformationBuyNow", "Order")" class="w-50">
+                            <input type="hidden" name="productId" value="@Model.productID" />
+                            <input type="hidden" name="quantity" id="productQuantityBuyNow" value="1" />
+                            <button type="submit" class="btn btn-danger w-100 py-2">
+                                <i class="fas fa-bolt me-2"></i>Mua ngay
+                            </button>
+                        </form>
+
+                        <form method="post" action="@Url.Action("AddToCart", "ShoppingCart")" class="w-50">
+                            <input type="hidden" name="productId" value="@Model.productID" />
+                            <input type="hidden" name="quantity" id="productQuantityAddToCart" value="1" />
+                            <button class="btn btn-outline-primary w-100 py-2">
+                                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button class="btn btn-danger w-50 py-2" onclick="alertLogin()">
+                            <i class="fas fa-bolt me-2"></i>Mua ngay
+                        </button>
+                        <button class="btn btn-outline-primary w-50 py-2" onclick="alertLogin()">
+                            <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Phần đánh giá sản phẩm -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="product-reviews bg-white p-4 rounded shadow-sm">
+                <h4 class="mb-4 pb-2 border-bottom">
+                    <i class="fas fa-comments me-2 text-primary"></i>
+                    Đánh giá sản phẩm
+                    <span class="badge bg-secondary ms-2">@reviewCount</span>
+                </h4>
+
+                @if (Model.ProductReviews != null && Model.ProductReviews.Any())
+                {
+                    <div class="reviews-list">
+                        @foreach (var review in Model.ProductReviews.OrderByDescending(r => r.CreateDate))
+                        {
+                            <div class="card review-item mb-3 border-0">
+                                <div class="card-header bg-transparent border-0 d-flex justify-content-between">
+                                    <div>
+                                        <strong class="text-primary">@review.user.fullName</strong>
+                                        <span class="text-muted ms-2 small">@review.CreateDate.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="review-stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="@(i <= review.rating ? "fas" : "far") fa-star text-warning"></i>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <p class="card-text">@review.comment</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!
+                    </div>
+                }
+
+                @if (role == "Customer")
+                {
+                    <div class="add-review-section mt-5 p-4 bg-light rounded">
+                        @if (ViewBag.HasPurchased == null || !(bool)ViewBag.HasPurchased)
+                        {
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>Bạn cần mua sản phẩm này trước khi có thể đánh giá.
+                            </div>
+                        }
+                        else
+                        {
+                            if (!(bool)ViewBag.HasReviewed)
+                            {
+                                <div class="alert alert-success" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>Cảm ơn bạn đã đánh giá sản phẩm này!
+                                </div>
+                            }
+                            else
+                            {
+                                <h5 class="mb-4 text-center">Đánh giá của bạn</h5>
+                                <form method="post" action="@Url.Action("AddReview", "Product")">
+                                    <input type="hidden" name="productID" value="@Model.productID" />
+
+                                    <div class="mb-4 text-center">
+                                        <label class="form-label d-block mb-3">Chất lượng sản phẩm</label>
+                                        <div class="star-rating d-inline-block">
+                                            <input type="radio" id="star5" name="rating" value="5" required />
+                                            <label for="star5" title="Tuyệt vời">★</label>
+                                            <input type="radio" id="star4" name="rating" value="4" />
+                                            <label for="star4" title="Tốt">★</label>
+                                            <input type="radio" id="star3" name="rating" value="3" />
+                                            <label for="star3" title="Bình thường">★</label>
+                                            <input type="radio" id="star2" name="rating" value="2" />
+                                            <label for="star2" title="Không hài lòng">★</label>
+                                            <input type="radio" id="star1" name="rating" value="1" />
+                                            <label for="star1" title="Rất tệ">★</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="comment" class="form-label">Nhận xét của bạn</label>
+                                        <textarea class="form-control" name="comment" id="comment" rows="4"
+                                                  placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm..." required></textarea>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary px-4 py-2">
+                                            <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                        }
                     </div>
                 }
             </div>
         </div>
-        @if (role == null)
-        {
-            <div id="deleteModal" class="modal" style="display: none;">
-
-                <div class="modal-content">
-                    <span type="button" class="btn-close" disabled aria-label="Close" style=" margin-right: auto;" id="close" onclick="setCursor()"></span>
-                    <p class="text-center" style="font-size: 20px;">Vui lòng đăng nhập</p>
-                    <div class="d-flex justify-content-sm-between">
-                        <form action="/Login/Login" method="get">
-                            <button type="submit" class="btn btn-danger" id="confirmDelete">Đăng nhập</button>
-                        </form>
-
-
-                        <form action="/Register/Register"> <button id="cancelDelete" class="btn btn-secondary">Đăng ký tài khoản</button> </form>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-
-    <div class="product-reviews mt-5 pt-4 border-top">
-        <h4 class="mb-4">Đánh giá sản phẩm</h4>
-
-        @if (Model.ProductReviews != null && Model.ProductReviews.Any())
-        {
-            <div class="reviews-list">
-                @foreach (var review in Model.ProductReviews.OrderByDescending(r => r.CreateDate)) // Sắp xếp mới nhất lên đầu
-                {
-                    <div class="card review-item mb-3 shadow-sm">
-                        <div class="card-header bg-light py-2">
-                            <strong class="text-primary">@review.user.fullName</strong>
-                            <span class="float-end review-stars">
-                                @for (int i = 1; i <= 5; i++)
-                                {
-                                    if (i <= review.rating)
-                                    {
-                                        <i class="fas fa-star text-warning"></i>
-                                        // Icon sao đầy
-                                    }
-                                    else
-                                    {
-                                        <i class="far fa-star text-warning"></i>
-                                        // Icon sao rỗng (hoặc fas fa-star text-muted)
-                                    }
-                                }
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">@review.comment</p>
-                        </div>
-                        <div class="card-footer text-muted py-1">
-                            <small>@review.CreateDate.ToString("dd/MM/yyyy HH:mm")</small>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info" role="alert">
-                Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!
-            </div>
-        }
-
-        @if (role == "Customer")
-        {
-            <div class="add-review-section mt-4 p-4 border rounded bg-light">
-                @if (ViewBag.HasPurchased == null || !(bool)ViewBag.HasPurchased)
-                {
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>Bạn cần mua sản phẩm này trước khi có thể đánh giá.
-                    </div>
-                }
-                else
-                {
-                    // Giả sử ViewBag.HasReviewed = true nghĩa là "chưa đánh giá" và false là "đã đánh giá"
-                    // Logic này hơi ngược, thường HasReviewed = true là "đã đánh giá"
-                    // Giữ nguyên logic của bạn: !ViewBag.HasReviewed -> "đã đánh giá"
-                    if (!(bool)ViewBag.HasReviewed) // Nếu HasReviewed là false (nghĩa là đã đánh giá theo logic cũ)
-                    {
-                        <div class="alert alert-success" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>Cảm ơn bạn đã đánh giá sản phẩm này! Bạn có thể đánh giá lại ở lần mua hàng tiếp theo.
-                        </div>
-                    }
-                    else // Nếu HasReviewed là true (nghĩa là chưa đánh giá và có thể đánh giá)
-                    {
-                        <h5 class="mb-3">Viết đánh giá của bạn</h5>
-                        <form method="post" action="@Url.Action("AddReview", "Product")">
-                            <input type="hidden" name="productID" value="@Model.productID" />
-                            <div class="mb-3">
-                                <label for="rating" class="form-label">Xếp hạng của bạn:</label>
-                                <select class="form-select" name="rating" id="rating" required>
-                                    <option value="" disabled selected>Chọn số sao...</option>
-                                    <option value="5">5 Sao <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></option>
-                                    <option value="4">4 Sao <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></option>
-                                    <option value="3">3 Sao <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></option>
-                                    <option value="2">2 Sao <i class="fas fa-star"></i><i class="fas fa-star"></i></option>
-                                    <option value="1">1 Sao <i class="fas fa-star"></i></option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="comment" class="form-label">Nhận xét của bạn:</label>
-                                <textarea class="form-control" name="comment" id="comment" rows="4" placeholder="Sản phẩm này như thế nào?" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>Gửi đánh giá</button>
-                        </form>
-                    }
-                }
-            </div>
-        }
     </div>
 </div>
+
+<!-- Modal đăng nhập -->
+@if (role == null)
+{
+    <div id="loginModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vui lòng đăng nhập</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn cần đăng nhập để thực hiện chức năng này.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="/Register/Register" class="btn btn-outline-secondary">Đăng ký</a>
+                    <a href="/Login/Login" class="btn btn-primary">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/productDetail.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .product-image {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .product-info {
+            padding-left: 30px;
+        }
+
+        .product-price {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .quantity-selector {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px 10px;
+            width: fit-content;
+        }
+
+        .btn-quantity {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Star rating */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
+
+            .star-rating input {
+                display: none;
+            }
+
+            .star-rating label {
+                font-size: 32px;
+                color: #ddd;
+                cursor: pointer;
+                padding: 0 5px;
+                transition: all 0.2s;
+            }
+
+                .star-rating input:checked ~ label,
+                .star-rating input:hover ~ label,
+                .star-rating label:hover,
+                .star-rating label:hover ~ label {
+                    color: #ffc107;
+                }
+
+            .star-rating input:checked + label {
+                animation: bounce 0.5s;
+            }
+
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+            .review-item:last-child {
+                border-bottom: none;
+            }
+
+        .add-review-section {
+            border: 1px solid #eee;
+        }
+
+        @@media (max-width: 768px) {
+            .product-info {
+                padding-left: 15px;
+                margin-top: 30px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px !important;
+            }
+
+                .action-buttons form {
+                    width: 100% !important;
+                }
+        }
+    </style>
+}
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý số lượng sản phẩm
             const quantityDisplay = document.getElementById('quantity-display');
             const productQuantityBuyNowInput = document.getElementById('productQuantityBuyNow');
             const productQuantityAddToCartInput = document.getElementById('productQuantityAddToCart');
             const increaseBtn = document.getElementById('increase-btn');
             const decreaseBtn = document.getElementById('decrease-btn');
-            const maxQuantity = parseInt('@Model.quantity'); // Lấy số lượng tối đa từ Model
+            const maxQuantity = parseInt('@Model.quantity');
 
             function updateQuantityInputs(newQuantity) {
                 if (productQuantityBuyNowInput) {
@@ -197,31 +334,20 @@
                 }
             }
 
-            let initialQuantity = 1; // Khởi tạo mặc định là 1
-             if (quantityDisplay) { // Kiểm tra quantityDisplay có tồn tại không
-                initialQuantity = parseInt(quantityDisplay.innerText) || 1;
-                quantityDisplay.innerText = initialQuantity;
-                updateQuantityInputs(initialQuantity);
-            }
+            if (quantityDisplay) {
+                let currentQuantity = 1;
 
-
-            if (increaseBtn) {
-                increaseBtn.addEventListener('click', function () {
-                    let currentQuantity = parseInt(quantityDisplay.innerText);
-                    if (currentQuantity < maxQuantity) { // Kiểm tra không vượt quá số lượng tồn kho
+                increaseBtn?.addEventListener('click', function () {
+                    if (currentQuantity < maxQuantity) {
                         currentQuantity++;
                         quantityDisplay.innerText = currentQuantity;
                         updateQuantityInputs(currentQuantity);
                     } else {
-                        // Tùy chọn: thông báo cho người dùng đã đạt số lượng tối đa
-                        alert('Bạn đã chọn số lượng tối đa cho sản phẩm này.');
+                        toastr.warning('Bạn đã chọn số lượng tối đa có sẵn');
                     }
                 });
-            }
 
-            if (decreaseBtn) {
-                decreaseBtn.addEventListener('click', function () {
-                    let currentQuantity = parseInt(quantityDisplay.innerText);
+                decreaseBtn?.addEventListener('click', function () {
                     if (currentQuantity > 1) {
                         currentQuantity--;
                         quantityDisplay.innerText = currentQuantity;
@@ -229,123 +355,16 @@
                     }
                 });
             }
+
+            // Hiển thị tooltip cho rating
+            $('.star-rating label').tooltip({
+                placement: 'bottom',
+                trigger: 'hover'
+            });
         });
 
         function alertLogin() {
-            var modal = document.getElementById('deleteModal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.cursor = 'default'; // Đặt lại con trỏ chuột cho body
-            }
+            $('#loginModal').modal('show');
         }
-
-        // Optional: close modal when clicking outside
-        window.onclick = function (event) {
-            var modal = document.getElementById('deleteModal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        function setCursor(){
-             document.body.style.cursor = 'default';
-        }
-
     </script>
 }
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/productDetail.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        .quantity-selector span {
-            min-width: 30px; /* Tăng không gian cho số */
-            text-align: center;
-            display: inline-block;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .btn-quantity {
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            line-height: 1; /* Căn giữa text trong button tròn */
-        }
-
-        .product-reviews {
-            background-color: #f9f9f9; /* Nền nhẹ cho toàn bộ khu vực đánh giá */
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .review-item .card-header {
-            font-size: 0.95rem;
-        }
-
-        .review-item .card-body {
-            font-size: 0.9rem;
-        }
-
-        .review-item .card-footer {
-            font-size: 0.8rem;
-        }
-
-        .review-stars i {
-            margin: 0 1px; /* Khoảng cách nhỏ giữa các sao */
-        }
-
-        /* CSS cho modal đăng nhập */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1050; /* Cao hơn các element khác */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5); /* Nền mờ */
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 15% auto; /* Căn giữa modal */
-            padding: 25px;
-            border: 1px solid #ddd;
-            width: 80%;
-            max-width: 450px; /* Giới hạn chiều rộng tối đa */
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,.3);
-            position: relative; /* Để btn-close có thể định vị */
-        }
-
-            .modal-content .btn-close {
-                position: absolute;
-                top: 10px;
-                right: 15px;
-                /* Bỏ background và border mặc định của Bootstrap nếu cần */
-                /* background: none; */
-                /* border: none; */
-            }
-
-        /* Cải thiện nút trong form đánh giá */
-        .add-review-section .form-select,
-        .add-review-section .form-control {
-            font-size: 0.95rem; /* Kích thước font vừa phải */
-        }
-
-        .add-review-section .btn-primary {
-            font-weight: bold;
-        }
-
-        /* Bổ sung CSS cho các thông báo trong phần đánh giá */
-        .alert i {
-            font-size: 1.1rem; /* Icon to hơn một chút */
-        }
-
-    </style>
-}
-
-<script src="~/js/alertLogin.js"></script>

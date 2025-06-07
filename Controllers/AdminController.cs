@@ -81,8 +81,8 @@ namespace COSMESTIC.Controllers
         }
 
 
-
         [Authorize(Roles = "admin")]
+
         public IActionResult Product()
         {
             return RedirectToAction("Index", "AdminProduct");

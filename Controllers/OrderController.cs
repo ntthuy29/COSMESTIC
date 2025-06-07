@@ -599,14 +599,30 @@ namespace COSMESTIC.Controllers
         [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> Reject(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            // Lấy đơn hàng kèm theo danh sách sản phẩm chi tiết
+            var order = await _context.Orders
+                .Include(o => o.orderDetails) // Load các chi tiết đơn hàng
+                .ThenInclude(od => od.products) // Load thông tin sản phẩm
+                .FirstOrDefaultAsync(o => o.orderID == id);
+
             if (order == null)
             {
                 return NotFound();
             }
+
+            // Duyệt qua từng sản phẩm trong đơn hàng và hoàn lại số lượng
+            foreach (var orderDetail in order.orderDetails)
+            {
+                var product = orderDetail.products;
+                product.quantity += orderDetail.quantity; // Hoàn lại số lượng đã trừ
+                _context.Products.Update(product);
+            }
+
+            // Cập nhật trạng thái đơn hàng
             order.status = "Bị từ chối";
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Đơn hàng đã bị từ chối";
+
+            TempData["SuccessMessage"] = "Đơn hàng đã bị từ chối và số lượng sản phẩm đã được hoàn lại";
 
             return RedirectToAction("IndexAdminOrder");
         }

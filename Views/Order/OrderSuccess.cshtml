@@ -2,87 +2,129 @@
 @model COSMESTIC.Models.Data.Orders
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-<script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<div class="container-sm my-5 px-3" style="max-width: 800px;">
-    <!-- Nút điều hướng -->
-    <div style="position: fixed; top: 180px; left: 20px; z-index: 1000;">
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-danger px-3 py-2 custom-home-btn">
-            <i class="fas fa-home me-2"></i>Về trang chủ
-        </a>
+<div class="container my-5" style="max-width: 900px;">
+    <!-- Success Header with Animation -->
+    <div class="text-center mb-5 p-4 rounded-4" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); margin-top: 20px; border: 1px dashed #dee2e6;">
+        
+        <h1 class="fw-bold mb-3" style="color: crimson; font-size: 2.2rem;">ĐẶT HÀNG THÀNH CÔNG!</h1>
+        <p class="lead text-muted mb-2">Cảm ơn bạn đã mua sắm tại COSMESTIC</p>
+        <div class="mt-3">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary px-4 py-2 me-2">
+                <i class="fas fa-home me-2"></i>Về trang chủ
+            </a>
+            <a href="#" class="btn btn-warning px-4 py-2">
+                <i class="fas fa-receipt me-2"></i>Xem chi tiết đơn hàng
+            </a>
+        </div>
     </div>
 
-    <!-- Header -->
-    <div class="text-center mb-4 p-4 rounded-3" style="background: linear-gradient(to right, #f3f4f6, #e5e7eb); margin-top: 60px;">
-        <div class="display-4 mb-2">🎉</div>
-        <h2 class="fw-bold  mb-2" style="color: #CC3300;">ĐẶT HÀNG THÀNH CÔNG!</h2>
-        <p class="text-muted">Cảm ơn bạn đã mua sắm tại COSMESTIC</p>
-    </div>
-
-    <!-- Card chính -->
-    <div class="card border-0 shadow rounded-3 overflow-hidden">
+    <!-- Main Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-light py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin đơn hàng
+            </h5>
+        </div>
         <div class="card-body p-4">
-            <!-- Thông tin khách hàng & thanh toán -->
+            <!-- Customer & Payment Info -->
             <div class="row g-4 mb-4">
+                <!-- Customer Info -->
                 <div class="col-md-6">
-                    <h5 class="fw-bold  mb-3" style="color: #FF6600">
-                        <i class="fas fa-user me-2"></i>THÔNG TIN KHÁCH HÀNG
-                    </h5>
-                    <p class="mb-2 small" style="font-size: 20px;"><strong>Họ tên:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</p>
-                    <p class="mb-2 small"><strong>Điện thoại:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</p>
-                    <p class="mb-0 small"><strong>Địa chỉ:</strong> @Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</p>
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <h6 class="fw-bold mb-3 text-uppercase small" style="color: #6c757d;">
+                            <i class="fas fa-user me-2"></i>Thông tin khách hàng
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong class="d-block small text-muted">Họ tên</strong>
+                                <span class="fw-medium">@Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryName))</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong class="d-block small text-muted">Điện thoại</strong>
+                                <span class="fw-medium">@Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryPhone))</span>
+                            </li>
+                            <li>
+                                <strong class="d-block small text-muted">Địa chỉ</strong>
+                                <span class="fw-medium">@Html.Raw(HttpUtility.HtmlDecode(@Model.Delivery.deliveryAddress))</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Payment Info -->
                 <div class="col-md-6">
-                    <h5 class="fw-bold  mb-3" style="color: #FF6600">
-                        <i class="fas fa-receipt me-2"></i>THÔNG TIN THANH TOÁN
-                    </h5>
-                    <p class="mb-2 small">
-                        <strong>Phương thức:</strong>
-                        @if (Model.payMethod == "cash")
-                        {
-                            <span class="badge text-bg-success">Tiền mặt</span>
-                        }
-                        else if (Model.payMethod == "momo")
-                        {
-                            <span class="badge text-bg-primary">Momo</span>
-                        }
-                        else
-                        {
-                            <span class="badge text-bg-secondary">Chuyển khoản</span>
-                        }
-                    </p>
-                    @if (!string.IsNullOrEmpty(Model.note))
-                    {
-                        <p class="mb-0 small"><strong>Ghi chú:</strong> @Html.Raw(HttpUtility.HtmlDecode(Model.note))</p>
-                    }
+                    <div class="p-3 bg-light rounded-3 h-100">
+                        <h6 class="fw-bold mb-3 text-uppercase small" style="color: #6c757d;">
+                            <i class="fas fa-credit-card me-2"></i>Thanh toán
+                        </h6>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong class="d-block small text-muted">Phương thức</strong>
+                                @if (Model.payMethod == "cash")
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success py-1 px-2">
+                                        <i class="fas fa-money-bill-wave me-1"></i> Tiền mặt
+                                    </span>
+                                }
+                                else if (Model.payMethod == "momo")
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary py-1 px-2">
+                                        <i class="fas fa-mobile-alt me-1"></i> Momo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary py-1 px-2">
+                                        <i class="fas fa-university me-1"></i> Chuyển khoản
+                                    </span>
+                                }
+                            </li>
+                            <li class="mb-2">
+                                <strong class="d-block small text-muted">Tổng tiền</strong>
+                                <span class="fw-bold text-danger">@Model.totalAmount.ToString("N0") ₫</span>
+                            </li>
+                            @if (!string.IsNullOrEmpty(Model.note))
+                            {
+                                <li>
+                                    <strong class="d-block small text-muted">Ghi chú</strong>
+                                    <span class="fw-medium">@Html.Raw(HttpUtility.HtmlDecode(Model.note))</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <!-- Bảng sản phẩm -->
-            <h5 class="fw-bold  mb-3" style="color:#FF6600">
-                <i class="fas fa-boxes me-2"></i>CHI TIẾT ĐƠN HÀNG
+            <!-- Order Items -->
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-box-open me-2 text-primary"></i>Sản phẩm đã đặt
             </h5>
             <div class="table-responsive">
-                <table class="table table-hover table-sm align-middle">
-                    <thead class="table-light">
+                <table class="table table-borderless">
+                    <thead class="bg-light">
                         <tr>
-                            <th style="width: 80px;">Ảnh</th>
+                            <th style="width: 60px;"></th>
                             <th>Sản phẩm</th>
-                            <th class="text-center" style="width: 100px;">SL</th>
-                            <th class="text-end" style="width: 120px;">Đơn giá</th>
+                            <th class="text-end" style="width: 100px;">Đơn giá</th>
+                            <th class="text-center" style="width: 80px;">SL</th>
                             <th class="text-end" style="width: 120px;">Thành tiền</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in Model.orderDetails)
                         {
-                            <tr>
+                            <tr class="border-bottom">
                                 <td>
-                                    <img src="@Url.Content("~/" + item.products.imagePath)" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <img src="@Url.Content("~/" + item.products.imagePath)" class="rounded-2" style="width: 50px; height: 50px; object-fit: cover;">
                                 </td>
-                                <td>@item.products.productName</td>
-                                <td class="text-center">@item.quantity</td>
+                                <td>
+                                    <div class="fw-medium">@item.products.productName</div>
+                    
+                                </td>
                                 <td class="text-end">@item.unitPrice.ToString("N0") ₫</td>
+                                <td class="text-center">@item.quantity</td>
                                 <td class="text-end fw-semibold">@((item.quantity * item.unitPrice).ToString("N0")) ₫</td>
                             </tr>
                         }
@@ -90,39 +132,107 @@
                 </table>
             </div>
 
-            <!-- Tổng tiền -->
-            <div class="d-flex justify-content-end mt-4">
-                <div class="border-top pt-3" style="width: 250px;">
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-bold">Tổng cộng:</span>
-                        <span class="fw-bold text-danger fs-5">@Model.totalAmount.ToString("N0") ₫</span>
+            <!-- Order Summary -->
+            <div class="row justify-content-end mt-4">
+                <div class="col-lg-5">
+                    <div class="p-3 bg-light rounded-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính:</span>
+                            <span>@Model.totalAmount.ToString("N0") ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span>0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Giảm giá:</span>
+                            <span>0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2 mt-2 fw-bold fs-5">
+                            <span>Tổng cộng:</span>
+                            <span class="text-danger">@Model.totalAmount.ToString("N0") ₫</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Delivery Info -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-light py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-truck me-2 text-primary"></i>Thông tin vận chuyển
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 text-primary me-3" style="font-size: 1.5rem;">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1">Đơn hàng đang được xử lý</h6>
+                    <p class="small text-muted mb-0">Chúng tôi sẽ liên hệ với bạn để xác nhận đơn hàng trong thời gian sớm nhất.</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <span class="badge bg-warning bg-opacity-15 text-warning py-2 px-3">
+                        <i class="fas fa-clock me-1"></i> Đang chờ xử lý
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Info -->
+    <div class="text-center mt-5 pt-3">
+        <p class="text-muted mb-2">Cần hỗ trợ? Chúng tôi luôn sẵn sàng giúp bạn!</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="#" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="fas fa-phone-alt me-2"></i>0123 456 789
+            </a>
+            <a href="#" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="fas fa-envelope me-2"></i>support@cosmestic.com
+            </a>
+            <a href="#" class="btn btn-outline-secondary btn-sm px-3">
+                <i class="fas fa-comment me-2"></i>Chat ngay
+            </a>
+        </div>
+    </div>
 </div>
 
 <style>
-    .card {
+    /* Animation */
+    @@keyframes bounce {
+        from {
+            transform: translateY(0);
+        }
+
+        to {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Hover effects */
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Smooth transitions */
+    .card, .btn, .badge {
         transition: all 0.3s ease;
     }
 
-        .card:hover {
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-        }
-
+    /* Custom badge style */
     .badge {
-        font-size: 0.75em;
+        letter-spacing: 0.5px;
+        font-weight: 500;
     }
 
-    .custom-home-btn {
-        color: #dc3545 !important;
+    /* Table row hover */
+    tbody tr:hover {
+        background-color: rgba(0,0,0,0.02) !important;
     }
-
-        .custom-home-btn:hover {
-            color: #fff !important;
-        }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

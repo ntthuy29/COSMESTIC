@@ -5,68 +5,68 @@
     ViewBag.Title = "Dashboard";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml";
 }
+<div class="container-custom">
+    <h1 class="dashboard-title">Tổng Quan</h1>
 
-<h1 class="dashboard-title">Tổng Quan</h1>
+    <div class="row text-white mb-5">
+        <div class="col-md-3 mb-4">
+            <div class="card card-custom bg-blue shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-users card-icon"></i>
+                    <h6 class="card-subtitle">Tổng Người Dùng</h6>
+                    <h3 class="card-value">@Model.TotalUsers</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card card-custom bg-purple shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart card-icon"></i>
+                    <h6 class="card-subtitle">Tổng Đơn Hàng</h6>
+                    <h3 class="card-value">@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card card-custom bg-teal shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-box card-icon"></i>
+                    <h6 class="card-subtitle">Tổng Sản Phẩm</h6>
+                    <h3 class="card-value">@Model.TotalProducts</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card card-custom bg-orange shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign card-icon"></i>
+                    <h6 class="card-subtitle">Doanh Thu</h6>
+                    <h3 class="card-value">@Model.TotalRevenue.ToString("N0") VNĐ</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="row text-white mb-5">
-    <div class="col-md-3 mb-4">
-        <div class="card card-custom bg-blue shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-users card-icon"></i>
-                <h6 class="card-subtitle">Tổng Người Dùng</h6>
-                <h3 class="card-value">@Model.TotalUsers</h3>
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card chart-card shadow-sm">
+                <div class="card-body">
+                    <h5 class="chart-title" style="color: darkred;">Doanh Thu Theo Danh Mục</h5>
+                    <canvas id="revenuePieChart"></canvas>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card card-custom bg-purple shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-shopping-cart card-icon"></i>
-                <h6 class="card-subtitle">Tổng Đơn Hàng</h6>
-                <h3 class="card-value">@Model.TotalOrders</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card card-custom bg-teal shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-box card-icon"></i>
-                <h6 class="card-subtitle">Tổng Sản Phẩm</h6>
-                <h3 class="card-value">@Model.TotalProducts</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-4">
-        <div class="card card-custom bg-orange shadow-sm">
-            <div class="card-body">
-                <i class="fas fa-dollar-sign card-icon"></i>
-                <h6 class="card-subtitle">Doanh Thu</h6>
-                <h3 class="card-value">@Model.TotalRevenue.ToString("N0") VNĐ</h3>
+        <div class="col-lg-4 mb-4">
+            <div class="card top-product-card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Sản Phẩm Hàng Đầu</h5>
+                    <p class="product-name">@Model.topProduct.ProductName</p>
+                    <p class="product-revenue">Doanh Thu: <strong>@Model.topProduct.TotalRevenue.ToString("N0") VNĐ</strong></p>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row">
-    <div class="col-lg-8 mb-4">
-        <div class="card chart-card shadow-sm">
-            <div class="card-body">
-                <h5 class="chart-title" style="color: darkred;">Doanh Thu Theo Danh Mục</h5>
-                <canvas id="revenuePieChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4 mb-4">
-        <div class="card top-product-card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Sản Phẩm Hàng Đầu</h5>
-                <p class="product-name">@Model.topProduct.ProductName</p>
-                <p class="product-revenue">Doanh Thu: <strong>@Model.topProduct.TotalRevenue.ToString("N0") VNĐ</strong></p>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
@@ -238,5 +238,13 @@
             font-size: 1.1rem;
             color: #2C3E50;
         }
+
+        .container-custom {
+            max-width: 1140px; /* hoặc 960px tùy thích */
+            padding-left: 15px;
+            padding-right: 15px;
+            margin: 0 auto;
+        }
+
     </style>
 }
