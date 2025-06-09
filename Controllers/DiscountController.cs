@@ -316,13 +316,7 @@ namespace COSMESTIC.Controllers
         public async Task<IActionResult> ChooseDiscount(String selectedItems, string search, string duocsudung, string value, int? productId = null, int? quantity = null, string address = null, string fullName = null, string phoneNumber = null, string returnUrl = null)
         {
             _logger.LogInformation($"ChooseDiscount called with: productId={productId}, quantity={quantity}, address={address}, fullName={fullName}, phoneNumber={phoneNumber}, returnUrl={returnUrl}");
-            foreach(var item in selectedItems)
-            {
-                Console.WriteLine("đây nè");
-                Console.WriteLine(item);
 
-            }
-            Console.WriteLine(selectedItems);
             // Validate returnUrl
             string defaultUrl = Url.Action("ConfirmOrder", "Order"); // Mặc định là Checkout
             if (!string.IsNullOrEmpty(returnUrl))
@@ -372,6 +366,7 @@ namespace COSMESTIC.Controllers
             }
 
             var model = await query
+                .Where(d => d.startDate <= DateTime.Now && d.endDate >= DateTime.Now && d.isActive ==  true)
                 .Select(d => new ListDiscountModel
                 {
                     discountID = d.discountID,

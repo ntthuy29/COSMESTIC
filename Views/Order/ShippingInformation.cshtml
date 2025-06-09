@@ -77,10 +77,7 @@
                         {
                             @foreach (var address in Model)
                             {
-                                <option value="@address.deliveryID" selected="@((address.deliveryID == ViewBag.savedAddress) ? "selected" : "")">
-                                    @address.deliveryName - @address.deliveryAddress (@address.deliveryPhone)
-                                </option>
-
+                                <option value="@address.deliveryID">@address.deliveryName - @address.deliveryAddress</option>
                             }
                         }
                         else

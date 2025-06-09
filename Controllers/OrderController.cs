@@ -226,10 +226,9 @@ namespace COSMESTIC.Controllers
             {
                 userID = userId.Value,
                 orderDate = DateTime.Now,
-
-                status = "Chờ xử lý",  // Trạng thái đang chờ duyệt
                 totalAmount = totalAmount,
                 payMethod = paymentMethod,
+                status = paymentMethod == "cash" ? "chờ xử lý" : "chờ vận chuyển",
                 note = note,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
@@ -286,12 +285,13 @@ namespace COSMESTIC.Controllers
         }
         public IActionResult InvoiceDetails(int orderId)
         {
+            var userId = HttpContext.Session.GetInt32("UserID");
             var invoice = _context.Invoice
                 .Include(o => o.orders)
                     .ThenInclude(od => od.orderDetails)
                     .ThenInclude(od => od.products)
                 .Include(o => o.orders.Delivery)
-                .FirstOrDefault(o => o.orderID == orderId);
+                .FirstOrDefault(o => o.orderID == orderId && o.orders.userID == userId);
             if (invoice == null)
             {
                 return NotFound();
@@ -437,8 +437,6 @@ namespace COSMESTIC.Controllers
             ViewBag.DiscountAmount = totalDiscountAmount;
             ViewBag.FinalTotal = totalAmount - totalDiscountAmount;
             ViewBag.DiscountCode = discountCode;
-
-            //ViewBag là 1 đối tượng động dùng để truyền dữ liệu từ controller sang View 1 cách động
 
             return View(deliveryAddresses);
         }

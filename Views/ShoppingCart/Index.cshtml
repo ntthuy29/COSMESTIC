@@ -43,10 +43,10 @@
                                             <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" class="updateQuantityForm d-inline">
                                                 @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
                                                 <input type="hidden" name="cartItemID" value="@item.cartItemID" />
-                                                <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary" @(item.quantity <= 1 ? "disabled" : "")>-</button>
-                                                <input type="number" name="quantity" value="@item.quantity" min="1" class="quantityInput" style="width: 50px; text-align: center;" onchange="updateTotalPrice(this, @item.unitprice, @item.cartItemID)" />
+                                                <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary" >-</button>
+                                                <input type="text" name="quantity" value="@item.quantity" class="quantityInput" style="width: 40px; text-align: center;" readonly />
                                                 <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-primary">+</button>
-                                            </form>
+                                            </form>                                       
                                         </td>
                                         <td class="text-end unitPrice">@item.unitprice.ToString("N0") ₫</td>
                                         <td class="text-end totalPrice" data-cartitemid="@item.cartItemID">@((item.quantity * item.unitprice).ToString("N0")) ₫</td>
@@ -148,23 +148,23 @@
         document.addEventListener('DOMContentLoaded', function () {
             updateSelectedItems();
         });
-        document.querySelectorAll('.updateQuantityForm').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                fetch(this.action, {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.success) {
-                          // Cập nhật giao diện nếu cần
-                          updateTotalPriceAll();
-                      } else {
-                          alert('Cập nhật số lượng thất bại!');
-                      }
-                  });
-            });
+        function updateQuantity(cartItemID, action) {
+            $.ajax({
+                type: "POST",
+                url: '/ShoppingCart/UpdateQuantity',
+                data: {
+                    cartItemID: cartItemID,
+                    action: action
+                },
+                success: function(response) {
+                    // Cập nhật lại giỏ hàng sau khi thành công
+                    updateTotalPriceAll();
+                },
+                error: function(error) {
+                    console.log("Error updating quantity:", error);
+                }
         });
+        }
+
     </script>
 }

@@ -107,6 +107,11 @@ namespace COSMESTIC.Controllers
         public IActionResult UpdateQuantity(int cartItemID, string action)
         {
             var cartItem = _context.CartItem.Find(cartItemID);
+            if (cartItem == null)
+            {
+                Console.WriteLine($"Cart item with ID {cartItemID} not found.");
+            }
+            Console.WriteLine(cartItemID);
             if (cartItem != null)
             {
                 if (action == "increase")
@@ -117,6 +122,7 @@ namespace COSMESTIC.Controllers
                 {
                     cartItem.quantity -= 1;
                 }
+                Console.WriteLine(cartItemID);
                 _context.SaveChanges();
                 // Tính lại tổng tiền và tổng số lượng
                 var cart = _context.ShoppingCart
