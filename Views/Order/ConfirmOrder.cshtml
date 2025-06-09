@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    <form method="post" action="@Url.Action("CreateOrder", "Order")" class="needs-validation" novalidate>
+    <form method="post" action="@Url.Action("CreateOrder", "Order")" id="orderForm">
         @Html.AntiForgeryToken()
 
         <!-- Hidden fields cho selected items -->
@@ -294,8 +294,12 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-pink" data-bs-dismiss="modal">Đã hiểu</button>
+            <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-success btn-sm" id="confirmPaymentBtn">
+                        <i class="fas fa-check me-1"></i> Đã thanh toán
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -540,6 +544,67 @@
                 }
                 form.classList.add('was-validated');
             }, false);
+        });
+        // Xử lý khi nhấn nút Đã thanh toán trong modal QR
+        document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
+            // Kiểm tra validation trước khi submit
+            let isValid = true;
+            const selectedItems = document.querySelectorAll('input[name="selectedItems"]');
+            const savedAddress = document.getElementById("savedAddress").value.trim();
+            const fullName = document.getElementById("fullName").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
+
+            // Reset validation
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+
+            // Validate địa chỉ
+            if (savedAddress === "") {
+                if (fullName === "") {
+                    isValid = false;
+                    document.getElementById("fullName").classList.add("is-invalid");
+                    document.getElementById("fullNameError").style.display = "block";
+                }
+
+                if (address === "") {
+                    isValid = false;
+                    document.getElementById("address").classList.add("is-invalid");
+                    document.getElementById("addressError").style.display = "block";
+                }
+
+                if (phoneNumber === "") {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").style.display = "block";
+                } else if (!/^(0|\+84)[1-9][0-9]{8}$/.test(phoneNumber)) {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").innerText = "Số điện thoại không hợp lệ";
+                    document.getElementById("phoneNumberError").style.display = "block";
+                }
+            }
+
+            if (isValid) {
+                // Nếu hợp lệ thì submit form
+                document.getElementById("orderForm").submit();
+            } else {
+                // Nếu không hợp lệ thì đóng modal và hiển thị lỗi
+                bootstrap.Modal.getInstance(document.getElementById('qrCodeModal')).hide();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        document.getElementById("confirmPaymentBtn").addEventListener("click", function() {
+            // Lấy đối tượng form
+            var orderForm = document.getElementById("orderForm");
+
+            // Kiểm tra nếu form có tồn tại
+            if (orderForm) {
+                // Nếu có, gửi form (Submit)
+                orderForm.submit();
+            } else {
+                console.log("Form không tồn tại");
+            }
         });
     </script>
 }
