@@ -228,7 +228,7 @@ namespace COSMESTIC.Controllers
                 orderDate = DateTime.Now,
                 totalAmount = totalAmount,
                 payMethod = paymentMethod,
-                status = paymentMethod == "cash" ? "chờ xử lý" : "chờ vận chuyển",
+                status = (paymentMethod == "cash") ? "chờ xử lý" : "chờ vận chuyển",
                 note = note,
                 DeliveryID = savedAddress ?? _context.DeliveryIFMT
                                                     .Where(d => d.userID == userId)
@@ -505,7 +505,7 @@ namespace COSMESTIC.Controllers
                 userID = userId.Value,
                 orderDate = DateTime.Now,
 
-                status = "Chờ xử lý",
+                status = (paymentMethod == "cash") ? "chờ xử lý" : "chờ vận chuyển",
 
 
                 totalAmount = totalAmount - totalDiscountAmount, // Áp dụng giảm giá ngay tại đây
