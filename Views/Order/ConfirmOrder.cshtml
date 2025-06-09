@@ -85,8 +85,18 @@
                         <div class="discount-section mb-4">
                             <h6 class="fw-bold text-pink mb-3"><i class="fas fa-tag me-2"></i>Mã giảm giá</h6>
                             <div class="input-group">
+                                @{
+                                    var selectedItemIds = ViewBag.SelectedItems != null
+                                    ? string.Join(",", ((List<COSMESTIC.Models.Data.CartItem>)ViewBag.SelectedItems).Select(item => item.cartItemID))
+                                    : "";
+                                }
+
                                 <input type="text" class="form-control border-pink" id="discountCode" name="discountCode" value="@ViewBag.DiscountCode" placeholder="Nhập mã giảm giá" readonly />
-                                <a href="@Url.Action("ChooseDiscount", "Discount", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber, returnUrl = Url.Action("ConfirmOrder", "Order") })" class="btn btn-pink">
+                                @{
+                                    var selectedItemQuery = string.Join(",", selectedItemIds);
+                                }
+
+                                <a href="@Url.Action("ChooseDiscount", "Discount", new { selectedItems = selectedItemQuery, fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber, returnUrl = Url.Action("ConfirmOrder", "Order") })" class="btn btn-pink">
                                     <i class="fas fa-ticket-alt me-1"></i> Chọn mã
                                 </a>
                             </div>

@@ -18,6 +18,7 @@ namespace COSMESTIC.Controllers
         {
             _context = context;
         }
+        [Authorize(Roles = "Customer")]
         public IActionResult Index(int id)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
@@ -38,42 +39,57 @@ namespace COSMESTIC.Controllers
             return View(order);
 
         }
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> ShippingInformation(string selectedItems, int? savedAddress = null)
         {
             var userId = HttpContext.Session.GetInt32("UserID");
-            var deliveryAddesses = await _context.DeliveryIFMT
-                                                    .Where(d => d.userID == userId).ToListAsync();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var deliveryAddresses = await _context.DeliveryIFMT
+                .Where(d => d.userID == userId).ToListAsync();
+
             if (string.IsNullOrEmpty(selectedItems))
             {
                 TempData["ErrorMessage"] = "Vui lòng chọn sản phẩm để đặt hàng.";
                 return RedirectToAction("Index", "ShoppingCart");
             }
 
-            // Chuyển đổi selectedItems từ string thành List<int>
             var selectedItemsList = selectedItems.Split(',').Select(int.Parse).ToList();
 
-            // Lọc các sản phẩm trong giỏ hàng dựa trên selectedItemsList
+            // ✅ Bảo vệ: Chỉ lấy cart items của chính người đang đăng nhập
             var selectedCartItems = await _context.CartItem
-                                                   .Where(c => selectedItemsList.Contains(c.cartItemID))
-                                                   .Include(c => c.products)
-                                                   .ToListAsync();
+                .Where(c => selectedItemsList.Contains(c.cartItemID) && c.cart.userID == userId)
+                .Include(c => c.products)
+                .ToListAsync();
 
-            ViewBag.SelectedCartItems = selectedCartItems; // Giả sử bạn đã thêm dòng này
+            // Nếu có item không thuộc user → chặn lại
+            if (selectedCartItems.Count != selectedItemsList.Count)
+            {
+                TempData["ErrorMessageNotAllow"] = "Phát hiện truy cập trái phép ";
+                return RedirectToAction("Product", "Product");
+            }
+
+            ViewBag.SelectedCartItems = selectedCartItems;
             ViewBag.savedAddress = savedAddress;
-            return View(deliveryAddesses);
+  
+            return View(deliveryAddresses);
         }
 
         [HttpGet]
         [HttpPost]
         public async Task<IActionResult> ConfirmOrder(List<int> selectedItems, string fullName, string address, string phoneNumber, string discountCode, int? savedAddress)
         {
-            Console.WriteLine("HUHU");
+            //Console.WriteLine("HUHU");
 
-            Console.WriteLine(fullName);
-            Console.WriteLine(address);
-            Console.WriteLine(phoneNumber);
-            Console.WriteLine(discountCode);
-            Console.WriteLine("haha");
+            //Console.WriteLine(fullName);
+            //Console.WriteLine(address);
+            //Console.WriteLine(phoneNumber);
+            //Console.WriteLine(discountCode);
+            //Console.WriteLine("haha");
             var userId = HttpContext.Session.GetInt32("UserID");
             if (userId == null)
             {
@@ -89,6 +105,7 @@ namespace COSMESTIC.Controllers
 
             if (!selectedCartItems.Any())
             {
+                Console.WriteLine("Hăm có sản p duoc chọn");
                 TempData["ErrorMessage"] = "Không tìm thấy sản phẩm được chọn trong giỏ hàng.";
                 return RedirectToAction("Index", "ShoppingCart");
             }
@@ -584,16 +601,39 @@ namespace COSMESTIC.Controllers
         [Authorize(Roles = "admin,sale")]
         public async Task<IActionResult> Approve(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            // Tìm đơn hàng và kèm theo OrderDetails
+            var order = await _context.Orders
+                .Include(o => o.orderDetails)
+                .FirstOrDefaultAsync(o => o.orderID == id);
+
             if (order == null)
             {
                 return NotFound();
             }
+
+            // Lấy ID người bán từ Session (giả sử là người duyệt)
+            var sellerID = HttpContext.Session.GetInt32("UserID");
+            if (sellerID == null)
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để duyệt đơn.";
+                return RedirectToAction("Login", "Account");
+            }
+
+          
             order.status = "Đang giao";
+
+          
+            foreach (var item in order.orderDetails)
+            {
+                item.SellerID = sellerID.Value; 
+            }
+
             await _context.SaveChangesAsync();
+
             TempData["SuccessMessage"] = "Đơn hàng được duyệt thành công";
             return RedirectToAction("IndexAdminOrder");
         }
+
 
         [HttpPost]
         [Authorize(Roles = "admin,sale")]

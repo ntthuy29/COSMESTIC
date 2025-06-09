@@ -20,6 +20,7 @@ namespace COSMESTIC.Controllers
             this.dbContext = dbContext;
             _logger = logger;
         }
+      
 
         [HttpGet]//đây là action để hiển thị ra danh sách mã khuyến mãi
         public async Task<IActionResult> Index(string search, string duocsudung, string value)
@@ -67,7 +68,8 @@ namespace COSMESTIC.Controllers
 
             return View(model);
         }
-        
+        [Authorize(Roles = "admin")]
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -83,6 +85,7 @@ namespace COSMESTIC.Controllers
        
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(CreateModel model)
         {
             if (!ModelState.IsValid)
@@ -140,6 +143,7 @@ namespace COSMESTIC.Controllers
         //làm 2 action là edit và delete là xog @@
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             //var discount = await dbContext.Discount.FindAsync(id);
@@ -231,6 +235,7 @@ namespace COSMESTIC.Controllers
 
         }*/
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int id, CreateModel model)
         {
             if (!ModelState.IsValid)
@@ -282,7 +287,7 @@ namespace COSMESTIC.Controllers
             return RedirectToAction("Index");
         }
 
-        
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var discount = await dbContext.Discount
@@ -307,10 +312,17 @@ namespace COSMESTIC.Controllers
             return RedirectToAction("Index");
         }
         [HttpGet]
-        public async Task<IActionResult> ChooseDiscount(string search, string duocsudung, string value, int? productId = null, int? quantity = null, string address = null, string fullName = null, string phoneNumber = null, string returnUrl = null)
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> ChooseDiscount(String selectedItems, string search, string duocsudung, string value, int? productId = null, int? quantity = null, string address = null, string fullName = null, string phoneNumber = null, string returnUrl = null)
         {
             _logger.LogInformation($"ChooseDiscount called with: productId={productId}, quantity={quantity}, address={address}, fullName={fullName}, phoneNumber={phoneNumber}, returnUrl={returnUrl}");
+            foreach(var item in selectedItems)
+            {
+                Console.WriteLine("đây nè");
+                Console.WriteLine(item);
 
+            }
+            Console.WriteLine(selectedItems);
             // Validate returnUrl
             string defaultUrl = Url.Action("ConfirmOrder", "Order"); // Mặc định là Checkout
             if (!string.IsNullOrEmpty(returnUrl))
@@ -329,7 +341,7 @@ namespace COSMESTIC.Controllers
             {
                 returnUrl = defaultUrl;
             }
-
+            
             // Xác định action type dựa trên returnUrl
             string actionType = returnUrl.Contains("ShippingInformationBuyNow") ? "ShippingInformationBuyNow" : "ConfirmOrder";
 
@@ -342,9 +354,10 @@ namespace COSMESTIC.Controllers
 
             if (!string.IsNullOrEmpty(duocsudung))
             {
-                bool isActive = duocsudung.ToLower() == "True";
+                bool isActive = duocsudung.ToLower() == "true";
                 query = query.Where(d => (d.isActive && isActive) || (d.isActive && !isActive));
             }
+
 
             if (!string.IsNullOrEmpty(value))
             {
@@ -369,6 +382,10 @@ namespace COSMESTIC.Controllers
                     isActive = d.isActive
                 })
                 .ToListAsync();
+            var selectedItemIds = selectedItems?
+                               .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                               .Select(id => int.Parse(id))
+                               .ToList() ?? new List<int>();
 
             ViewData["Search"] = search;
             ViewData["StatusFilter"] = duocsudung;
@@ -380,6 +397,7 @@ namespace COSMESTIC.Controllers
             ViewBag.PhoneNumber = phoneNumber;
             ViewBag.ReturnUrl = returnUrl;
             ViewBag.ActionType = actionType; // Lưu action type để sử dụng trong view
+            ViewBag.SelectedItems = selectedItemIds;
 
 
             return View(model);
@@ -387,6 +405,7 @@ namespace COSMESTIC.Controllers
 
 
         //còn thiếu controller detail
+        [Authorize(Roles = "admin")]
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
