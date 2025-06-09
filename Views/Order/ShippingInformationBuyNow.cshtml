@@ -229,9 +229,11 @@
                 </div>
             </div>
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
-                    <i class="fas fa-check me-1"></i> Đã thanh toán
-                </button>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-success btn-sm" id="confirmPaymentBtn">
+                        <i class="fas fa-check me-1"></i> Đã thanh toán
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -346,8 +348,26 @@
                 }
             });
         });
-
         function showQRCode(element) {
+            // Kiểm tra địa chỉ trước khi hiển thị QR
+            let isValid = true;
+            const savedAddress = document.getElementById("savedAddress").value.trim();
+            const fullName = document.getElementById("fullName").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
+
+            if (savedAddress === "") {
+                if (fullName === "") isValid = false;
+                if (address === "") isValid = false;
+                if (phoneNumber === "") isValid = false;
+                if (phoneNumber && !/^(0|\+84)[1-9][0-9]{8}$/.test(phoneNumber)) isValid = false;
+            }
+
+            if (!isValid) {
+                alert("Vui lòng nhập đầy đủ thông tin địa chỉ giao hàng trước khi chọn phương thức thanh toán");
+                return;
+            }
+
             const paymentMethod = element.value;
             const qrCodeImage = document.getElementById("qrCodeImage");
             const bankInfo = document.getElementById("bankTransferInfo");
@@ -436,6 +456,54 @@
                 '&phoneNumber=' + encodeURIComponent(phoneNumber) +
                 '&returnUrl=' + encodeURIComponent(returnUrl);
             window.location.href = url;
+        });
+                // Xử lý khi nhấn nút Đã thanh toán trong modal QR
+        document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
+            // Kiểm tra validation trước khi submit
+            let isValid = true;
+            const savedAddress = document.getElementById("savedAddress").value.trim();
+            const fullName = document.getElementById("fullName").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
+
+            // Reset validation
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+
+            // Validate địa chỉ
+            if (savedAddress === "") {
+                if (fullName === "") {
+                    isValid = false;
+                    document.getElementById("fullName").classList.add("is-invalid");
+                    document.getElementById("fullNameError").style.display = "block";
+                }
+
+                if (address === "") {
+                    isValid = false;
+                    document.getElementById("address").classList.add("is-invalid");
+                    document.getElementById("addressError").style.display = "block";
+                }
+
+                if (phoneNumber === "") {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").style.display = "block";
+                } else if (!/^(0|\+84)[1-9][0-9]{8}$/.test(phoneNumber)) {
+                    isValid = false;
+                    document.getElementById("phoneNumber").classList.add("is-invalid");
+                    document.getElementById("phoneNumberError").innerText = "Số điện thoại không hợp lệ";
+                    document.getElementById("phoneNumberError").style.display = "block";
+                }
+            }
+
+            if (isValid) {
+                // Nếu hợp lệ thì submit form
+                document.getElementById("orderForm").submit();
+            } else {
+                // Nếu không hợp lệ thì đóng modal và hiển thị lỗi
+                bootstrap.Modal.getInstance(document.getElementById('qrCodeModal')).hide();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         });
     </script>
 }

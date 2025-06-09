@@ -29,88 +29,90 @@ namespace COSMESTIC.Controllers
             Console.WriteLine("Email: " + models.email);
             Console.WriteLine("Password: " + models.password);
 
+            // Tìm người dùng theo email
+            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.email == models.email);
 
-
-            var ktrauser = db.Accounts.Include(u => u.user).FirstOrDefault(u => u.email == models.email && u.password == models.password);
-            if (ktrauser != null)
+            // Kiểm tra tài khoản và mật khẩu
+            if (ktrauser == null || !BCrypt.Net.BCrypt.Verify(models.password, ktrauser.password))
             {
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, ktrauser.user.fullName),
-            new Claim(ClaimTypes.Role, ktrauser.user.role), // lấy role từ DB
-            new Claim("UserID", ktrauser.userID.ToString()) // custom claim nếu cần
-
-        };
-                HttpContext.Session.SetInt32("UserID", ktrauser.userID);
-
-                HttpContext.Session.SetString("role", ktrauser.user.role);
-                HttpContext.Session.SetString("Username", ktrauser.email);
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-            }
-            if (ktrauser == null)
-            {
-                // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
-                TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
+                TempData["ErrorMessageLogin"] = "Tài khoản hoặc mật khẩu không đúng!";
                 return RedirectToAction("Login");
             }
+
+            // Tạo danh sách claims
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, ktrauser.user.fullName),
+        new Claim(ClaimTypes.Role, ktrauser.user.role),
+        new Claim("UserID", ktrauser.userID.ToString())
+    };
+
+            // Lưu thông tin vào session
+            HttpContext.Session.SetInt32("UserID", ktrauser.userID);
+            HttpContext.Session.SetString("role", ktrauser.user.role);
+            HttpContext.Session.SetString("Username", ktrauser.email);
+
+            // Xác thực đăng nhập
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            // Nếu là Customer, cập nhật giỏ hàng
             if (ktrauser.user.role == "Customer")
             {
-
                 try
                 {
                     var cart = db.ShoppingCart.FirstOrDefault(c => c.userID == ktrauser.userID);
-
-     
-                // Giả sử bạn có bảng Cart với userID
-
-                if (cart != null)
+                    int quantity = cart?.totalQuantity ?? 0;
+                    HttpContext.Session.SetInt32("CartItemCount", quantity);
+                }
+                catch (Exception ex)
                 {
-                    HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
+                    Console.WriteLine("Lỗi giỏ hàng: " + ex.Message);
                 }
-                else
-                {
-                    // Handle the case where cart is null, e.g., set count to 0 or skip
-                    HttpContext.Session.SetInt32("CartItemCount", 0);
-                }
-
-
-
-                    if (cart != null && cart.totalQuantity != null)
-                    {
-                        HttpContext.Session.SetInt32("CartItemCount", cart.totalQuantity);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message); // hoặc e.ToString() nếu cần đầy đủ
-                    return RedirectToAction("Product", "Product");
-                }
-
             }
-            if (ktrauser == null)
-            {
-                // Nếu không tìm thấy tài khoản hoặc mật khẩu không đúng
-                TempData["ErrorMessage"] = "Tài khoản hoặc mật khẩu không đúng!";
-                return RedirectToAction("Login");
-            }
-            else if (ktrauser.email == "ngan@gmail.com" && ktrauser.password == "Ngan123@")
+
+            // Điều hướng theo vai trò
+            if (ktrauser.user.role=="admin")
             {
                 return RedirectToAction("Home", "Admin");
-            }else if (ktrauser.user.role == "sale")
+            }
+            else if (ktrauser.user.role == "sale")
             {
-                Console.WriteLine("role = sale");
                 return RedirectToAction("Home", "Admin");
-
             }
             else
             {
-
                 return RedirectToAction("Product", "Product");
+            }
+        }
 
+        public IActionResult forgetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult forgetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var account = db.Users.Include(u=>u.account).FirstOrDefault(a => a.email == model.Email);
+                if (account == null)
+                {
+                    ModelState.AddModelError("", "Email không tồn tại trong hệ thống.");
+                    return View(model);
+                }
+                // Mã hóa mật khẩu mới
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                // Cập nhật mật khẩu trong cơ sở dữ liệu
+                account.account.password = hashedPassword;
+                db.SaveChanges();
+
+                TempData["Success"] = "Mật khẩu đã được cập nhật.";
+                return RedirectToAction("Login");
             }
 
+            return View(model);
         }
     }
+   
 }

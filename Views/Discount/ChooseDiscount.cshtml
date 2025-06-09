@@ -106,7 +106,14 @@
                     }
                 </div>
             </div>
-
+            @{
+                var selectedQuery = "";
+                var selectedList = ViewBag.SelectedItems as List<int>;
+                if (selectedList != null && selectedList.Any())
+                {
+                    selectedQuery = string.Join("&", selectedList.Select(id => $"selectedItems={id}"));
+                }
+            }
             <!-- Back button -->
             <div class="text-center mt-5">
                 @if (ViewBag.ReturnUrl == "ShippingInformationBuyNow")
@@ -119,7 +126,7 @@
                 }
                 else
                 {
-                    <a href="@Url.Action("ConfirmOrder", "Order", new { fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber })"
+                    <a href="@Url.Action("ConfirmOrder", "Order", new { selectedItems = selectedList, fullName = ViewBag.FullName, address = ViewBag.Address, phoneNumber = ViewBag.PhoneNumber })"
                        class="btn btn-lg px-4 fw-bold"
                        style="background: #06AED5; color: white;">
                         <i class="fas fa-arrow-left me-2"></i>QUAY LẠI
@@ -127,6 +134,8 @@
                 }
             </div>
         </div>
+      
+
     </div>
 </div>
 
@@ -171,6 +180,9 @@
                 url += '&productId=@ViewBag.ProductId' +
                        '&quantity=@ViewBag.Quantity';
             }
+         if (actionType === 'ConfirmOrder') {
+            url += '@Html.Raw("&" + selectedQuery)';
+        }
 
             window.location.href = url;
         }

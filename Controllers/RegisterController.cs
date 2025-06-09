@@ -35,6 +35,8 @@ namespace COSMESTIC.Controllers
                     role = "Customer",
                     status = "Đồng"
                 };
+                //hashpassword
+                models.password = BCrypt.Net.BCrypt.HashPassword(models.password);
                 var newAccount = new Account
                 {
                     email = models.email,

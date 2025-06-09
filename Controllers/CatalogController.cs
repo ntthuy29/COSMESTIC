@@ -1,4 +1,5 @@
 ﻿using COSMESTIC.Models.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace COSMESTIC.Controllers
             db = _db;
             _environment = environment;
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Index()
         {
             var catalogs = db.Catalogs
@@ -22,12 +24,14 @@ namespace COSMESTIC.Controllers
 
             return View(catalogs);
         }
+        [Authorize(Roles = "admin")]
         public IActionResult Create()
         {
 
             return View();
         }
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(CatalogWithProductsViewModel model)
         {
             if (!ModelState.IsValid)
@@ -110,6 +114,7 @@ namespace COSMESTIC.Controllers
 
             return View(catalog);
         }
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var catalog = db.Catalogs
@@ -135,7 +140,7 @@ namespace COSMESTIC.Controllers
             TempData["SuccessMessage"] = "Xóa danh mục thành công.";
             return RedirectToAction("Index");
         }
-
+        [Authorize(Roles = "admin")]
         public IActionResult Edit(int id)
         {
             var catalog = db.Catalogs
@@ -165,6 +170,7 @@ namespace COSMESTIC.Controllers
 
             return View(model); // View ở đây dùng CatalogWithProductsViewModel
         }
+        [Authorize(Roles = "admin")]
 
         [HttpPost]
         public async Task<IActionResult> Edits(CatalogWithProductsViewModel model)

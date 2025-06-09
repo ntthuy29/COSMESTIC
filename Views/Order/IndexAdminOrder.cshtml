@@ -1,113 +1,4 @@
-﻿@*  @model IEnumerable<COSMESTIC.Models.Order.ListOrderModel>
-
-@{
-    ViewData["Title"] = "Quản lý đơn hàng";
-    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
-}
-
-<h1>Order Management</h1>
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-<form asp-action="IndexAdminOrder" method="get" class="mb-3">
-    <div class="row">
-        <div class="col-md-4">
-            <label>Trạng thái</label>
-            <select name="status" class="form-control">
-                @foreach (var status in ViewBag.Statuses)
-                {
-                    <option value="@status" selected="@(status == ViewBag.SelectedStatus ? "selected" : "")">@status</option>
-                }
-                
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label>Search Customer</label>
-            <input type="text" name="searchCustomer" class="form-control" value="@ViewBag.SearchCustomer" />
-        </div>
-
-        <div class="col-md-4 align-self-end">
-            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-        </div>
-    </div>
-</form>
-
-<form asp-action="BulkApprove" method="post">
-    <table class="table table-bordered">
-        <thead>
-
-            <tr>
-                @if (ViewBag.SelectedStatus == "Chờ xử lý")
-                {
-                    <th>
-                        <input type="checkbox" id="selectAll" onclick="document.querySelectorAll('.order-checkbox').forEach(cb => { if (!cb.disabled) cb.checked = this.checked; })" />
-                    </th>
-                }
-            <th>Order ID</th>
-            <th>Khách hàng</th>
-            <th>Tổng tiền</th>
-            <th>Ngày đặt</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                
-                    @if (ViewBag.SelectedStatus == "Chờ xử lý")
-                    {
-                        <td>
-                            <input type="checkbox" name="selectedOrders" value="@order.OrderID" class="order-checkbox" @(order.Status != "Chờ xử lý" ? "disabled" : "") />
-                        </td>
-                    }
-                <td>@order.OrderID</td>
-                <td>@order.CustomerName</td>
-                <td>@order.TotalAmount.ToString("C")</td>
-                <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
-                <td>@order.Status</td>
-                <td>
-                    @if (order.Status == "Chờ xử lý")
-                    {
-                        <form asp-action="Approve" method="post" class="d-inline">
-                            <input type="hidden" name="id" value="@order.OrderID" />
-                            <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
-                        </form>
-                        <form asp-action="Reject" method="post" class="d-inline">
-                            <input type="hidden" name="id" value="@order.OrderID" />
-                            <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
-                            <a onclick="return confirm('Bạn có chắc chắn muốn từ chối đơn hàng này?');"></a>
-                        </form>
-                    }
-                      
-                    else{
-
-                        <form asp-action="Detail" method="get" class="d-inline">
-                            <input type="hidden" name="id" value="@order.OrderID" />
-                            <button type="submit" class="btn btn-success btn-sm">Chi tiết</button>
-                        </form>
-                       
-                    }
-
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-    @if (ViewBag.SelectedStatus == "Chờ xử lý")
-    {
-        <button type="submit" class="btn btn-success">Duyệt đơn</button>
-    }
-
-   
-
-</form>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  *@
-  @model IEnumerable<COSMESTIC.Models.Order.ListOrderModel>
+﻿@model IEnumerable<COSMESTIC.Models.Order.ListOrderModel>
 
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
@@ -158,7 +49,7 @@
         </div>
     </div>
 
-    <form asp-action="BulkApprove" method="post">
+    <form asp-action="BulkApprove" method="post" id="bulkActionForm">
         <div class="card mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <div>
@@ -167,7 +58,7 @@
                 </div>
                 @if (ViewBag.SelectedStatus == "Chờ xử lý" && Model.Any(o => o.Status == "Chờ xử lý"))
                 {
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success" id="bulkApproveButton">
                         <i class="fas fa-check-circle me-1"></i> Duyệt đơn hàng đã chọn
                     </button>
                 }
@@ -220,33 +111,21 @@
                                         <div class="d-flex gap-2">
                                             @if (order.Status == "Chờ xử lý")
                                             {
-                                                <form asp-action="Approve" method="post" class="d-inline">
-                                                    <input type="hidden" name="id" value="@order.OrderID"/>
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        <i class="fas fa-check me-1"></i> Duyệt
-                                                    </button>
-                                                </form>
-                                                <form asp-action="Reject" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn từ chối đơn hàng này?')";>
-                                                    <input type="hidden" name="id" value="@order.OrderID" />
-                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-times me-1"></i> Từ chối
-                                                    </button>
-                                                </form>
-                                                <form asp-action="Index" method="get" class="d-inline">
-                                                    <input type="hidden" name="id" value="@order.OrderID" />
-                                                    <button type="submit" class="btn btn-sm btn-info text-white">
-                                                        <i class="fas fa-eye me-1"></i> Chi tiết
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-success approve-btn" data-order-id="@order.OrderID">
+                                                    <i class="fas fa-check me-1"></i> Duyệt
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger reject-btn" data-order-id="@order.OrderID" data-bs-toggle="modal" data-bs-target="#rejectConfirmationModal">
+                                                    <i class="fas fa-times me-1"></i> Từ chối
+                                                </button>
+                                                <a asp-action="Detail" asp-route-id="@order.OrderID" class="btn btn-sm btn-info text-white">
+                                                    <i class="fas fa-eye me-1"></i> Chi tiết
+                                                </a>
                                             }
                                             else
                                             {
-                                                <form asp-action="Index" method="get" class="d-inline">
-                                                    <input type="hidden" name="id" value="@order.OrderID" />
-                                                    <button type="submit" class="btn btn-sm btn-info text-white">
-                                                        <i class="fas fa-eye me-1"></i> Chi tiết
-                                                    </button>
-                                                </form>
+                                                <a asp-action="Detail" asp-route-id="@order.OrderID" class="btn btn-sm btn-info text-white">
+                                                    <i class="fas fa-eye me-1"></i> Chi tiết
+                                                </a>
                                             }
                                         </div>
                                     </td>
@@ -260,6 +139,26 @@
     </form>
 </div>
 
+<div class="modal fade" id="rejectConfirmationModal" tabindex="-1" aria-labelledby="rejectConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="rejectConfirmationModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận từ chối đơn hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn **từ chối** đơn hàng này không? Hành động này không thể hoàn tác.
+                <input type="hidden" id="modalOrderId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmRejectBtn"><i class="fas fa-check me-1"></i>Xác nhận từ chối</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
     <script>
         // Select all checkbox functionality
@@ -270,7 +169,54 @@
             });
         });
 
-        // Initialize tooltips
+        // Event listener for individual Approve buttons
+        document.querySelectorAll('.approve-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '@Url.Action("Approve", "Order")'; // Replace "Order" with your controller name
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = orderId;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            });
+        });
+
+        // Store the order ID when the reject modal is about to be shown
+        document.querySelectorAll('.reject-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                document.getElementById('modalOrderId').value = orderId; // Store the ID in the hidden input
+            });
+        });
+
+        // Handle the confirmation click inside the modal
+        document.getElementById('confirmRejectBtn').addEventListener('click', function() {
+            const orderId = document.getElementById('modalOrderId').value; // Get the stored ID
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '@Url.Action("Reject", "Order")'; // Replace "Order" with your controller name
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = orderId;
+            form.appendChild(input);
+            document.body.appendChild(form);
+
+            // Hide the modal before submitting the form
+            var rejectModal = bootstrap.Modal.getInstance(document.getElementById('rejectConfirmationModal'));
+            if (rejectModal) {
+                rejectModal.hide();
+            }
+
+            form.submit();
+        });
+
+        // Initialize tooltips (if you have Bootstrap's JS enabled)
         $(document).ready(function(){
             $('[data-bs-toggle="tooltip"]').tooltip();
         });

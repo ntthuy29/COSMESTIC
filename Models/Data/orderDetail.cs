@@ -17,5 +17,7 @@ namespace COSMESTIC.Models.Data
         public decimal unitPrice { get; set; }
         public virtual Orders orders { get; set; }
         public virtual Products products { get; set; }
+        public int? SellerID { get; set; }
+        public Users Seller { get; set; } // Giả sử bạn có class User hoặc Staff
     }
 }
