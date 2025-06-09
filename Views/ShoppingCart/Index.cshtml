@@ -40,7 +40,7 @@
                                         <td><img src="@Url.Content("~/" + item.products.imagePath)" style="width: 50px; height: 50px; object-fit: cover;" alt="@item.products.productName" /></td>
                                         <td>@item.products.productName</td>
                                         <td class="text-center">
-                                            <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" class="updateQuantityForm d-inline">
+                                            <form method="post" action="@Url.Action("UpdateQuantity", "ShoppingCart")" class="d-inline">
                                                 @Html.AntiForgeryToken() <!-- Thêm CSRF token -->
                                                 <input type="hidden" name="cartItemID" value="@item.cartItemID" />
                                                 <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-primary" >-</button>
